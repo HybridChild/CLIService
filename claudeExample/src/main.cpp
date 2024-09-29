@@ -86,8 +86,9 @@ public:
   MenuNode(const std::string& name, MenuNode* parent = nullptr)
     : name(name), parent(parent) {}
 
-  void addSubMenu(const std::string& name) {
-    subMenus[name] = std::make_unique<MenuNode>(name, this);
+  MenuNode* addSubMenu(const std::string& name) {
+    auto [it, inserted] = subMenus.try_emplace(name, std::make_unique<MenuNode>(name, this));
+    return it->second.get();
   }
 
   void addCommand(const std::string& name, const std::function<void(CommandRequest&)>& action) {
@@ -126,6 +127,10 @@ public:
 
   MenuNode* getCurrentNode() {
     return currentNode;
+  }
+
+  MenuNode* getRoot() {
+    return &root;
   }
 
   void navigate(const std::string& path) {
@@ -218,10 +223,59 @@ private:
   }
 };
 
+// Updated CommandMenuTreeFactory class
+class CommandMenuTreeFactory {
+public:
+  static std::unique_ptr<CommandMenuTree> createDefaultTree() {
+    auto tree = std::make_unique<CommandMenuTree>();
+    MenuNode* root = tree->getRoot();
+
+    // Get branch
+    MenuNode* getNode = root->addSubMenu("get");
+    MenuNode* getHwNode = getNode->addSubMenu("hw");
+    getHwNode->addCommand("potmeter", [](CommandRequest& req) {
+      // Simulate reading potmeter value
+      req.setResponse("Potmeter value: 512", 0);
+    });
+
+    // Set branch
+    MenuNode* setNode = root->addSubMenu("set");
+    MenuNode* setHwNode = setNode->addSubMenu("hw");
+    setHwNode->addCommand("rgbLed", [](CommandRequest& req) {
+      const auto& args = req.getArgs();
+      if (args.size() != 3) {
+        req.setResponse("Error: rgbLed command requires 3 arguments", 1);
+      } else {
+        // Simulate setting RGB LED
+        req.setResponse("RGB LED set to " + args[0] + " " + args[1] + " " + args[2], 0);
+      }
+    });
+
+    return tree;
+  }
+
+  static std::unique_ptr<CommandMenuTree> createMinimalTree() {
+    auto tree = std::make_unique<CommandMenuTree>();
+    MenuNode* root = tree->getRoot();
+
+    root->addCommand("help", [](CommandRequest& req) {
+      req.setResponse("This is a minimal command tree. Use 'exit' to quit.", 0);
+    });
+
+    root->addCommand("exit", [](CommandRequest& req) {
+      req.setResponse("Exiting...", 0);
+      // You might want to set a flag or use some other mechanism to signal the main loop to exit
+    });
+
+    return tree;
+  }
+};
+
 // Updated CLIService class
 class CLIService {
 public:
-  CLIService() : menuTree(std::make_unique<CommandMenuTree>()) {}
+  CLIService(std::unique_ptr<CommandMenuTree> tree) 
+    : menuTree(std::move(tree)) {}
 
   void processCommand(const std::string& input) {
     CommandRequest request(input);
@@ -251,12 +305,16 @@ private:
 };
 
 int main() {
-  CLIService cli;
+  // Create a CLIService with the default command tree
+  CLIService cli(CommandMenuTreeFactory::createDefaultTree());
 
   // Example usage
   cli.processCommand("set/hw/rgbLed 255 55 123");
   cli.processCommand("get/hw/potmeter");
   cli.listCurrentCommands();
+
+  // If you want to use a minimal tree instead, you can do:
+  // CLIService minimalCli(CommandMenuTreeFactory::createMinimalTree());
 
   return 0;
 }
