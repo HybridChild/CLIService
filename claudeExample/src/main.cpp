@@ -4,10 +4,13 @@
 #include <unordered_map>
 #include <sstream>
 #include <iostream>
+#include <memory>
 
 // Forward declarations
 class Command;
 class MenuNode;
+class CommandMenuTree;
+class CommandActions;
 
 // CommandRequest class
 class CommandRequest {
@@ -223,6 +226,35 @@ private:
   }
 };
 
+// New CommandActions class
+class CommandActions {
+public:
+  static void getPotmeterValue(CommandRequest& req) {
+    // Simulate reading potmeter value
+    req.setResponse("Potmeter value: 512", 0);
+  }
+
+  static void setRgbLed(CommandRequest& req) {
+    const auto& args = req.getArgs();
+    if (args.size() != 3) {
+      req.setResponse("Error: rgbLed command requires 3 arguments", 1);
+    } else {
+      // Simulate setting RGB LED
+      req.setResponse("RGB LED set to " + args[0] + " " + args[1] + " " + args[2], 0);
+    }
+  }
+
+  static void showHelp(CommandRequest& req) {
+    req.setResponse("Available commands: get/hw/potmeter, set/hw/rgbLed", 0);
+  }
+
+  static void exit(CommandRequest& req) {
+    req.setResponse("Exiting...", 0);
+    // You might want to set a flag or use some other mechanism to signal the main loop to exit
+  }
+};
+
+
 // Updated CommandMenuTreeFactory class
 class CommandMenuTreeFactory {
 public:
@@ -233,23 +265,16 @@ public:
     // Get branch
     MenuNode* getNode = root->addSubMenu("get");
     MenuNode* getHwNode = getNode->addSubMenu("hw");
-    getHwNode->addCommand("potmeter", [](CommandRequest& req) {
-      // Simulate reading potmeter value
-      req.setResponse("Potmeter value: 512", 0);
-    });
+    getHwNode->addCommand("potmeter", CommandActions::getPotmeterValue);
 
     // Set branch
     MenuNode* setNode = root->addSubMenu("set");
     MenuNode* setHwNode = setNode->addSubMenu("hw");
-    setHwNode->addCommand("rgbLed", [](CommandRequest& req) {
-      const auto& args = req.getArgs();
-      if (args.size() != 3) {
-        req.setResponse("Error: rgbLed command requires 3 arguments", 1);
-      } else {
-        // Simulate setting RGB LED
-        req.setResponse("RGB LED set to " + args[0] + " " + args[1] + " " + args[2], 0);
-      }
-    });
+    setHwNode->addCommand("rgbLed", CommandActions::setRgbLed);
+
+    // Root commands
+    root->addCommand("help", CommandActions::showHelp);
+    root->addCommand("exit", CommandActions::exit);
 
     return tree;
   }
@@ -258,18 +283,13 @@ public:
     auto tree = std::make_unique<CommandMenuTree>();
     MenuNode* root = tree->getRoot();
 
-    root->addCommand("help", [](CommandRequest& req) {
-      req.setResponse("This is a minimal command tree. Use 'exit' to quit.", 0);
-    });
-
-    root->addCommand("exit", [](CommandRequest& req) {
-      req.setResponse("Exiting...", 0);
-      // You might want to set a flag or use some other mechanism to signal the main loop to exit
-    });
+    root->addCommand("help", CommandActions::showHelp);
+    root->addCommand("exit", CommandActions::exit);
 
     return tree;
   }
 };
+
 
 // Updated CLIService class
 class CLIService {
@@ -311,6 +331,7 @@ int main() {
   // Example usage
   cli.processCommand("set/hw/rgbLed 255 55 123");
   cli.processCommand("get/hw/potmeter");
+  cli.processCommand("help");
   cli.listCurrentCommands();
 
   // If you want to use a minimal tree instead, you can do:
