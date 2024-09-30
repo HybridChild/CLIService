@@ -124,9 +124,7 @@ private:
 // Updated CommandMenuTree class
 class CommandMenuTree {
 public:
-  CommandMenuTree() : root("root"), currentNode(&root) {
-    setupCommandTree();
-  }
+  CommandMenuTree() : root("root"), currentNode(&root) {}
 
   MenuNode* getCurrentNode() {
     return currentNode;
@@ -137,45 +135,38 @@ public:
   }
 
   void navigate(const std::string& path) {
-    if (path == "..") {
-      // Move up one level
-      if (currentNode != &root && currentNode->getParent() != nullptr) {
-        currentNode = currentNode->getParent();
-      }
-    } else {
-      MenuNode* node = currentNode->getSubMenu(path);
-      if (node) {
-        currentNode = node;
-      } else {
-        std::cout << "Invalid path: " << path << std::endl;
+    std::vector<std::string> segments = splitPath(path);
+    MenuNode* node = (path.front() == '/') ? &root : currentNode;
+
+    for (const auto& segment : segments) {
+      if (segment == "..") {
+        if (node != &root && node->getParent() != nullptr) {
+          node = node->getParent();
+        }
+      } else if (!segment.empty()) {
+        MenuNode* next = node->getSubMenu(segment);
+        if (next) {
+          node = next;
+        } else {
+          // Invalid path segment, stay at current node
+          std::cout << "Invalid path segment: " << segment << std::endl;
+          return;
+        }
       }
     }
+    currentNode = node;
   }
 
-  void executeCommand(CommandRequest& request) {
-    MenuNode* node = &root;
+  bool executeCommand(CommandRequest& request) {
     const auto& path = request.getPath();
-    
-    // Navigate to the correct node
-    for (size_t i = 0; i < path.size() - 1; ++i) {
-      node = node->getSubMenu(path[i]);
-      if (!node) {
-        request.setResponse("Error: Invalid path", 1);
-        return;
-      }
-    }
+    if (path.empty()) return false;
 
-    // Execute the command
-    if (!path.empty()) {
-      Command* cmd = node->getCommand(path.back());
-      if (cmd) {
-        cmd->execute(request);
-      } else {
-        request.setResponse("Error: Command not found", 1);
-      }
-    } else {
-      request.setResponse("Error: No command specified", 1);
+    Command* cmd = currentNode->getCommand(path[0]);
+    if (cmd) {
+      cmd->execute(request);
+      return true;
     }
+    return false;
   }
 
   std::string getCurrentPath() {
@@ -196,34 +187,64 @@ private:
   MenuNode root;
   MenuNode* currentNode;
 
-  void setupCommandTree() {
-    // Set up the command tree structure
-    root.addSubMenu("get");
-    root.addSubMenu("set");
-
-    MenuNode* getNode = root.getSubMenu("get");
-    getNode->addSubMenu("hw");
-
-    MenuNode* getHwNode = getNode->getSubMenu("hw");
-    getHwNode->addCommand("potmeter", [](CommandRequest& req) {
-      // Simulate reading potmeter value
-      req.setResponse("Potmeter value: 512", 0);
-    });
-
-    MenuNode* setNode = root.getSubMenu("set");
-    setNode->addSubMenu("hw");
-
-    MenuNode* setHwNode = setNode->getSubMenu("hw");
-    setHwNode->addCommand("rgbLed", [](CommandRequest& req) {
-      const auto& args = req.getArgs();
-      if (args.size() != 3) {
-        req.setResponse("Error: rgbLed command requires 3 arguments", 1);
-      } else {
-        // Simulate setting RGB LED
-        req.setResponse("RGB LED set to " + args[0] + " " + args[1] + " " + args[2], 0);
+  std::vector<std::string> splitPath(const std::string& path) {
+    std::vector<std::string> segments;
+    std::istringstream iss(path);
+    std::string segment;
+    while (std::getline(iss, segment, '/')) {
+      if (!segment.empty() || segments.empty()) {
+        segments.push_back(segment);
       }
-    });
+    }
+    return segments;
   }
+};
+
+// Updated CLIService class
+class CLIService {
+public:
+  CLIService(std::unique_ptr<CommandMenuTree> tree) 
+    : menuTree(std::move(tree)) {}
+
+  void processCommand(const std::string& input) {
+    CommandRequest request(input);
+    const auto& path = request.getPath();
+
+    if (path.empty()) {
+      std::cout << "Empty command. Current location: " << menuTree->getCurrentPath() << std::endl;
+      return;
+    }
+
+    // Check if this is a navigation command
+    if (input.find('/') != std::string::npos || input == ".." || input == ".") {
+      menuTree->navigate(input);
+      std::cout << "Navigated to: " << menuTree->getCurrentPath() << std::endl;
+    } else {
+      // This is a command execution
+      bool executed = menuTree->executeCommand(request);
+      if (executed) {
+        std::cout << "Response: " << request.getResponse() 
+                  << " (Code: " << request.getResponseCode() << ")" << std::endl;
+      } else {
+        std::cout << "Unknown command. Use 'help' for available commands." << std::endl;
+      }
+    }
+  }
+
+  void listCurrentCommands() {
+    std::cout << "Current location: " << menuTree->getCurrentPath() << std::endl;
+    std::cout << "Available commands:" << std::endl;
+    for (const auto& cmd : menuTree->getCurrentNode()->getCommands()) {
+      std::cout << "  " << cmd.first << std::endl;
+    }
+    std::cout << "Available submenus:" << std::endl;
+    for (const auto& submenu : menuTree->getCurrentNode()->getSubMenus()) {
+      std::cout << "  " << submenu.first << "/" << std::endl;
+    }
+  }
+
+private:
+  std::unique_ptr<CommandMenuTree> menuTree;
 };
 
 // New CommandActions class
@@ -290,52 +311,17 @@ public:
   }
 };
 
-
-// Updated CLIService class
-class CLIService {
-public:
-  CLIService(std::unique_ptr<CommandMenuTree> tree) 
-    : menuTree(std::move(tree)) {}
-
-  void processCommand(const std::string& input) {
-    CommandRequest request(input);
-    menuTree->executeCommand(request);
-    // Here you would send the response back through the serial port
-    std::cout << "Response: " << request.getResponse() << " (Code: " << request.getResponseCode() << ")" << std::endl;
-  }
-
-  void navigate(const std::string& path) {
-    menuTree->navigate(path);
-  }
-
-  void listCurrentCommands() {
-    std::cout << "Current location: " << menuTree->getCurrentPath() << std::endl;
-    std::cout << "Available commands:" << std::endl;
-    for (const auto& cmd : menuTree->getCurrentNode()->getCommands()) {
-      std::cout << "  " << cmd.first << std::endl;
-    }
-    std::cout << "Available submenus:" << std::endl;
-    for (const auto& submenu : menuTree->getCurrentNode()->getSubMenus()) {
-      std::cout << "  " << submenu.first << "/" << std::endl;
-    }
-  }
-
-private:
-  std::unique_ptr<CommandMenuTree> menuTree;
-};
-
 int main() {
-  // Create a CLIService with the default command tree
   CLIService cli(CommandMenuTreeFactory::createDefaultTree());
 
-  // Example usage
-  cli.processCommand("set/hw/rgbLed 255 55 123");
-  cli.processCommand("get/hw/potmeter");
+  // Example usage with enhanced navigation
+  cli.processCommand("set/hw");
+  cli.processCommand("rgbLed 255 55 123");
+  cli.processCommand("../../get/hw");
+  cli.processCommand("potmeter");
+  cli.processCommand("../../../");  // Navigate to root
   cli.processCommand("help");
   cli.listCurrentCommands();
-
-  // If you want to use a minimal tree instead, you can do:
-  // CLIService minimalCli(CommandMenuTreeFactory::createMinimalTree());
 
   return 0;
 }
