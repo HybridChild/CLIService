@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iostream>
 #include <memory>
+#include <algorithm>
 
 // Forward declarations
 class Command;
@@ -126,17 +127,12 @@ class CommandMenuTree {
 public:
   CommandMenuTree() : root("root"), currentNode(&root) {}
 
-  MenuNode* getCurrentNode() {
-    return currentNode;
-  }
+  MenuNode* getCurrentNode() { return currentNode; }
+  MenuNode* getRoot() { return &root; }
 
-  MenuNode* getRoot() {
-    return &root;
-  }
-
-  void navigate(const std::string& path) {
+  void navigate(const std::string& path, bool isAbsolute = false) {
     std::vector<std::string> segments = splitPath(path);
-    MenuNode* node = (path.front() == '/') ? &root : currentNode;
+    MenuNode* node = isAbsolute ? &root : currentNode;
 
     for (const auto& segment : segments) {
       if (segment == "..") {
@@ -148,7 +144,6 @@ public:
         if (next) {
           node = next;
         } else {
-          // Invalid path segment, stay at current node
           std::cout << "Invalid path segment: " << segment << std::endl;
           return;
         }
@@ -157,15 +152,43 @@ public:
     currentNode = node;
   }
 
-  bool executeCommand(CommandRequest& request) {
-    const auto& path = request.getPath();
-    if (path.empty()) return false;
+  bool executeCommand(const std::string& fullCommand, bool isAbsolute = false) {
+    std::istringstream iss(fullCommand);
+    std::string navigation, commandName;
+    std::getline(iss, navigation, ' ');
 
-    Command* cmd = currentNode->getCommand(path[0]);
+    // Split the navigation part from the command name
+    auto lastSlash = navigation.find_last_of('/');
+    if (lastSlash != std::string::npos) {
+      commandName = navigation.substr(lastSlash + 1);
+      navigation = navigation.substr(0, lastSlash);
+    } else {
+      commandName = navigation;
+      navigation = "";
+    }
+
+    // Navigate to the correct node
+    MenuNode* originalNode = currentNode;
+    if (!navigation.empty()) {
+      navigate(navigation, isAbsolute);
+    }
+
+    // Find and execute the command
+    Command* cmd = currentNode->getCommand(commandName);
     if (cmd) {
+      std::string remainingArgs;
+      std::getline(iss, remainingArgs);
+      std::string fullCommandWithArgs = commandName + " " + remainingArgs;
+      CommandRequest request(fullCommandWithArgs);
       cmd->execute(request);
+      std::cout << "Response: " << request.getResponse() 
+                << " (Code: " << request.getResponseCode() << ")" << std::endl;
+      currentNode = originalNode;  // Reset to original position
       return true;
     }
+
+    // If command not found, reset to original position and return false
+    currentNode = originalNode;
     return false;
   }
 
@@ -207,25 +230,35 @@ public:
     : menuTree(std::move(tree)) {}
 
   void processCommand(const std::string& input) {
-    CommandRequest request(input);
-    const auto& path = request.getPath();
-
-    if (path.empty()) {
+    if (input.empty()) {
       std::cout << "Empty command. Current location: " << menuTree->getCurrentPath() << std::endl;
       return;
     }
 
+    // Handle root navigation
+    if (input == "/") {
+      menuTree->navigate("", true);  // Navigate to root
+      std::cout << "Navigated to root: " << menuTree->getCurrentPath() << std::endl;
+      return;
+    }
+
+    bool isAbsolute = input[0] == '/';
+    std::string processedInput = isAbsolute ? input.substr(1) : input;
+
     // Check if this is a navigation command
-    if (input.find('/') != std::string::npos || input == ".." || input == ".") {
-      menuTree->navigate(input);
+    if (processedInput.back() == '/') {
+      menuTree->navigate(processedInput, isAbsolute);
       std::cout << "Navigated to: " << menuTree->getCurrentPath() << std::endl;
+    } else if (processedInput.find('/') == std::string::npos) {
+      // This is a command execution in the current node
+      bool executed = menuTree->executeCommand(processedInput, false);
+      if (!executed) {
+        std::cout << "Unknown command. Use 'help' for available commands." << std::endl;
+      }
     } else {
-      // This is a command execution
-      bool executed = menuTree->executeCommand(request);
-      if (executed) {
-        std::cout << "Response: " << request.getResponse() 
-                  << " (Code: " << request.getResponseCode() << ")" << std::endl;
-      } else {
+      // This is a command execution with navigation
+      bool executed = menuTree->executeCommand(processedInput, isAbsolute);
+      if (!executed) {
         std::cout << "Unknown command. Use 'help' for available commands." << std::endl;
       }
     }
@@ -246,6 +279,7 @@ public:
 private:
   std::unique_ptr<CommandMenuTree> menuTree;
 };
+
 
 // New CommandActions class
 class CommandActions {
@@ -314,13 +348,13 @@ public:
 int main() {
   CLIService cli(CommandMenuTreeFactory::createDefaultTree());
 
-  // Example usage with enhanced navigation
-  cli.processCommand("set/hw");
-  cli.processCommand("rgbLed 255 55 123");
-  cli.processCommand("../../get/hw");
-  cli.processCommand("potmeter");
-  cli.processCommand("../../../");  // Navigate to root
-  cli.processCommand("help");
+  // Example usage demonstrating all cases, including root navigation
+  cli.processCommand("set/hw");  // Navigate to set/hw
+  cli.listCurrentCommands();
+  cli.processCommand("rgbLed 255 55 123");  // Execute command in current context
+  cli.processCommand("../../get/hw/potmeter");  // Navigate and execute relative to current position
+  cli.processCommand("/set/hw/rgbLed 100 100 100");  // Navigate and execute with absolute path
+  cli.processCommand("/");  // Navigate to root
   cli.listCurrentCommands();
 
   return 0;
