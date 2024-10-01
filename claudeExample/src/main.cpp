@@ -12,7 +12,7 @@
 class MenuNode;
 class CommandMenuTree;
 
-// CommandRequest class (unchanged)
+// Updated CommandRequest class with corrected parsing
 class CommandRequest {
 public:
   CommandRequest(const std::string& input) {
@@ -21,6 +21,7 @@ public:
   
   const std::vector<std::string>& getPath() const { return path; }
   const std::vector<std::string>& getArgs() const { return args; }
+  const std::string& getCommandName() const { return commandName; }
   void setResponse(const std::string& resp, int code = 0) { 
     response = resp; 
     responseCode = code;
@@ -31,26 +32,47 @@ public:
 private:
   std::vector<std::string> path;
   std::vector<std::string> args;
+  std::string commandName;
   std::string response;
   int responseCode = 0;
 
   void parseInput(const std::string& input) {
     std::istringstream iss(input);
-    std::string token;
+    std::string segment;
+    std::string remainingInput;
     
-    // Parse the command path and name
-    while (std::getline(iss, token, ' ')) {
-      if (token.empty()) continue;
-      path.push_back(token);
-      break;
-    }
-    
-    // Parse arguments
-    while (std::getline(iss, token, ' ')) {
-      if (!token.empty()) {
-        args.push_back(token);
+    // Parse the path and command name
+    while (std::getline(iss, segment, '/')) {
+      if (!segment.empty()) {
+        path.push_back(segment);
       }
     }
+    
+    if (!path.empty()) {
+      // Extract the last element, which contains the command and possibly arguments
+      std::string lastElement = path.back();
+      path.pop_back();
+
+      // Split the last element into command and arguments
+      std::istringstream lastElementStream(lastElement);
+      lastElementStream >> commandName;
+
+      // Parse arguments
+      std::string arg;
+      while (lastElementStream >> arg) {
+        args.push_back(arg);
+      }
+    }
+
+    // Debug output
+    std::cout << "Debug: Command parsed as:" << std::endl;
+    std::cout << "  Path: ";
+    for (const auto& p : path) std::cout << p << "/";
+    std::cout << std::endl;
+    std::cout << "  Command: " << commandName << std::endl;
+    std::cout << "  Args: ";
+    for (const auto& a : args) std::cout << a << " ";
+    std::cout << std::endl;
   }
 };
 
@@ -63,17 +85,28 @@ public:
   virtual std::string getUsage() const = 0;
 };
 
-// Example of a concrete Command subclass
+// Updated RgbLedCommand with more detailed error checking
 class RgbLedCommand : public Command {
 public:
   void execute(CommandRequest& request) override {
     const auto& args = request.getArgs();
+    std::cout << "Debug: RgbLedCommand execute called with " << args.size() << " arguments." << std::endl;
     if (args.size() != 3) {
       request.setResponse("Error: rgbLed command requires 3 arguments. Usage: " + getUsage(), 1);
       return;
     }
-    // Simulate setting RGB LED
-    request.setResponse("RGB LED set to " + args[0] + " " + args[1] + " " + args[2], 0);
+    try {
+      int r = std::stoi(args[0]);
+      int g = std::stoi(args[1]);
+      int b = std::stoi(args[2]);
+      if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) {
+        throw std::out_of_range("RGB values must be between 0 and 255");
+      }
+      // Simulate setting RGB LED
+      request.setResponse("RGB LED set to " + args[0] + " " + args[1] + " " + args[2], 0);
+    } catch (const std::exception& e) {
+      request.setResponse("Error: Invalid RGB values. " + std::string(e.what()), 1);
+    }
   }
 
   std::string getName() const override { return "rgbLed"; }
@@ -134,7 +167,7 @@ private:
   std::unordered_map<std::string, std::unique_ptr<Command>> commands;
 };
 
-// Updated CommandMenuTree class
+// Updated CommandMenuTree class with more detailed logging
 class CommandMenuTree {
 public:
   CommandMenuTree() : root("root"), currentNode(&root) {}
@@ -164,42 +197,33 @@ public:
     currentNode = node;
   }
 
-  bool executeCommand(const std::string& fullCommand, bool isAbsolute = false) {
-    std::istringstream iss(fullCommand);
-    std::string navigation, commandName;
-    std::getline(iss, navigation, ' ');
-
-    // Split the navigation part from the command name
-    auto lastSlash = navigation.find_last_of('/');
-    if (lastSlash != std::string::npos) {
-      commandName = navigation.substr(lastSlash + 1);
-      navigation = navigation.substr(0, lastSlash);
-    } else {
-      commandName = navigation;
-      navigation = "";
-    }
-
-    // Navigate to the correct node
+  bool executeCommand(CommandRequest& request, bool isAbsolute = false) {
+    // Store original position
     MenuNode* originalNode = currentNode;
-    if (!navigation.empty()) {
+
+    // Navigate to the command's location
+    const auto& path = request.getPath();
+    if (!path.empty()) {
+      std::string navigation = isAbsolute ? "/" : "";
+      for (const auto& segment : path) {
+        navigation += segment + "/";
+      }
       navigate(navigation, isAbsolute);
     }
 
+    std::cout << "Debug: Executing command at path: " << getCurrentPath() << std::endl;
+
     // Find and execute the command
-    Command* cmd = currentNode->getCommand(commandName);
+    Command* cmd = currentNode->getCommand(request.getCommandName());
     if (cmd) {
-      std::string remainingArgs;
-      std::getline(iss, remainingArgs);
-      std::string fullCommandWithArgs = commandName + " " + remainingArgs;
-      CommandRequest request(fullCommandWithArgs);
+      std::cout << "Debug: Found command: " << cmd->getName() << std::endl;
       cmd->execute(request);
-      std::cout << "Response: " << request.getResponse() 
-                << " (Code: " << request.getResponseCode() << ")" << std::endl;
       currentNode = originalNode;  // Reset to original position
       return true;
     }
 
     // If command not found, reset to original position and return false
+    std::cout << "Debug: Command not found: " << request.getCommandName() << std::endl;
     currentNode = originalNode;
     return false;
   }
@@ -257,20 +281,19 @@ public:
     bool isAbsolute = input[0] == '/';
     std::string processedInput = isAbsolute ? input.substr(1) : input;
 
+    CommandRequest request(processedInput);
+
     // Check if this is a navigation command
     if (processedInput.back() == '/') {
       menuTree->navigate(processedInput, isAbsolute);
       std::cout << "Navigated to: " << menuTree->getCurrentPath() << std::endl;
-    } else if (processedInput.find('/') == std::string::npos) {
-      // This is a command execution in the current node
-      bool executed = menuTree->executeCommand(processedInput, false);
-      if (!executed) {
-        std::cout << "Unknown command. Use 'help' for available commands." << std::endl;
-      }
     } else {
-      // This is a command execution with navigation
-      bool executed = menuTree->executeCommand(processedInput, isAbsolute);
-      if (!executed) {
+      // This is a command execution (with or without navigation)
+      bool executed = menuTree->executeCommand(request, isAbsolute);
+      if (executed) {
+        std::cout << "Response: " << request.getResponse() 
+                  << " (Code: " << request.getResponseCode() << ")" << std::endl;
+      } else {
         std::cout << "Unknown command. Use 'help' for available commands." << std::endl;
       }
     }
@@ -280,7 +303,7 @@ public:
     std::cout << "Current location: " << menuTree->getCurrentPath() << std::endl;
     std::cout << "Available commands:" << std::endl;
     for (const auto& cmd : menuTree->getCurrentNode()->getCommands()) {
-      std::cout << "  " << cmd.second->getUsage() << std::endl;
+      std::cout << "  " << cmd.first << " - Usage: " << cmd.second->getUsage() << std::endl;
     }
     std::cout << "Available submenus:" << std::endl;
     for (const auto& submenu : menuTree->getCurrentNode()->getSubMenus()) {
@@ -317,10 +340,17 @@ public:
 int main() {
   CLIService cli(CommandMenuTreeFactory::createDefaultTree());
 
-  // Example usage
+  // Example usage with debug output
+  std::cout << "\nExecuting: set/hw/rgbLed 255 55 123" << std::endl;
   cli.processCommand("set/hw/rgbLed 255 55 123");
+  
+  std::cout << "\nExecuting: get/hw/potmeter" << std::endl;
   cli.processCommand("get/hw/potmeter");
-  cli.processCommand("set/hw/");
+  
+  std::cout << "\nNavigating to root" << std::endl;
+  cli.processCommand("/");
+  
+  std::cout << "\nListing commands at root" << std::endl;
   cli.listCurrentCommands();
 
   return 0;
