@@ -12,6 +12,6 @@ class InOutStream {
   }
 
   void write(const std::string& data) {
-    std::cout << data << std::endl;
+    std::cout << data;
   }
 };

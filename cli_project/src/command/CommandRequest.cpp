@@ -45,18 +45,18 @@ void CommandRequest::parseInput(const std::string& input) {
     }
   }
 
-  // Debug output
-  std::cout << "Debug: Command parsed as:" << std::endl;
-  std::cout << "  Type: " << (type == Type::Navigation ? "Navigation" : 
-                              type == Type::Execution ? "Execution" : "RootNavigation") << std::endl;
-  std::cout << "  Absolute: " << (absolute ? "Yes" : "No") << std::endl;
-  std::cout << "  Path: ";
-  for (const auto& p : path) std::cout << p << "/";
-  std::cout << std::endl;
-  std::cout << "  Command: " << commandName << std::endl;
-  std::cout << "  Args: ";
-  for (const auto& a : args) std::cout << a << " ";
-  std::cout << std::endl;
+  // // Debug output
+  // std::cout << "Debug: Command parsed as:" << std::endl;
+  // std::cout << "  Type: " << (type == Type::Navigation ? "Navigation" : 
+  //                             type == Type::Execution ? "Execution" : "RootNavigation") << std::endl;
+  // std::cout << "  Absolute: " << (absolute ? "Yes" : "No") << std::endl;
+  // std::cout << "  Path: ";
+  // for (const auto& p : path) std::cout << p << "/";
+  // std::cout << std::endl;
+  // std::cout << "  Command: " << commandName << std::endl;
+  // std::cout << "  Args: ";
+  // for (const auto& a : args) std::cout << a << " ";
+  // std::cout << std::endl;
 }
 
 std::vector<std::string> CommandRequest::splitPath(const std::string& path) {

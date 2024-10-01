@@ -2,7 +2,27 @@
 #include <iostream>
 
 CLIService::CLIService(std::unique_ptr<CLIServiceConfiguration> config) 
-  : configuration(std::move(config)) {}
+  : configuration(std::move(config))
+{}
+
+void CLIService::activate() {
+  running = true;
+  configuration->inOutStream->write("Welcome to the CLI Service. Type 'exit' to quit.\n");
+}
+
+void CLIService::service() {
+  configuration->inOutStream->write(configuration->menuTree->getCurrentPath() + " > ");
+  std::string input = configuration->inOutStream->read();
+
+  if (input == "exit") {
+    running = false;
+    return;
+  } else if (input == "help") {
+    listCurrentCommands();
+  } else {
+    processCommand(input);
+  }
+}
 
 void CLIService::processCommand(const std::string& input) {
   CommandRequest request(input);
@@ -11,37 +31,21 @@ void CLIService::processCommand(const std::string& input) {
 }
 
 void CLIService::listCurrentCommands() {
-  std::cout << "Current location: " << configuration->menuTree->getCurrentPath() << std::endl;
-  std::cout << "Available commands:" << std::endl;
-  for (const auto& [name, cmd] : configuration->menuTree->getCurrentNode()->getCommands()) {
-    std::cout << "  " << name << " - Usage: " << cmd->getUsage() << std::endl;
-  }
-  std::cout << "Available submenus:" << std::endl;
-  for (const auto& [name, submenu] : configuration->menuTree->getCurrentNode()->getSubMenus()) {
-    std::cout << "  " << name << "/" << std::endl;
-  }
-}
+  configuration->inOutStream->write("Current location: " + configuration->menuTree->getCurrentPath() + "\n");
+  configuration->inOutStream->write("Available commands:\n");
 
-void CLIService::run() {
-  std::cout << "Welcome to the CLI Service. Type 'exit' to quit." << std::endl;
-  std::string input;
-  while (true) {
-    std::cout << configuration->menuTree->getCurrentPath() << " > ";
-    std::getline(std::cin, input);
-    if (input == "exit") {
-      break;
-    } else if (input == "help") {
-      listCurrentCommands();
-    } else {
-      processCommand(input);
-    }
+  for (const auto& [name, cmd] : configuration->menuTree->getCurrentNode()->getCommands()) {
+    configuration->inOutStream->write("  " + name + " - Usage: " + cmd->getUsage() + "\n");
   }
-  std::cout << "Thank you for using the CLI Service. Goodbye!" << std::endl;
+
+  configuration->inOutStream->write("Available submenus:\n");
+  for (const auto& [name, submenu] : configuration->menuTree->getCurrentNode()->getSubMenus()) {
+    configuration->inOutStream->write("  " + name + "/\n");
+  }
 }
 
 void CLIService::printResponse(const CommandRequest& request) {
   if (!request.getResponse().empty()) {
-    std::cout << "Response: " << request.getResponse() 
-              << " (Code: " << request.getResponseCode() << ")" << std::endl;
+    configuration->inOutStream->write(request.getResponse() + "\n");
   }
 }

@@ -8,11 +8,15 @@ class CLIService {
 public:
   CLIService(std::unique_ptr<CLIServiceConfiguration> config);
 
+  void activate();
+  void service();
   void processCommand(const std::string& input);
   void listCurrentCommands();
-  void run();
+  bool isRunning() const { return running; }
 
 private:
   std::unique_ptr<CLIServiceConfiguration> configuration;
+  bool running = false;
+
   void printResponse(const CommandRequest& request);
 };

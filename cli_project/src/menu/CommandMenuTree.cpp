@@ -10,12 +10,9 @@ CommandRequest CommandMenuTree::processRequest(const CommandRequest& request) {
   switch (request.getType()) {
     case CommandRequest::Type::RootNavigation:
       currentNode = &root;
-      processedRequest.setResponse("Navigated to root: " + getCurrentPath());
       break;
     case CommandRequest::Type::Navigation:
-      if (navigate(request.getPath(), request.isAbsolute())) {
-        processedRequest.setResponse("Navigated to: " + getCurrentPath());
-      } else {
+      if (!navigate(request.getPath(), request.isAbsolute())) {
         processedRequest.setResponse("Navigation failed: Invalid path", 1);
       }
       break;

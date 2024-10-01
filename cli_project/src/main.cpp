@@ -9,8 +9,15 @@ int main() {
   auto config = std::make_unique<CLIServiceConfiguration>(std::move(tree), std::move(inOutStream));
 
   CLIService cli(std::move(config));
+  cli.activate();
 
-  cli.run();
+  while (true) {
+    cli.service();
+    if (!cli.isRunning()) {
+      inOutStream->write("Thank you for using the CLI Service. Goodbye!\n");
+      break;
+    }
+  }
   
   return 0;
 }
