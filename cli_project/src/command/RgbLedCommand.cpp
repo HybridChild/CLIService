@@ -2,7 +2,6 @@
 
 void RgbLedCommand::execute(CommandRequest& request) {
   const auto& args = request.getArgs();
-  std::cout << "Debug: RgbLedCommand execute called with " << args.size() << " arguments." << std::endl;
   if (args.size() != 3) {
     request.setResponse("Error: rgbLed command requires 3 arguments. Usage: " + getUsage(), 1);
     return;

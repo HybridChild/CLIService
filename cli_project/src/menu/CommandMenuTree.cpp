@@ -5,25 +5,29 @@ CommandMenuTree::CommandMenuTree() : root("root"), currentNode(&root) {}
 MenuNode* CommandMenuTree::getCurrentNode() { return currentNode; }
 MenuNode* CommandMenuTree::getRoot() { return &root; }
 
-void CommandMenuTree::processRequest(const CommandRequest& request) {
+CommandRequest CommandMenuTree::processRequest(const CommandRequest& request) {
+  CommandRequest processedRequest = request;
   switch (request.getType()) {
     case CommandRequest::Type::RootNavigation:
       currentNode = &root;
-      std::cout << "Navigated to root: " << getCurrentPath() << std::endl;
+      processedRequest.setResponse("Navigated to root: " + getCurrentPath());
       break;
     case CommandRequest::Type::Navigation:
-      navigate(request.getPath(), request.isAbsolute());
-      std::cout << "Navigated to: " << getCurrentPath() << std::endl;
+      if (navigate(request.getPath(), request.isAbsolute())) {
+        processedRequest.setResponse("Navigated to: " + getCurrentPath());
+      } else {
+        processedRequest.setResponse("Navigation failed: Invalid path", 1);
+      }
       break;
     case CommandRequest::Type::Execution:
-      if (executeCommand(const_cast<CommandRequest&>(request))) {
-        std::cout << "Response: " << request.getResponse() 
-                  << " (Code: " << request.getResponseCode() << ")" << std::endl;
+      if (executeCommand(processedRequest)) {
+        // Response is set by the command itself
       } else {
-        std::cout << "Unknown command. Use 'help' for available commands." << std::endl;
+        processedRequest.setResponse("Unknown command. Use 'help' for available commands.", 1);
       }
       break;
   }
+  return processedRequest;
 }
 
 std::string CommandMenuTree::getCurrentPath() {
@@ -40,7 +44,7 @@ std::string CommandMenuTree::getCurrentPath() {
   return result;
 }
 
-void CommandMenuTree::navigate(const std::vector<std::string>& path, bool isAbsolute) {
+bool CommandMenuTree::navigate(const std::vector<std::string>& path, bool isAbsolute) {
   MenuNode* node = isAbsolute ? &root : currentNode;
 
   for (const auto& segment : path) {
@@ -53,12 +57,12 @@ void CommandMenuTree::navigate(const std::vector<std::string>& path, bool isAbso
       if (next) {
         node = next;
       } else {
-        std::cout << "Invalid path segment: " << segment << std::endl;
-        return;
+        return false;  // Invalid path segment
       }
     }
   }
   currentNode = node;
+  return true;
 }
 
 bool CommandMenuTree::executeCommand(CommandRequest& request) {

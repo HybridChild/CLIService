@@ -14,4 +14,5 @@ public:
 
 private:
   std::unique_ptr<CommandMenuTree> menuTree;
+  void printResponse(const CommandRequest& request);
 };

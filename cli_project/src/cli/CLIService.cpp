@@ -1,12 +1,13 @@
 #include "CLIService.hpp"
-#include "../command/CommandRequest.hpp"
+#include <iostream>
 
 CLIService::CLIService(std::unique_ptr<CommandMenuTree> tree) 
   : menuTree(std::move(tree)) {}
 
 void CLIService::processCommand(const std::string& input) {
   CommandRequest request(input);
-  menuTree->processRequest(request);
+  CommandRequest processedRequest = menuTree->processRequest(request);
+  printResponse(processedRequest);
 }
 
 void CLIService::listCurrentCommands() {
@@ -36,4 +37,11 @@ void CLIService::run() {
     }
   }
   std::cout << "Thank you for using the CLI Service. Goodbye!" << std::endl;
+}
+
+void CLIService::printResponse(const CommandRequest& request) {
+  if (!request.getResponse().empty()) {
+    std::cout << "Response: " << request.getResponse() 
+              << " (Code: " << request.getResponseCode() << ")" << std::endl;
+  }
 }
