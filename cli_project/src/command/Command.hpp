@@ -11,15 +11,15 @@ public:
     Admin = 2
   };
 
-  Command(Command::AccessLevel accessLevel) : accessLevel(accessLevel) {}
+  Command(Command::AccessLevel accessLevel) : _accessLevel(accessLevel) {}
   virtual ~Command() = default;
 
   virtual void execute(CommandRequest& request) = 0;
   virtual std::string getName() const = 0;
   virtual std::string getUsage() const = 0;
   
-  Command::AccessLevel getAccessLevel() const { return accessLevel; }
+  Command::AccessLevel getAccessLevel() const { return _accessLevel; }
 
 private:
-  Command::AccessLevel accessLevel;
+  Command::AccessLevel _accessLevel;
 };

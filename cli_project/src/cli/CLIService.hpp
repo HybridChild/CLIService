@@ -7,19 +7,19 @@
 
 class CLIService {
 public:
-  CLIService(std::unique_ptr<CLIServiceConfiguration> conf);
+  CLIService(std::unique_ptr<CLIServiceConfiguration> config);
 
   void activate();
   void service();
-  bool isRunning() const { return running; }
+  bool isRunning() const { return _running; }
 
 private:
-  std::unique_ptr<CLIServiceConfiguration> config;
-  CommandMenuTree* tree;
-  InOutStream* io;
-  bool running = false;
-  bool isAuthenticated = false;
-  const User* currentUser = nullptr;
+  std::unique_ptr<CLIServiceConfiguration> _config;
+  CommandMenuTree* _tree;
+  InOutStream* _io;
+  bool _running = false;
+  bool _isAuthenticated = false;
+  const User* _currentUser = nullptr;
 
   bool authenticateUser();
   void processCommand(const std::string& input);
