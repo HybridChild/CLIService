@@ -14,7 +14,13 @@ void CLIService::activate() {
 }
 
 void CLIService::service() {
-  io->write(tree->getCurrentPath() + " > ");
+  if (!isAuthenticated) {
+    if (!authenticateUser()) {
+      return;
+    }
+  }
+
+  io->write(currentUser + "@" + tree->getCurrentPath() + " > ");
   std::string input = io->read();
 
   if (input == "exit") {
@@ -60,4 +66,24 @@ void CLIService::printWelcomeMessage() {
 
 void CLIService::printGoodbyeMessage() {
   io->write("Thank you for using the CLI Service. Goodbye!\n");
+}
+
+bool CLIService::authenticateUser() {
+  auto* io = config->getIOStream();
+  std::string username, password;
+
+  io->write("Username: ");
+  username = io->read();
+  io->write("Password: ");
+  password = io->read();
+
+  if (config->authenticateUser(username, password)) {
+    isAuthenticated = true;
+    currentUser = username;
+    io->write("Login successful. Welcome, " + username + "!\n");
+    return true;
+  } else {
+    io->write("Login failed. Invalid username or password.\n");
+    return false;
+  }
 }

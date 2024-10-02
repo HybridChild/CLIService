@@ -18,10 +18,13 @@ private:
   CommandMenuTree* tree;
   InOutStream* io;
   bool running = false;
+  bool isAuthenticated = false;
+  std::string currentUser;
 
   void processCommand(const std::string& input);
   void printResponse(const CommandRequest& request);
   void listCurrentCommands();
   void printWelcomeMessage();
   void printGoodbyeMessage();
+  bool authenticateUser();
 };
