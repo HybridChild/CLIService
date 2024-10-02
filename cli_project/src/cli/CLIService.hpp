@@ -11,15 +11,15 @@ public:
 
   void activate();
   void service();
-  bool isRunning() const { return running; }
+  bool isRunning() const { return _running; }
 
 private:
-  std::unique_ptr<CLIServiceConfiguration> config;
-  CommandMenuTree* tree;
-  InOutStream* io;
-  bool running = false;
-  bool isAuthenticated = false;
-  const User* currentUser = nullptr;
+  std::unique_ptr<CLIServiceConfiguration> _config;
+  const User* _currentUser = nullptr;
+  CommandMenuTree* _tree = nullptr;
+  InOutStream* _io = nullptr;
+  bool _running = false;
+  bool _isAuthenticated = false;
 
   bool authenticateUser();
   void processCommand(const std::string& input);
