@@ -8,15 +8,15 @@ std::unique_ptr<CommandMenuTree> CommandMenuTreeFactory::createDefaultTree() {
   MenuNode* root = tree->getRoot();
 
   // Get branch
-  MenuNode* getNode = root->addSubMenu("get");
-  MenuNode* getHwNode = getNode->addSubMenu("hw");
+  MenuNode* getNode = root->addSubMenu("get", Command::AccessLevel::Basic);
+  MenuNode* getHwNode = getNode->addSubMenu("hw", Command::AccessLevel::Basic);
   getHwNode->addCommand(std::make_unique<PotmeterCommand>(Command::AccessLevel::Basic));
-  MenuNode* getAnalyticsNode = getNode->addSubMenu("analytics");
+  MenuNode* getAnalyticsNode = getNode->addSubMenu("analytics", Command::AccessLevel::Admin);
   getAnalyticsNode->addCommand(std::make_unique<GetAnalyticsCommand>(Command::AccessLevel::Admin));
 
   // Set branch
-  MenuNode* setNode = root->addSubMenu("set");
-  MenuNode* setHwNode = setNode->addSubMenu("hw");
+  MenuNode* setNode = root->addSubMenu("set", Command::AccessLevel::Advanced);
+  MenuNode* setHwNode = setNode->addSubMenu("hw", Command::AccessLevel::Advanced);
   setHwNode->addCommand(std::make_unique<RgbLedCommand>(Command::AccessLevel::Advanced));
   
   return tree;
