@@ -16,6 +16,8 @@ public:
 
 private:
   std::unique_ptr<CLIServiceConfiguration> config;
+  CommandMenuTree* tree;
+  InOutStream* io;
   bool running = false;
 
   void printResponse(const CommandRequest& request);

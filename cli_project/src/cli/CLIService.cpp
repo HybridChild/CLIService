@@ -3,16 +3,19 @@
 
 CLIService::CLIService(std::unique_ptr<CLIServiceConfiguration> conf) 
   : config(std::move(conf))
-{}
+{
+  tree = config->getMenuTree();
+  io = config->getIOStream();
+}
 
 void CLIService::activate() {
   running = true;
-  config->getIOStream()->write("Welcome to the CLI Service. Type 'exit' to quit.\n");
+  io->write("Welcome to the CLI Service. Type 'exit' to quit.\n");
 }
 
 void CLIService::service() {
-  config->getIOStream()->write(config->getMenuTree()->getCurrentPath() + " > ");
-  std::string input = config->getIOStream()->read();
+  io->write(tree->getCurrentPath() + " > ");
+  std::string input = io->read();
 
   if (input == "exit") {
     running = false;
@@ -26,26 +29,26 @@ void CLIService::service() {
 
 void CLIService::processCommand(const std::string& input) {
   CommandRequest request(input);
-  CommandRequest processedRequest = config->getMenuTree()->processRequest(request);
+  CommandRequest processedRequest = tree->processRequest(request);
   printResponse(processedRequest);
 }
 
 void CLIService::listCurrentCommands() {
-  config->getIOStream()->write("Current location: " + config->getMenuTree()->getCurrentPath() + "\n");
-  config->getIOStream()->write("Available commands:\n");
+  io->write("Current location: " + tree->getCurrentPath() + "\n");
+  io->write("Available commands:\n");
 
-  for (const auto& [name, cmd] : config->getMenuTree()->getCurrentNode()->getCommands()) {
-    config->getIOStream()->write("  " + name + " - Usage: " + cmd->getUsage() + "\n");
+  for (const auto& [name, cmd] : tree->getCurrentNode()->getCommands()) {
+    io->write("  " + name + " - Usage: " + cmd->getUsage() + "\n");
   }
 
-  config->getIOStream()->write("Available submenus:\n");
-  for (const auto& [name, submenu] : config->getMenuTree()->getCurrentNode()->getSubMenus()) {
-    config->getIOStream()->write("  " + name + "/\n");
+  io->write("Available submenus:\n");
+  for (const auto& [name, submenu] : tree->getCurrentNode()->getSubMenus()) {
+    io->write("  " + name + "/\n");
   }
 }
 
 void CLIService::printResponse(const CommandRequest& request) {
   if (!request.getResponse().empty()) {
-    config->getIOStream()->write(request.getResponse() + "\n");
+    io->write(request.getResponse() + "\n");
   }
 }
