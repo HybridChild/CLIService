@@ -5,46 +5,59 @@ CommandRequest::CommandRequest(const std::string& input) {
 }
 
 void CommandRequest::setResponse(const std::string& resp, int code) {
-  _response = resp;
-  _responseCode = code;
+  response = resp;
+  responseCode = code;
 }
 
 void CommandRequest::parseInput(const std::string& input) {
   if (input.empty() || input == "/") {
-    _type = Type::RootNavigation;
-    _absolute = true;
+    type = Type::RootNavigation;
+    absolute = true;
     return;
   }
 
-  _absolute = input[0] == '/';
-  std::string processedInput = _absolute ? input.substr(1) : input;
+  absolute = input[0] == '/';
+  std::string processedInput = absolute ? input.substr(1) : input;
 
   if (processedInput.empty()) {
-    _type = Type::RootNavigation;
+    type = Type::RootNavigation;
     return;
   }
 
   if (processedInput.back() == '/' || processedInput == "..") {
-    _type = Type::Navigation;
-    _path = splitPath(processedInput);
+    type = Type::Navigation;
+    path = splitPath(processedInput);
   } else {
-    _type = Type::Execution;
+    type = Type::Execution;
     std::vector<std::string> segments = splitPath(processedInput);
     
     if (!segments.empty()) {
-      _commandName = segments.back();
+      commandName = segments.back();
       segments.pop_back();
-      _path = segments;
+      path = segments;
 
       // Parse arguments
-      std::istringstream iss(_commandName);
-      iss >> _commandName;
+      std::istringstream iss(commandName);
+      iss >> commandName;
       std::string arg;
       while (iss >> arg) {
-        _args.push_back(arg);
+        args.push_back(arg);
       }
     }
   }
+
+  // // Debug output (you can remove this in production)
+  // std::cout << "Debug: Command parsed as:" << std::endl;
+  // std::cout << "  Type: " << (type == Type::Navigation ? "Navigation" : 
+  //                             type == Type::Execution ? "Execution" : "RootNavigation") << std::endl;
+  // std::cout << "  Absolute: " << (absolute ? "Yes" : "No") << std::endl;
+  // std::cout << "  Path: ";
+  // for (const auto& p : path) std::cout << p << "/";
+  // std::cout << std::endl;
+  // std::cout << "  Command: " << commandName << std::endl;
+  // std::cout << "  Args: ";
+  // for (const auto& a : args) std::cout << a << " ";
+  // std::cout << std::endl;
 }
 
 std::vector<std::string> CommandRequest::splitPath(const std::string& path) {

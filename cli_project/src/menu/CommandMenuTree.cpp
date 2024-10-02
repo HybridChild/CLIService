@@ -1,16 +1,15 @@
 #include "CommandMenuTree.hpp"
 
-CommandMenuTree::CommandMenuTree()
-  : _root("root"), _currentNode(&_root) {}
+CommandMenuTree::CommandMenuTree() : root("root"), currentNode(&root) {}
 
-MenuNode* CommandMenuTree::getCurrentNode() { return _currentNode; }
-MenuNode* CommandMenuTree::getRoot() { return &_root; }
+MenuNode* CommandMenuTree::getCurrentNode() { return currentNode; }
+MenuNode* CommandMenuTree::getRoot() { return &root; }
 
 CommandRequest CommandMenuTree::processRequest(const CommandRequest& request) {
   CommandRequest processedRequest = request;
   switch (request.getType()) {
     case CommandRequest::Type::RootNavigation:
-      _currentNode = &_root;
+      currentNode = &root;
       break;
     case CommandRequest::Type::Navigation:
       if (!navigate(request.getPath(), request.isAbsolute())) {
@@ -30,8 +29,8 @@ CommandRequest CommandMenuTree::processRequest(const CommandRequest& request) {
 
 std::string CommandMenuTree::getCurrentPath() const {
   std::vector<std::string> path;
-  MenuNode* node = _currentNode;
-  while (node != &_root) {
+  MenuNode* node = currentNode;
+  while (node != &root) {
     path.push_back(node->getName());
     node = node->getParent();
   }
@@ -43,11 +42,11 @@ std::string CommandMenuTree::getCurrentPath() const {
 }
 
 bool CommandMenuTree::navigate(const std::vector<std::string>& path, bool isAbsolute) {
-  MenuNode* node = isAbsolute ? &_root : _currentNode;
+  MenuNode* node = isAbsolute ? &root : currentNode;
 
   for (const auto& segment : path) {
     if (segment == "..") {
-      if (node != &_root && node->getParent() != nullptr) {
+      if (node != &root && node->getParent() != nullptr) {
         node = node->getParent();
       }
     } else if (!segment.empty()) {
@@ -59,21 +58,21 @@ bool CommandMenuTree::navigate(const std::vector<std::string>& path, bool isAbso
       }
     }
   }
-  _currentNode = node;
+  currentNode = node;
   return true;
 }
 
 bool CommandMenuTree::executeCommand(CommandRequest& request) {
-  MenuNode* originalNode = _currentNode;
+  MenuNode* originalNode = currentNode;
   navigate(request.getPath(), request.isAbsolute());
 
-  Command* cmd = _currentNode->getCommand(request.getCommandName());
+  Command* cmd = currentNode->getCommand(request.getCommandName());
   if (cmd) {
     cmd->execute(request);
-    _currentNode = originalNode;  // Reset to original position
+    currentNode = originalNode;  // Reset to original position
     return true;
   }
 
-  _currentNode = originalNode;
+  currentNode = originalNode;
   return false;
 }
