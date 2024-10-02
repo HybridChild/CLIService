@@ -14,7 +14,6 @@ int main() {
   while (true) {
     cli.service();
     if (!cli.isRunning()) {
-      inOutStream->write("Thank you for using the CLI Service. Goodbye!\n");
       break;
     }
   }

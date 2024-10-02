@@ -10,7 +10,7 @@ CLIService::CLIService(std::unique_ptr<CLIServiceConfiguration> conf)
 
 void CLIService::activate() {
   running = true;
-  io->write("Welcome to the CLI Service. Type 'exit' to quit.\n");
+  printWelcomeMessage();
 }
 
 void CLIService::service() {
@@ -18,6 +18,7 @@ void CLIService::service() {
   std::string input = io->read();
 
   if (input == "exit") {
+    printGoodbyeMessage();
     running = false;
     return;
   } else if (input == "help") {
@@ -51,4 +52,12 @@ void CLIService::printResponse(const CommandRequest& request) {
   if (!request.getResponse().empty()) {
     io->write(request.getResponse() + "\n");
   }
+}
+
+void CLIService::printWelcomeMessage() {
+  io->write("Welcome to the CLI Service. Type 'exit' to quit.\n");
+}
+
+void CLIService::printGoodbyeMessage() {
+  io->write("Thank you for using the CLI Service. Goodbye!\n");
 }

@@ -10,9 +10,8 @@ public:
 
   void activate();
   void service();
-  void processCommand(const std::string& input);
-  void listCurrentCommands();
   bool isRunning() const { return running; }
+
 
 private:
   std::unique_ptr<CLIServiceConfiguration> config;
@@ -20,5 +19,9 @@ private:
   InOutStream* io;
   bool running = false;
 
+  void processCommand(const std::string& input);
   void printResponse(const CommandRequest& request);
+  void listCurrentCommands();
+  void printWelcomeMessage();
+  void printGoodbyeMessage();
 };
