@@ -10,8 +10,9 @@ void CommandRequest::setResponse(const std::string& resp, int code) {
 }
 
 void CommandRequest::parseInput(const std::string& input) {
-  if (input.empty()) {
+  if (input.empty() || input == "/") {
     type = Type::RootNavigation;
+    absolute = true;
     return;
   }
 
@@ -45,7 +46,7 @@ void CommandRequest::parseInput(const std::string& input) {
     }
   }
 
-  // // Debug output
+  // // Debug output (you can remove this in production)
   // std::cout << "Debug: Command parsed as:" << std::endl;
   // std::cout << "  Type: " << (type == Type::Navigation ? "Navigation" : 
   //                             type == Type::Execution ? "Execution" : "RootNavigation") << std::endl;

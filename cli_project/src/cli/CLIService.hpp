@@ -13,7 +13,6 @@ public:
   void service();
   bool isRunning() const { return running; }
 
-
 private:
   std::unique_ptr<CLIServiceConfiguration> config;
   CommandMenuTree* tree;
@@ -22,10 +21,14 @@ private:
   bool isAuthenticated = false;
   const User* currentUser = nullptr;
 
+  bool authenticateUser();
   void processCommand(const std::string& input);
+  void handleNavigation(const CommandRequest& request);
+  void handleExecution(const CommandRequest& request);
+  bool navigateToNode(const std::vector<std::string>& path, bool isAbsolute);
+  void executeCommand(const std::string& commandName, const CommandRequest& request);
   void printResponse(const CommandRequest& request);
-  void listCurrentCommands();
   void printWelcomeMessage();
   void printGoodbyeMessage();
-  bool authenticateUser();
+  void listCurrentCommands();
 };

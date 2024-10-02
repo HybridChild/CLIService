@@ -36,56 +36,70 @@ void CLIService::service() {
 
 void CLIService::processCommand(const std::string& input) {
   CommandRequest request(input);
+  
+  switch (request.getType()) {
+    case CommandRequest::Type::Navigation:
+    case CommandRequest::Type::RootNavigation:
+      handleNavigation(request);
+      break;
+    case CommandRequest::Type::Execution:
+      handleExecution(request);
+      break;
+    default:
+      io->writeLine("Unknown command type.");
+      break;
+  }
+}
 
-  // Handle navigation commands
-  if (request.getType() == CommandRequest::Type::Navigation) {
-    if (request.isAbsolute()) {
-      tree->setCurrentNode(tree->getRoot());
-    }
-    for (const auto& pathSegment : request.getPath()) {
-      if (pathSegment == "..") {
-        MenuNode* parent = tree->getCurrentNode()->getParent();
-        if (parent) {
-          tree->setCurrentNode(parent);
-        } else {
-          io->writeLine("Already at root.");
-        }
+void CLIService::handleNavigation(const CommandRequest& request) {
+  if (request.getType() == CommandRequest::Type::RootNavigation) {
+    tree->setCurrentNode(tree->getRoot());
+    io->writeLine("Navigated to root: /");
+  } else if (navigateToNode(request.getPath(), request.isAbsolute())) {
+    io->writeLine("Current location: " + tree->getCurrentPath());
+  }
+}
+
+void CLIService::handleExecution(const CommandRequest& request) {
+  auto* tree = config->getMenuTree();
+  MenuNode* originalNode = tree->getCurrentNode();
+
+  if (navigateToNode(request.getPath(), request.isAbsolute())) {
+    executeCommand(request.getCommandName(), request);
+  }
+
+  tree->setCurrentNode(originalNode);
+}
+
+bool CLIService::navigateToNode(const std::vector<std::string>& path, bool isAbsolute) {
+  if (isAbsolute) {
+    tree->setCurrentNode(tree->getRoot());
+  }
+
+  for (const auto& pathSegment : path) {
+    if (pathSegment == "..") {
+      MenuNode* parent = tree->getCurrentNode()->getParent();
+      if (parent) {
+        tree->setCurrentNode(parent);
       } else {
-        MenuNode* nextNode = tree->getCurrentNode()->getSubMenu(pathSegment);
-        if (nextNode) {
-          if (static_cast<int>(currentUser->getAccessLevel()) >= static_cast<int>(nextNode->getAccessLevel())) {
-            tree->setCurrentNode(nextNode);
-          } else {
-            io->writeLine("Access denied to: " + pathSegment);
-            return;
-          }
-        } else {
-          io->writeLine("Invalid path: " + pathSegment);
-          return;
-        }
+        io->writeLine("Already at root.");
+        return false;
+      }
+    } else {
+      MenuNode* nextNode = tree->getCurrentNode()->getSubMenu(pathSegment);
+      if (nextNode && static_cast<int>(currentUser->getAccessLevel()) >= static_cast<int>(nextNode->getAccessLevel())) {
+        tree->setCurrentNode(nextNode);
+      } else {
+        io->writeLine("Access denied or invalid path: " + pathSegment);
+        return false;
       }
     }
-    io->writeLine("Current location: " + tree->getCurrentPath());
-    return;
   }
+  return true;
+}
 
-  // Handle execution commands
-  MenuNode* originalNode = tree->getCurrentNode();
-  
-  // Navigate to the correct node based on the request path
-  for (const auto& pathSegment : request.getPath()) {
-    MenuNode* nextNode = tree->getCurrentNode()->getSubMenu(pathSegment);
-    if (nextNode && static_cast<int>(currentUser->getAccessLevel()) >= static_cast<int>(nextNode->getAccessLevel())) {
-      tree->setCurrentNode(nextNode);
-    } else {
-      io->writeLine("Access denied or invalid path: " + pathSegment);
-      tree->setCurrentNode(originalNode);
-      return;
-    }
-  }
-  
-  // Now we're at the correct node, look for the command
-  Command* cmd = tree->getCurrentNode()->getCommand(request.getCommandName());
+void CLIService::executeCommand(const std::string& commandName, const CommandRequest& request) {
+  Command* cmd = tree->getCurrentNode()->getCommand(commandName);
   
   if (cmd && static_cast<int>(currentUser->getAccessLevel()) >= static_cast<int>(cmd->getAccessLevel())) {
     CommandRequest processedRequest = tree->processRequest(request);
@@ -95,9 +109,6 @@ void CLIService::processCommand(const std::string& input) {
   } else {
     io->writeLine("Unknown command. Use 'help' for available commands.");
   }
-  
-  // Reset to original position
-  tree->setCurrentNode(originalNode);
 }
 
 void CLIService::listCurrentCommands() {
