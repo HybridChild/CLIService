@@ -1,6 +1,6 @@
 #include "cli/CLIService.hpp"
 #include "cli/CLIServiceConfiguration.hpp"
-#include "stream/InOutStream.hpp"
+#include "io/InOutStream.hpp"
 #include "menu/CommandMenuTreeFactory.hpp"
 
 int main() {
