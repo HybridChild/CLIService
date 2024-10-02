@@ -27,7 +27,7 @@ CommandRequest CommandMenuTree::processRequest(const CommandRequest& request) {
   return processedRequest;
 }
 
-std::string CommandMenuTree::getCurrentPath() {
+std::string CommandMenuTree::getCurrentPath() const {
   std::vector<std::string> path;
   MenuNode* node = currentNode;
   while (node != &root) {

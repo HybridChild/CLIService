@@ -8,10 +8,11 @@ public:
   CommandMenuTree();
 
   MenuNode* getCurrentNode();
+  void setCurrentNode(MenuNode* node) { currentNode = node; }
   MenuNode* getRoot();
 
   CommandRequest processRequest(const CommandRequest& request);
-  std::string getCurrentPath();
+  std::string getCurrentPath() const;
 
 private:
   MenuNode root;

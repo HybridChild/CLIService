@@ -15,11 +15,11 @@ public:
   const std::vector<std::string>& getPath() const { return path; }
   const std::vector<std::string>& getArgs() const { return args; }
   const std::string& getCommandName() const { return commandName; }
-  bool isAbsolute() const { return absolute; }
   Type getType() const { return type; }
-  void setResponse(const std::string& resp, int code = 0);
   const std::string& getResponse() const { return response; }
   int getResponseCode() const { return responseCode; }
+  void setResponse(const std::string& resp, int code = 0);
+  bool isAbsolute() const { return absolute; }
 
 private:
   std::vector<std::string> path;

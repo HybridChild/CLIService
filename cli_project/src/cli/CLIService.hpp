@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CLIServiceConfiguration.hpp"
+#include "../user/User.hpp"
 #include <memory>
 #include <string>
 
@@ -19,7 +20,7 @@ private:
   InOutStream* io;
   bool running = false;
   bool isAuthenticated = false;
-  std::string currentUser;
+  const User* currentUser = nullptr;
 
   void processCommand(const std::string& input);
   void printResponse(const CommandRequest& request);

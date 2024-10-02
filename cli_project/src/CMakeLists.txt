@@ -4,6 +4,7 @@ add_executable(cli_app
   command/CommandRequest.cpp
   command/RgbLedCommand.cpp
   command/PotmeterCommand.cpp
+  command/GetAnalyticsCommand.cpp
   menu/MenuNode.cpp
   menu/CommandMenuTree.cpp
   menu/CommandMenuTreeFactory.cpp
