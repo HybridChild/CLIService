@@ -18,11 +18,12 @@ private:
   const User* _currentUser = nullptr;
   CommandMenuTree* _tree = nullptr;
   InOutStream* _io = nullptr;
-  bool _running = false;
   bool _isAuthenticated = false;
 
+  bool _running = false;
+
   bool authenticateUser();
-  void processCommand(const std::string& input);
+  void processCommand(const CommandRequest& request);
   void handleNavigation(const CommandRequest& request);
   void handleExecution(const CommandRequest& request);
   bool navigateToNode(const std::vector<std::string>& path, bool isAbsolute);
@@ -30,5 +31,6 @@ private:
   void printResponse(const CommandRequest& request);
   void printWelcomeMessage();
   void printGoodbyeMessage();
+  void printPromptString();
   void listCurrentCommands();
 };

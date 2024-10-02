@@ -18,10 +18,14 @@ void CLIService::service() {
     if (!authenticateUser()) {
       return;
     }
+    printPromptString();
   }
 
-  _io->write(_currentUser->getUsername() + "@" + _tree->getCurrentPath() + " > ");
   std::string input = _io->read();
+  if (input.empty()) {
+    return;
+  }
+
 
   if (input == "exit") {
     printGoodbyeMessage();
@@ -30,13 +34,16 @@ void CLIService::service() {
   } else if (input == "help") {
     listCurrentCommands();
   } else {
-    processCommand(input);
+    CommandRequest request(input);
+    processCommand(request);
   }
+  
+  printPromptString();
 }
 
-void CLIService::processCommand(const std::string& input) {
-  CommandRequest request(input);
-  
+
+
+void CLIService::processCommand(const CommandRequest& request) {  
   switch (request.getType()) {
     case CommandRequest::Type::Navigation:
     case CommandRequest::Type::RootNavigation:
@@ -138,6 +145,10 @@ void CLIService::printWelcomeMessage() {
 
 void CLIService::printGoodbyeMessage() {
   _io->writeLine("Thank you for using the CLI Service. Goodbye!");
+}
+
+void CLIService::printPromptString() {
+  _io->write(_currentUser->getUsername() + "@" + _tree->getCurrentPath() + " > ");
 }
 
 bool CLIService::authenticateUser() {

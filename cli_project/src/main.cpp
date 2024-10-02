@@ -5,6 +5,11 @@
 #include "command/Command.hpp"
 #include <unordered_map>
 
+// void inputCommandHandler((void)*msg) {
+  
+// }
+
+
 int main() {
   auto inOutStream = std::make_unique<InOutStream>();
   auto tree = CommandMenuTreeFactory::createDefaultTree();
@@ -24,11 +29,8 @@ int main() {
   CLIService cli(std::move(config));
   cli.activate();
 
-  while (true) {
+  while (cli.isRunning()) {
     cli.service();
-    if (!cli.isRunning()) {
-      break;
-    }
   }
   
   return 0;
