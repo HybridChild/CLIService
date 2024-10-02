@@ -6,7 +6,7 @@
 
 class CLIService {
 public:
-  CLIService(std::unique_ptr<CLIServiceConfiguration> config);
+  CLIService(std::unique_ptr<CLIServiceConfiguration> conf);
 
   void activate();
   void service();
@@ -15,7 +15,7 @@ public:
   bool isRunning() const { return running; }
 
 private:
-  std::unique_ptr<CLIServiceConfiguration> configuration;
+  std::unique_ptr<CLIServiceConfiguration> config;
   bool running = false;
 
   void printResponse(const CommandRequest& request);
