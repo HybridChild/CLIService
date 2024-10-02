@@ -31,19 +31,36 @@ void CLIService::service() {
     printGoodbyeMessage();
     _running = false;
     return;
-  } else if (input == "help") {
-    listCurrentCommands();
-  } else {
-    CommandRequest request(input);
-    processCommand(request);
   }
-  
-  printPromptString();
+
+  CommandRequest request(input);
+  processCommand(request);
+}
+
+std::string CLIService::parseInputStream() {
+  char c;
+  while (std::cin.get(c)) {
+    if (c == '\r' || c == '\n') {
+      if (!_inputBuffer.empty()) {
+        std::string command(_inputBuffer.begin(), _inputBuffer.end());
+        _inputBuffer.clear();
+        return command;
+      }
+    } else {
+      _inputBuffer.push_back(c);
+    }
+  }
+  return "";  // No complete command found
 }
 
 
 
 void CLIService::processCommand(const CommandRequest& request) {  
+  if (request.getCommandName() == "help") {
+    listCurrentCommands();
+    return;
+  }
+
   switch (request.getType()) {
     case CommandRequest::Type::Navigation:
     case CommandRequest::Type::RootNavigation:

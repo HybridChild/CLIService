@@ -19,9 +19,11 @@ private:
   CommandMenuTree* _tree = nullptr;
   InOutStream* _io = nullptr;
   bool _isAuthenticated = false;
+  std::deque<char> _inputBuffer;
 
   bool _running = false;
 
+  std::string parseInputStream();
   bool authenticateUser();
   void processCommand(const CommandRequest& request);
   void handleNavigation(const CommandRequest& request);
