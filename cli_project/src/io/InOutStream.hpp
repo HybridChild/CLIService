@@ -14,8 +14,4 @@ class InOutStream {
   void write(const std::string& data) {
     std::cout << data;
   }
-
-  void writeLine(const std::string& data) {
-    std::cout << data << std::endl;
-  }
 };

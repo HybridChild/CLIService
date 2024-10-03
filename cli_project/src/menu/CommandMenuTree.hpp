@@ -11,7 +11,7 @@ public:
   void setCurrentNode(MenuNode* node);
   MenuNode* getRoot();
 
-  CommandRequest processRequest(const CommandRequest& request);
+  void processRequest(CommandRequest& request);
   std::string getCurrentPath() const;
 
 private:

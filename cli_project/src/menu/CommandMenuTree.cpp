@@ -8,26 +8,24 @@ MenuNode* CommandMenuTree::getCurrentNode() { return _currentNode; }
 void CommandMenuTree::setCurrentNode(MenuNode* node)  { _currentNode = node; }
 MenuNode* CommandMenuTree::getRoot() { return &_root; }
 
-CommandRequest CommandMenuTree::processRequest(const CommandRequest& request) {
-  CommandRequest processedRequest = request;
+void CommandMenuTree::processRequest(CommandRequest& request) {
   switch (request.getType()) {
     case CommandRequest::Type::RootNavigation:
       _currentNode = &_root;
       break;
     case CommandRequest::Type::Navigation:
       if (!navigate(request.getPath(), request.isAbsolute())) {
-        processedRequest.setResponse("Navigation failed: Invalid path", 1);
+        request.setResponse("Navigation failed: Invalid path\n", 1);
       }
       break;
     case CommandRequest::Type::Execution:
-      if (executeCommand(processedRequest)) {
+      if (executeCommand(request)) {
         // Response is set by the command itself
       } else {
-        processedRequest.setResponse("Unknown command. Use 'help' for available commands.", 1);
+        request.setResponse("Unknown command. Use 'help' for available commands.\n", 1);
       }
       break;
   }
-  return processedRequest;
 }
 
 std::string CommandMenuTree::getCurrentPath() const {
