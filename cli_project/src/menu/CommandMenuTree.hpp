@@ -11,7 +11,7 @@ public:
   void setCurrentNode(MenuNode* node);
   MenuNode* getRoot();
 
-  void processRequest(CommandRequest& request);
+  void processRequest(const CommandRequest& request, std::string& response);
   std::string getCurrentPath() const;
 
 private:
@@ -19,5 +19,5 @@ private:
   MenuNode* _currentNode;
 
   bool navigate(const std::vector<std::string>& path, bool isAbsolute);
-  bool executeCommand(CommandRequest& request);
+  bool executeCommand(const CommandRequest& request, std::string& response);
 };

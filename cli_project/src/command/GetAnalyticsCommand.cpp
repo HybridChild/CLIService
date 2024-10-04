@@ -1,12 +1,12 @@
 #include "GetAnalyticsCommand.hpp"
 
-void GetAnalyticsCommand::execute(CommandRequest& request) {
+void GetAnalyticsCommand::execute(const CommandRequest& request, std::string& response) {
   if (!request.getArgs().empty()) {
-    request.setResponse("Error: getAnalytics command takes no arguments. Usage: " + getUsage() + "\n", 1);
+    response = "Error: getAnalytics command takes no arguments. Usage: " + getUsage() + "\n";
     return;
   }
   // Simulate reading analytics data
-  request.setResponse("DataPoint[1] = User is an idiot\n", 0);
+  response = "DataPoint[1] = User is an idiot\n";
 }
 
 std::string GetAnalyticsCommand::getName() const { return "getData"; }

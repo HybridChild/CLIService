@@ -4,11 +4,6 @@ CommandRequest::CommandRequest(const std::string& input) {
   parseInput(input);
 }
 
-void CommandRequest::setResponse(const std::string& resp, int code) {
-  _response = resp;
-  _responseCode = code;
-}
-
 void CommandRequest::parseInput(const std::string& input) {
   if (input.empty() || input == "/") {
     _type = Type::RootNavigation;

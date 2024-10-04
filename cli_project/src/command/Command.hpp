@@ -14,7 +14,7 @@ public:
   Command(Command::AccessLevel accessLevel) : _accessLevel(accessLevel) {}
   virtual ~Command() = default;
 
-  virtual void execute(CommandRequest& request) = 0;
+  virtual void execute(const CommandRequest& request, std::string& response) = 0;
   virtual std::string getName() const = 0;
   virtual std::string getUsage() const = 0;
   

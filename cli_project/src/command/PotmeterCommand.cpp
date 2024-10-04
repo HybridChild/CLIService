@@ -1,12 +1,12 @@
 #include "PotmeterCommand.hpp"
 
-void PotmeterCommand::execute(CommandRequest& request) {
+void PotmeterCommand::execute(const CommandRequest& request, std::string& response) {
   if (!request.getArgs().empty()) {
-    request.setResponse("Error: potmeter command takes no arguments. Usage: " + getUsage() + "\n", 1);
+    response = "Error: potmeter command takes no arguments. Usage: " + getUsage() + "\n";
     return;
   }
   // Simulate reading potmeter value
-  request.setResponse("Potmeter value: 512\n", 0);
+  response = "Potmeter value: 512\n";
 }
 
 std::string PotmeterCommand::getName() const { return "potmeter"; }

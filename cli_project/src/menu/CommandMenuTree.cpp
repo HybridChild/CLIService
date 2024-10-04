@@ -8,21 +8,21 @@ MenuNode* CommandMenuTree::getCurrentNode() { return _currentNode; }
 void CommandMenuTree::setCurrentNode(MenuNode* node)  { _currentNode = node; }
 MenuNode* CommandMenuTree::getRoot() { return &_root; }
 
-void CommandMenuTree::processRequest(CommandRequest& request) {
+void CommandMenuTree::processRequest(const CommandRequest& request, std::string& response) {
   switch (request.getType()) {
     case CommandRequest::Type::RootNavigation:
       _currentNode = &_root;
       break;
     case CommandRequest::Type::Navigation:
       if (!navigate(request.getPath(), request.isAbsolute())) {
-        request.setResponse("Navigation failed: Invalid path\n", 1);
+        response = "Navigation failed: Invalid path\n";
       }
       break;
     case CommandRequest::Type::Execution:
-      if (executeCommand(request)) {
+      if (executeCommand(request, response)) {
         // Response is set by the command itself
       } else {
-        request.setResponse("Unknown command. Use 'help' for available commands.\n", 1);
+        response = "Unknown command. Use 'help' for available commands.\n";
       }
       break;
   }
@@ -63,13 +63,13 @@ bool CommandMenuTree::navigate(const std::vector<std::string>& path, bool isAbso
   return true;
 }
 
-bool CommandMenuTree::executeCommand(CommandRequest& request) {
+bool CommandMenuTree::executeCommand(const CommandRequest& request, std::string& response) {
   MenuNode* originalNode = _currentNode;
   navigate(request.getPath(), request.isAbsolute());
 
   Command* cmd = _currentNode->getCommand(request.getCommandName());
   if (cmd) {
-    cmd->execute(request);
+    cmd->execute(request, response);
     _currentNode = originalNode;  // Reset to original position
     return true;
   }

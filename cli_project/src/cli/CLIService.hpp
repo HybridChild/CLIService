@@ -30,15 +30,15 @@ private:
 
   std::string parseInputStream();
   bool authenticateUser(const std::string& commandString);
-  const std::string& processCommand(CommandRequest& request);
 
-  void handleNavigation(CommandRequest& request);
-  bool navigateToNode(CommandRequest& request);
-  void handleExecution(CommandRequest& request);
-  void executeCommand(CommandRequest& request);
+  void processCommand(const CommandRequest& request, std::string& response);
+  void handleNavigation(const CommandRequest& request, std::string& response);
+  bool navigateToNode(const CommandRequest& request, std::string& response);
+  void handleExecution(const CommandRequest& request, std::string& response);
+  void executeCommand(const CommandRequest& request, std::string& response);
   
   void outputResponse(const std::string& response);
-  
+
   std::string getLogInPrompt();
   std::string getWelcomeMessage();
   std::string generateHelpString();
