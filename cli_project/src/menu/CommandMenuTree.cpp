@@ -22,7 +22,7 @@ void CommandMenuTree::processRequest(const CommandRequest& request, std::string&
       if (executeCommand(request, response)) {
         // Response is set by the command itself
       } else {
-        response = "Unknown command. Use 'help' for available commands.\n";
+        response = "Unknown command. Use '?' for available commands.\n";
       }
       break;
   }
@@ -50,15 +50,18 @@ bool CommandMenuTree::navigate(const std::vector<std::string>& path, bool isAbso
       if (node != &_root && node->getParent() != nullptr) {
         node = node->getParent();
       }
-    } else if (!segment.empty()) {
+    }
+    else if (!segment.empty()) {
       MenuNode* next = node->getSubMenu(segment);
       if (next) {
         node = next;
-      } else {
+      }
+      else {
         return false;  // Invalid path segment
       }
     }
   }
+  
   _currentNode = node;
   return true;
 }

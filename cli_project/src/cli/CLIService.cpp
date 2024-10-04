@@ -40,7 +40,7 @@ void CLIService::service() {
       _state = State::Stopped;
       responseString = getExitString();
     }
-    else if (commandString == "help") {
+    else if (commandString == "?") {
       responseString = generateHelpString();
     }
     else {
@@ -109,7 +109,8 @@ bool CLIService::navigateToNode(const CommandRequest& request, std::string& resp
       else if(static_cast<int>(_currentUser->getAccessLevel()) < static_cast<int>(nextNode->getAccessLevel())) {
         response = "Access denied: " + pathSegment + "\n";
         return false;
-      } else {
+      }
+      else {
         _tree->setCurrentNode(nextNode);
       }
     }
@@ -133,10 +134,10 @@ void CLIService::executeCommand(const CommandRequest& request, std::string& resp
   Command* cmd = _tree->getCurrentNode()->getCommand(request.getCommandName());
   
   if (!cmd) {
-    response = "Unknown command. Use 'help' for available commands.\n";
+    response = "Unknown command. Use '?' for available commands.\n";
   }
   else if (static_cast<int>(_currentUser->getAccessLevel()) < static_cast<int>(cmd->getAccessLevel())) {
-    response = "Access denied. Your access level is too low for this command.\n";
+    response = "Access denied.\n";
   }
   else {
     _tree->processRequest(request, response);
