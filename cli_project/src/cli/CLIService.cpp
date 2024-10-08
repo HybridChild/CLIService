@@ -106,7 +106,7 @@ bool CLIService::navigateToNode(const CommandRequest& request, std::string& resp
         response = "Invalid path: " + pathSegment + "\n";
         return false;
       }
-      else if(static_cast<int>(_currentUser->getAccessLevel()) < static_cast<int>(nextNode->getAccessLevel())) {
+      else if(validateAccessLevel(*nextNode)) {
         response = "Access denied: " + pathSegment + "\n";
         return false;
       }
@@ -136,7 +136,7 @@ void CLIService::executeCommand(const CommandRequest& request, std::string& resp
   if (!cmd) {
     response = "Unknown command. Use '?' for available commands.\n";
   }
-  else if (static_cast<int>(_currentUser->getAccessLevel()) < static_cast<int>(cmd->getAccessLevel())) {
+  else if (validateAccessLevel(*cmd)) {
     response = "Access denied.\n";
   }
   else {
@@ -210,4 +210,12 @@ std::string CLIService::parseInputStream() {
     }
   }
   return "";  // No complete command found
+}
+
+bool CLIService::validateAccessLevel(const Command& command) {
+  return static_cast<int>(_currentUser->getAccessLevel()) < static_cast<int>(command.getAccessLevel());
+}
+
+bool CLIService::validateAccessLevel(const MenuNode& node) {
+  return static_cast<int>(_currentUser->getAccessLevel()) < static_cast<int>(node.getAccessLevel());
 }
