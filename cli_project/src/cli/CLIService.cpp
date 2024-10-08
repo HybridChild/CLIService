@@ -16,45 +16,72 @@ void CLIService::activate() {
 
 
 void CLIService::service() {
-  std::string responseString = "";
-
-  if (_state == State::Stopped) {
-    return;
-  }
-
   std::string commandString = parseInputStream();
-  if (commandString.empty()) {
+
+  if (commandString.empty() || _state == State::Stopped) {
     return;
   }
+
+  std::string response;
 
   if (_state == State::LoggedOut) {
     if (!authenticateUser(commandString)) {
-      responseString = getLogInPrompt();
+      response = getLogInPrompt();
     }
     else {
       _state = State::LoggedIn;
-      responseString = getWelcomeMessage();
+      response = getWelcomeMessage();
     }
   }
   else if (_state == State::LoggedIn) {
     if (commandString == "exit") {
       _state = State::Stopped;
-      responseString = getExitString();
+      response = getExitString();
     }
     else if (commandString == "?") {
-      responseString = generateHelpString();
+      response = generateHelpString();
     }
     else {
       CommandRequest cmdRequest(commandString);
-      processCommand(cmdRequest, responseString);
+      processCommand(cmdRequest, response);
     }
   }
 
   if (_state != State::Stopped && _currentUser != nullptr) {
-    responseString += getPromptString();
+    response += getPromptString();
   }
   
-  outputResponse(responseString);
+  outputResponse(response);
+}
+
+
+std::string CLIService::parseInputStream() {
+  char c;
+  while (std::cin.get(c)) {
+    if (c == '\r' || c == '\n') {
+      if (!_inputBuffer.empty()) {
+        std::string command(_inputBuffer.begin(), _inputBuffer.end());
+        _inputBuffer.clear();
+        return command;
+      }
+    } else {
+      _inputBuffer.push_back(c);
+    }
+  }
+  return "";  // No complete command found
+}
+
+
+bool CLIService::authenticateUser(const std::string& commandString) {
+  size_t colonPos = commandString.find(':');
+  if (colonPos == std::string::npos) {
+    return false;
+  }
+  std::string username = commandString.substr(0, colonPos);
+  std::string password = commandString.substr(colonPos + 1);
+
+  _currentUser = _config->authenticateUser(username, password);
+  return _currentUser != nullptr;
 }
 
 
@@ -77,10 +104,9 @@ void CLIService::processCommand(const CommandRequest& cmdRequest, std::string& r
 void CLIService::handleNavigation(const CommandRequest& request, std::string& response) {
   if (request.getType() == CommandRequest::Type::RootNavigation) {
     _currentNode = _tree->getRoot();
-    response = "Navigated to root: /\n";
   }
-  else if (navigateToNode(request, response)) {
-    response = "Current location: " + _tree->getPath(_currentNode) + "\n";
+  else if (request.getType() == CommandRequest::Type::Navigation) {
+    navigateToNode(request, response);
   }
 }
 
@@ -96,7 +122,6 @@ bool CLIService::navigateToNode(const CommandRequest& request, std::string& resp
       if (parent) {
         _currentNode = parent;
       } else {
-        response = "Already at root.\n";
         return false;
       }
     }
@@ -128,9 +153,29 @@ void CLIService::handleExecution(const CommandRequest& request, std::string& res
       cmd->execute(request, response);
       _currentNode = originalNode;  // Reset to original position
     }
+    else {
+      response = "Invalid command: " + request.getCommandName() + "\n";
+    }
   }
 
   _currentNode = originalNode;
+}
+
+
+bool CLIService::validateAccessLevel(const Command& command) {
+  return static_cast<int>(_currentUser->getAccessLevel()) < static_cast<int>(command.getAccessLevel());
+}
+
+
+bool CLIService::validateAccessLevel(const MenuNode& node) {
+  return static_cast<int>(_currentUser->getAccessLevel()) < static_cast<int>(node.getAccessLevel());
+}
+
+
+void CLIService::outputResponse(const std::string& response) {
+  if (!response.empty()) {
+    _config->getIOStream()->write(response);
+  }
 }
 
 
@@ -152,12 +197,6 @@ std::string CLIService::generateHelpString() {
   return helpString;
 }
 
-void CLIService::outputResponse(const std::string& response) {
-  if (!response.empty()) {
-    _config->getIOStream()->write(response);
-  }
-}
-
 std::string CLIService::getLogInPrompt() {
   return "Logged out. Please enter <username>:<password>\n > ";
 }
@@ -172,40 +211,4 @@ std::string CLIService::getExitString() {
 
 std::string CLIService::getPromptString() {
   return _currentUser->getUsername() + "@" + _tree->getPath(_currentNode) + " > ";
-}
-
-bool CLIService::authenticateUser(const std::string& commandString) {
-  size_t colonPos = commandString.find(':');
-  if (colonPos == std::string::npos) {
-    return false;
-  }
-  std::string username = commandString.substr(0, colonPos);
-  std::string password = commandString.substr(colonPos + 1);
-
-  _currentUser = _config->authenticateUser(username, password);
-  return _currentUser != nullptr;
-}
-
-std::string CLIService::parseInputStream() {
-  char c;
-  while (std::cin.get(c)) {
-    if (c == '\r' || c == '\n') {
-      if (!_inputBuffer.empty()) {
-        std::string command(_inputBuffer.begin(), _inputBuffer.end());
-        _inputBuffer.clear();
-        return command;
-      }
-    } else {
-      _inputBuffer.push_back(c);
-    }
-  }
-  return "";  // No complete command found
-}
-
-bool CLIService::validateAccessLevel(const Command& command) {
-  return static_cast<int>(_currentUser->getAccessLevel()) < static_cast<int>(command.getAccessLevel());
-}
-
-bool CLIService::validateAccessLevel(const MenuNode& node) {
-  return static_cast<int>(_currentUser->getAccessLevel()) < static_cast<int>(node.getAccessLevel());
 }
