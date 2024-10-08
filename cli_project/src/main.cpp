@@ -5,10 +5,6 @@
 #include "command/Command.hpp"
 #include <unordered_map>
 
-// void inputCommandHandler((void)*msg) {
-  
-// }
-
 
 int main() {
   auto inOutStream = std::make_unique<InOutStream>();

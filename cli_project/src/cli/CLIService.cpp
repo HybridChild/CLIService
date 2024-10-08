@@ -5,6 +5,7 @@ CLIService::CLIService(std::unique_ptr<CLIServiceConfiguration> conf)
   : _config(std::move(conf))
 {
   _tree = _config->getMenuTree();
+  _currentNode = _tree->getRoot();
 }
 
 
@@ -15,7 +16,7 @@ void CLIService::activate() {
 
 
 void CLIService::service() {
-  std::string responseString;
+  std::string responseString = "";
 
   if (_state == State::Stopped) {
     return;
@@ -52,6 +53,7 @@ void CLIService::service() {
   if (_state != State::Stopped && _currentUser != nullptr) {
     responseString += getPromptString();
   }
+  
   outputResponse(responseString);
 }
 
@@ -74,34 +76,32 @@ void CLIService::processCommand(const CommandRequest& cmdRequest, std::string& r
 
 void CLIService::handleNavigation(const CommandRequest& request, std::string& response) {
   if (request.getType() == CommandRequest::Type::RootNavigation) {
-    _tree->setCurrentNode(_tree->getRoot());
+    _currentNode = _tree->getRoot();
     response = "Navigated to root: /\n";
-    return;
   }
-
-  if (navigateToNode(request, response)) {
-    response = "Current location: " + _tree->getCurrentPath() + "\n";
+  else if (navigateToNode(request, response)) {
+    response = "Current location: " + _tree->getPath(_currentNode) + "\n";
   }
 }
 
 bool CLIService::navigateToNode(const CommandRequest& request, std::string& response)
 {
   if (request.isAbsolute()) {
-    _tree->setCurrentNode(_tree->getRoot());
+    _currentNode = _tree->getRoot();
   }
 
   for (const auto& pathSegment : request.getPath()) {
     if (pathSegment == "..") {
-      MenuNode* parent = _tree->getCurrentNode()->getParent();
+      MenuNode* parent = _currentNode->getParent();
       if (parent) {
-        _tree->setCurrentNode(parent);
+        _currentNode = parent;
       } else {
         response = "Already at root.\n";
         return false;
       }
     }
     else {
-      MenuNode* nextNode = _tree->getCurrentNode()->getSubMenu(pathSegment);
+      MenuNode* nextNode = _currentNode->getSubMenu(pathSegment);
       if (!nextNode) {
         response = "Invalid path: " + pathSegment + "\n";
         return false;
@@ -111,7 +111,7 @@ bool CLIService::navigateToNode(const CommandRequest& request, std::string& resp
         return false;
       }
       else {
-        _tree->setCurrentNode(nextNode);
+        _currentNode = nextNode;
       }
     }
   }
@@ -120,41 +120,31 @@ bool CLIService::navigateToNode(const CommandRequest& request, std::string& resp
 
 
 void CLIService::handleExecution(const CommandRequest& request, std::string& response) {
-  MenuNode* originalNode = _tree->getCurrentNode();
+  MenuNode* originalNode = _currentNode;
 
   if (navigateToNode(request, response)) {
-    executeCommand(request, response);
+    Command* cmd = _currentNode->getCommand(request.getCommandName());
+    if (cmd) {
+      cmd->execute(request, response);
+      _currentNode = originalNode;  // Reset to original position
+    }
   }
 
-  _tree->setCurrentNode(originalNode);
+  _currentNode = originalNode;
 }
 
-
-void CLIService::executeCommand(const CommandRequest& request, std::string& response) {
-  Command* cmd = _tree->getCurrentNode()->getCommand(request.getCommandName());
-  
-  if (!cmd) {
-    response = "Unknown command. Use '?' for available commands.\n";
-  }
-  else if (validateAccessLevel(*cmd)) {
-    response = "Access denied.\n";
-  }
-  else {
-    _tree->processRequest(request, response);
-  }
-}
 
 std::string CLIService::generateHelpString() {
   std::string helpString = "";
-  helpString += "Current location: " + _tree->getCurrentPath() + "\n";
+  helpString += "Current location: " + _tree->getPath(_currentNode) + "\n";
   helpString += "Available commands:\n";
-  for (const auto& [name, cmd] : _tree->getCurrentNode()->getCommands()) {
+  for (const auto& [name, cmd] : _currentNode->getCommands()) {
     if (static_cast<int>(_currentUser->getAccessLevel()) >= static_cast<int>(cmd->getAccessLevel())) {
       helpString += "  " + name + " - Usage: " + cmd->getUsage() + "\n";
     }
   }
   helpString += "Available submenus:\n";
-  for (const auto& [name, submenu] : _tree->getCurrentNode()->getSubMenus()) {
+  for (const auto& [name, submenu] : _currentNode->getSubMenus()) {
     if (static_cast<int>(_currentUser->getAccessLevel()) >= static_cast<int>(submenu->getAccessLevel())) {
       helpString += "  " + name + "/" + "\n";
     }
@@ -181,7 +171,7 @@ std::string CLIService::getExitString() {
 }
 
 std::string CLIService::getPromptString() {
-  return _currentUser->getUsername() + "@" + _tree->getCurrentPath() + " > ";
+  return _currentUser->getUsername() + "@" + _tree->getPath(_currentNode) + " > ";
 }
 
 bool CLIService::authenticateUser(const std::string& commandString) {

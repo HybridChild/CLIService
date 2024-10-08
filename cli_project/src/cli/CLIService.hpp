@@ -21,12 +21,11 @@ public:
 
 private:
   std::unique_ptr<CLIServiceConfiguration> _config;
+  std::deque<char> _inputBuffer;
+  State _state = State::Stopped;
   const User* _currentUser = nullptr;
   CommandMenuTree* _tree = nullptr;
-  bool _isAuthenticated = false;
-  std::deque<char> _inputBuffer;
-
-  State _state = State::Stopped;
+  MenuNode* _currentNode = nullptr;
 
   std::string parseInputStream();
   bool authenticateUser(const std::string& commandString);
@@ -35,7 +34,6 @@ private:
   void handleNavigation(const CommandRequest& request, std::string& response);
   bool navigateToNode(const CommandRequest& request, std::string& response);
   void handleExecution(const CommandRequest& request, std::string& response);
-  void executeCommand(const CommandRequest& request, std::string& response);
 
   bool validateAccessLevel(const Command& command);
   bool validateAccessLevel(const MenuNode& node);
