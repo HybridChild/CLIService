@@ -4,7 +4,17 @@ CommandMenuTree::CommandMenuTree()
   : _root("root"), _currentNode(&_root)
 {}
 
-MenuNode* CommandMenuTree::getRoot() { return &_root; }
+MenuNode* CommandMenuTree::getRoot() {
+  return &_root;
+}
+
+MenuNode* CommandMenuTree::getCurrentNode() const {
+  return _currentNode;
+}
+
+void CommandMenuTree::setCurrentNode(MenuNode* node) {
+  _currentNode = node;
+}
 
 std::string CommandMenuTree::getPath(const MenuNode* node) const {
   std::vector<std::string> path;
