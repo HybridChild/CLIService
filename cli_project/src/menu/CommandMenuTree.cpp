@@ -1,7 +1,7 @@
 #include "CommandMenuTree.hpp"
 
 CommandMenuTree::CommandMenuTree()
-  : _root("root")
+  : _root("root"), _currentNode(&_root)
 {}
 
 MenuNode* CommandMenuTree::getRoot() { return &_root; }
@@ -21,4 +21,36 @@ std::string CommandMenuTree::getPath(const MenuNode* node) const {
   }
 
   return result;
+}
+
+bool CommandMenuTree::navigateToNode(const std::vector<std::string>& path, bool absolute) {
+  MenuNode* originalNode = _currentNode;
+
+  if (absolute) {
+    _currentNode = &_root;
+  }
+
+  for (const auto& pathSegment : path) {
+    if (pathSegment == "..") {
+      MenuNode* parent = _currentNode->getParent();
+      if (parent) {
+        _currentNode = parent;
+      } else {
+        _currentNode = originalNode;
+        return false;
+      }
+    }
+    else {
+      MenuNode* nextNode = _currentNode->getSubMenu(pathSegment);
+      if (!nextNode) {
+        _currentNode = originalNode;
+        return false;
+      }
+      else {
+        _currentNode = nextNode;
+      }
+    }
+  }
+
+  return true;
 }

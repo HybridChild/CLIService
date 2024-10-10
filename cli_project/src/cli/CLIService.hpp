@@ -25,14 +25,12 @@ private:
   State _state = State::Stopped;
   const User* _currentUser = nullptr;
   CommandMenuTree* _tree = nullptr;
-  MenuNode* _currentNode = nullptr;
 
   std::string parseInputStream();
   bool authenticateUser(const std::string& commandString);
 
   void processCommand(const CommandRequest& request, std::string& response);
   void handleNavigation(const CommandRequest& request, std::string& response);
-  bool navigateToNode(const CommandRequest& request, std::string& response);
   void handleExecution(const CommandRequest& request, std::string& response);
 
   bool validateAccessLevel(const Command& command);
