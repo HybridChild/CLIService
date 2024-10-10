@@ -16,20 +16,16 @@ void CLIService::activate() {
 
 void CLIService::service() {
   std::string commandString = parseInputStream();
-
-  if (commandString.empty() || _state == State::Stopped) {
-    return;
-  }
-
   std::string response;
 
   if (_state == State::LoggedOut) {
-    if (!authenticateUser(commandString)) {
-      response = getLogInPrompt();
-    }
-    else {
+    if (authenticateUser(commandString)) {
       _state = State::LoggedIn;
       response = getWelcomeMessage();
+    }
+    else {
+      response = "Invalid username or password\n";
+      response += getLogInPrompt();
     }
   }
   else if (_state == State::LoggedIn) {

@@ -8,7 +8,7 @@ public:
   CommandMenuTree();
 
   MenuNode* getRoot();
-  MenuNode* getCurrentNode() { return _currentNode; }
+  MenuNode* getCurrentNode() const { return _currentNode; }
   void setCurrentNode(MenuNode* node) { _currentNode = node; }
   std::string getPath(const MenuNode* node) const;
   bool navigateToNode(const std::vector<std::string>& path, bool absolute = false);
