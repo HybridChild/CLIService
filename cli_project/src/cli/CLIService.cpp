@@ -22,28 +22,35 @@ void CLIService::service() {
 
   std::string response;
 
-  if (_state == State::LoggedOut) {
-    if (authenticateUser(commandString)) {
-      _state = State::LoggedIn;
-      response = getWelcomeMessage();
-    }
-    else {
-      response = "Invalid username or password\n";
-      response += getLogInPrompt();
-    }
-  }
-  else if (_state == State::LoggedIn) {
-    if (commandString == "exit") {
-      _state = State::Stopped;
-      response = getExitString();
-    }
-    else if (commandString == "?") {
-      response = generateHelpString();
-    }
-    else {
-      CommandRequest cmdRequest(commandString);
-      processCommand(cmdRequest, response);
-    }
+  switch (_state) {
+    case State::LoggedOut:
+      if (authenticateUser(commandString)) {
+        _state = State::LoggedIn;
+        response = getWelcomeMessage();
+      }
+      else {
+        response = "Invalid username or password\n";
+        response += getLogInPrompt();
+      }
+      break;
+
+    case State::LoggedIn:
+      if (commandString == "exit") {
+        _state = State::Stopped;
+        response = getExitString();
+      }
+      else if (commandString == "?") {
+        response = generateHelpString();
+      }
+      else {
+        CommandRequest cmdRequest(commandString);
+        processCommand(cmdRequest, response);
+      }
+      break;
+
+    case State::Stopped:
+    default:
+      break;
   }
 
   if (_state != State::Stopped && _currentUser != nullptr) {
