@@ -15,7 +15,11 @@ void CLIService::activate() {
 
 
 void CLIService::service() {
-  std::string commandString = parseInputStream();
+  std::string commandString{};
+  if (!parseInputStream(commandString)) {
+    return;
+  }
+
   std::string response;
 
   if (_state == State::LoggedOut) {
@@ -50,20 +54,28 @@ void CLIService::service() {
 }
 
 
-std::string CLIService::parseInputStream() {
+bool CLIService::parseInputStream(std::string& cmdString) {
   char c;
-  while (std::cin.get(c)) {
+
+  while (_config->getIOStream()->getCharTimeout(c, 1)) {
     if (c == '\r' || c == '\n') {
       if (!_inputBuffer.empty()) {
-        std::string command(_inputBuffer.begin(), _inputBuffer.end());
+        cmdString.assign(_inputBuffer.begin(), _inputBuffer.end());
         _inputBuffer.clear();
-        return command;
+        return true;
       }
-    } else {
+    }
+    else if (c == '\b' || c == 127) {  // Handle backspace and delete
+      if (!_inputBuffer.empty()) {
+        _inputBuffer.pop_back();
+      }
+    }
+    else if (c >= 32 && c <= 126) {  // Printable ASCII characters
       _inputBuffer.push_back(c);
     }
   }
-  return "";  // No complete command found
+  
+  return false;
 }
 
 
@@ -152,7 +164,7 @@ bool CLIService::validateAccessLevel(const MenuNode& node) {
 
 void CLIService::outputResponse(const std::string& response) {
   if (!response.empty()) {
-    _config->getIOStream()->write(response);
+    _config->getIOStream()->putString(response);
   }
 }
 

@@ -4,6 +4,7 @@
 #include "../user/User.hpp"
 #include <memory>
 #include <string>
+#include <deque>
 
 class CLIService {
 public:
@@ -26,7 +27,7 @@ private:
   const User* _currentUser = nullptr;
   CommandMenuTree* _tree = nullptr;
 
-  std::string parseInputStream();
+  bool parseInputStream(std::string& cmdString);
   bool authenticateUser(const std::string& commandString);
 
   void processCommand(const CommandRequest& request, std::string& response);

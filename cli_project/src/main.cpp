@@ -1,13 +1,13 @@
 #include "cli/CLIService.hpp"
 #include "menu/CommandMenuTreeFactory.hpp"
-#include "io/InOutStream.hpp"
+#include "io/StdIOStream.hpp"
 #include "user/User.hpp"
 #include "command/Command.hpp"
 #include <unordered_map>
 
 
 int main() {
-  auto inOutStream = std::make_unique<InOutStream>();
+  auto inOutStream = std::make_unique<StdIOStream>();
   auto tree = CommandMenuTreeFactory::createDefaultTree();
 
   std::unordered_map<std::string, User> users = {
@@ -27,6 +27,7 @@ int main() {
 
   while (cli.isRunning()) {
     cli.service();
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
   
   return 0;

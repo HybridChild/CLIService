@@ -8,7 +8,8 @@ add_executable(cli_app
   menu/MenuNode.cpp
   menu/CommandMenuTree.cpp
   menu/CommandMenuTreeFactory.cpp
-  io/InOutStream.hpp
+  io/IOStreamIf.hpp
+  io/StdIOStream.hpp
 )
 
 target_include_directories(cli_app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
