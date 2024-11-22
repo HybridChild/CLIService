@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Command.hpp"
+#include "../menu/Command.hpp"
 
-class GetAnalyticsCommand : public Command {
+class PotmeterCommand : public Command {
 public:
-  GetAnalyticsCommand(Command::AccessLevel accessLevel) : Command(accessLevel) {}
+  PotmeterCommand(Command::AccessLevel accessLevel) : Command(accessLevel) {}
   void execute(const CommandRequest& request, std::string& response) override;
   std::string getName() const override;
   std::string getUsage() const override;

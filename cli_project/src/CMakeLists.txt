@@ -1,13 +1,13 @@
 add_executable(cli_app
   main.cpp
   cli/CLIService.cpp
-  command/CommandRequest.cpp
-  command/RgbLedCommand.cpp
-  command/PotmeterCommand.cpp
-  command/GetAnalyticsCommand.cpp
+  menu/CommandRequest.cpp
+  commands/RgbLedCommand.cpp
+  commands/PotmeterCommand.cpp
+  commands/GetAnalyticsCommand.cpp
   menu/MenuNode.cpp
   menu/CommandMenuTree.cpp
-  menu/CommandMenuTreeFactory.cpp
+  factory/CommandMenuTreeFactory.cpp
   io/IOStreamIf.hpp
   io/StdIOStream.hpp
 )

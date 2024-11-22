@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../command/CommandRequest.hpp"
+#include "CommandRequest.hpp"
 #include <string>
 
 class Command {

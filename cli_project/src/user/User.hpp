@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../command/Command.hpp"
+#include "../menu/Command.hpp"
 #include <string>
 
 class User {

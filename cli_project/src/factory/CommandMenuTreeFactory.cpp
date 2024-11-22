@@ -1,7 +1,7 @@
 #include "CommandMenuTreeFactory.hpp"
-#include "../command/RgbLedCommand.hpp"
-#include "../command/PotmeterCommand.hpp"
-#include "../command/GetAnalyticsCommand.hpp"
+#include "../commands/RgbLedCommand.hpp"
+#include "../commands/PotmeterCommand.hpp"
+#include "../commands/GetAnalyticsCommand.hpp"
 
 std::unique_ptr<CommandMenuTree> CommandMenuTreeFactory::createDefaultTree() {
   auto tree = std::make_unique<CommandMenuTree>();

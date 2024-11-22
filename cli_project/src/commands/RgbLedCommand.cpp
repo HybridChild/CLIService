@@ -1,3 +1,5 @@
+#include <stdexcept>
+
 #include "RgbLedCommand.hpp"
 
 void RgbLedCommand::execute(const CommandRequest& request, std::string& response) {

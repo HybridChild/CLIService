@@ -1,3 +1,5 @@
+#include <sstream>
+
 #include "CommandRequest.hpp"
 
 CommandRequest::CommandRequest(const std::string& input) {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CommandMenuTree.hpp"
+#include "../menu/CommandMenuTree.hpp"
 
 class CommandMenuTreeFactory {
 public:

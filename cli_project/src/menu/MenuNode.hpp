@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../command/Command.hpp"
+#include "Command.hpp"
 #include <unordered_map>
 #include <memory>
 #include <string>

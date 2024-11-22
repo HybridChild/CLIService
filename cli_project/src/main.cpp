@@ -1,8 +1,8 @@
 #include "cli/CLIService.hpp"
-#include "menu/CommandMenuTreeFactory.hpp"
+#include "factory/CommandMenuTreeFactory.hpp"
 #include "io/StdIOStream.hpp"
 #include "user/User.hpp"
-#include "command/Command.hpp"
+#include "menu/Command.hpp"
 #include <unordered_map>
 
 

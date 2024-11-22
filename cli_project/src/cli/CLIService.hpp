@@ -1,10 +1,11 @@
 #pragma once
 
-#include "CLIServiceConfiguration.hpp"
-#include "../user/User.hpp"
 #include <memory>
 #include <string>
 #include <deque>
+
+#include "CLIServiceConfiguration.hpp"
+#include "../user/User.hpp"
 
 class CLIService {
 public:
