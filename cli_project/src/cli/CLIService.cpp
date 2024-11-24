@@ -5,12 +5,13 @@ CLIService::CLIService(std::unique_ptr<CLIServiceConfiguration> conf)
   : _config(std::move(conf))
 {
   _tree = _config->getMenuTree();
+  _io = _config->getIOStream();
 }
 
 
 void CLIService::activate() {
   _state = State::LoggedOut;
-  outputResponse(getLogInPrompt());
+  outputResponse(_config->getLogInPrompt());
 }
 
 
@@ -26,18 +27,18 @@ void CLIService::service() {
     case State::LoggedOut:
       if (authenticateUser(commandString)) {
         _state = State::LoggedIn;
-        response = getWelcomeMessage();
+        response = _config->getWelcomeMessage();
       }
       else {
         response = "Invalid username or password\n";
-        response += getLogInPrompt();
+        response += _config->getLogInPrompt();
       }
       break;
 
     case State::LoggedIn:
       if (commandString == "exit") {
         _state = State::Stopped;
-        response = getExitString();
+        response = _config->getExitString();
       }
       else if (commandString == "?") {
         response = generateHelpString();
@@ -54,7 +55,7 @@ void CLIService::service() {
   }
 
   if (_state != State::Stopped && _currentUser != nullptr) {
-    response += getPromptString();
+    response += generatePromptString();
   }
   
   outputResponse(response);
@@ -64,7 +65,7 @@ void CLIService::service() {
 void CLIService::parseInputStream(std::string& cmdString) {
   char c;
 
-  while (_config->getIOStream()->getCharTimeout(c, 1)) {
+  while (_io->getCharTimeout(c, 1)) {
     if (c == '\r' || c == '\n') {
       if (!_inputBuffer.empty()) {
         cmdString.assign(_inputBuffer.begin(), _inputBuffer.end());
@@ -168,41 +169,29 @@ bool CLIService::validateAccessLevel(const MenuNode& node) {
 
 void CLIService::outputResponse(const std::string& response) {
   if (!response.empty()) {
-    _config->getIOStream()->putString(response);
+    _io->putString(response);
   }
 }
 
 
 std::string CLIService::generateHelpString() {
   std::string helpString = "";
-  helpString += "Current location: " + _tree->getPath(_tree->getCurrentNode()) + "\n";
-  helpString += "Available commands:\n";
+  helpString += _config->getIndent(1) + "Current location: " + _tree->getPath(_tree->getCurrentNode()) + "\n";
+  helpString += _config->getIndent(1) + "Available commands:\n";
   for (const auto& [name, cmd] : _tree->getCurrentNode()->getCommands()) {
     if (static_cast<int>(_currentUser->getAccessLevel()) >= static_cast<int>(cmd->getAccessLevel())) {
-      helpString += "  " + name + " - Usage: " + cmd->getUsage() + "\n";
+      helpString += _config->getIndent(2) + name + " - Usage: " + cmd->getUsage() + "\n";
     }
   }
-  helpString += "Available submenus:\n";
+  helpString += _config->getIndent(1) + "Available submenus:\n";
   for (const auto& [name, submenu] : _tree->getCurrentNode()->getSubMenus()) {
     if (static_cast<int>(_currentUser->getAccessLevel()) >= static_cast<int>(submenu->getAccessLevel())) {
-      helpString += "  " + name + "/" + "\n";
+      helpString += _config->getIndent(2) + name + "/" + "\n";
     }
   }
   return helpString;
 }
 
-std::string CLIService::getLogInPrompt() {
-  return "Logged out. Please enter <username>:<password>\n > ";
-}
-
-std::string CLIService::getWelcomeMessage() {
-  return "Welcome to the CLI Service. Type 'exit' to quit.\n";
-}
-
-std::string CLIService::getExitString() {
-  return "Thank you for using the CLI Service. Goodbye!\n";
-}
-
-std::string CLIService::getPromptString() {
+std::string CLIService::generatePromptString() {
   return _currentUser->getUsername() + "@" + _tree->getPath(_tree->getCurrentNode()) + " > ";
 }
