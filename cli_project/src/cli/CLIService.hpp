@@ -28,7 +28,7 @@ private:
   const User* _currentUser = nullptr;
   CommandMenuTree* _tree = nullptr;
 
-  bool parseInputStream(std::string& cmdString);
+  void parseInputStream(std::string& cmdString);
   bool authenticateUser(const std::string& commandString);
 
   void processCommand(const CommandRequest& request, std::string& response);

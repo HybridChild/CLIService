@@ -16,9 +16,9 @@ void CLIService::activate() {
 
 void CLIService::service() {
   std::string commandString{};
-  if (!parseInputStream(commandString)) {
-    return;
-  }
+  parseInputStream(commandString);
+
+  if (commandString.empty()) { return; }
 
   std::string response;
 
@@ -61,7 +61,7 @@ void CLIService::service() {
 }
 
 
-bool CLIService::parseInputStream(std::string& cmdString) {
+void CLIService::parseInputStream(std::string& cmdString) {
   char c;
 
   while (_config->getIOStream()->getCharTimeout(c, 1)) {
@@ -69,7 +69,6 @@ bool CLIService::parseInputStream(std::string& cmdString) {
       if (!_inputBuffer.empty()) {
         cmdString.assign(_inputBuffer.begin(), _inputBuffer.end());
         _inputBuffer.clear();
-        return true;
       }
     }
     else if (c == '\b' || c == 127) {  // Handle backspace and delete
@@ -81,8 +80,6 @@ bool CLIService::parseInputStream(std::string& cmdString) {
       _inputBuffer.push_back(c);
     }
   }
-  
-  return false;
 }
 
 
