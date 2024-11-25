@@ -38,14 +38,17 @@ namespace cliService {
       for (uint32_t i = 0; i < count; ++i) {
         returnStr += _indent;
       }
+      
       return returnStr;
     }
     
     const User* authenticateUser(const std::string& username, const std::string& password) const {
       auto it = _users.find(username);
+
       if (it != _users.end() && it->second.getPassword() == password) {
         return &it->second;
       }
+
       return nullptr;
     }
 

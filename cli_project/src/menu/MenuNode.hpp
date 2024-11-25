@@ -1,9 +1,10 @@
 #pragma once
 
-#include "Command.hpp"
 #include <unordered_map>
 #include <memory>
 #include <string>
+
+#include "Command.hpp"
 
 namespace cliService {
 
@@ -31,7 +32,7 @@ namespace cliService {
     std::string _name;
     AccessLevel _accessLevel;
     MenuNode* _parent;
-    
+
     std::unordered_map<std::string, std::unique_ptr<MenuNode>> _subMenus;
     std::unordered_map<std::string, std::unique_ptr<Command>> _commands;
   };
