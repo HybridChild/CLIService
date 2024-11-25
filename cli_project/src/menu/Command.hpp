@@ -1,25 +1,25 @@
 #pragma once
 
-#include "CommandRequest.hpp"
 #include <string>
+#include "CommandRequest.hpp"
 
-class Command {
-public:
-  enum class AccessLevel {
-    Basic = 0,
-    Advanced = 1,
-    Admin = 2
+namespace cliService {
+
+  enum class AccessLevel;
+
+  class Command {
+  public:
+    Command(AccessLevel accessLevel) : _accessLevel(accessLevel) {}
+    virtual ~Command() = default;
+
+    virtual void execute(const CommandRequest& request, std::string& response) = 0;
+    virtual std::string getName() const = 0;
+    virtual std::string getUsage() const = 0;
+    
+    AccessLevel getAccessLevel() const { return _accessLevel; }
+
+  private:
+    AccessLevel _accessLevel;
   };
 
-  Command(Command::AccessLevel accessLevel) : _accessLevel(accessLevel) {}
-  virtual ~Command() = default;
-
-  virtual void execute(const CommandRequest& request, std::string& response) = 0;
-  virtual std::string getName() const = 0;
-  virtual std::string getUsage() const = 0;
-  
-  Command::AccessLevel getAccessLevel() const { return _accessLevel; }
-
-private:
-  Command::AccessLevel _accessLevel;
-};
+}

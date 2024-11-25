@@ -1,11 +1,16 @@
 #pragma once
 
 #include "../menu/Command.hpp"
+#include "accessLevel.hpp"
 
-class GetAnalyticsCommand : public Command {
-public:
-  GetAnalyticsCommand(Command::AccessLevel accessLevel) : Command(accessLevel) {}
-  void execute(const CommandRequest& request, std::string& response) override;
-  std::string getName() const override;
-  std::string getUsage() const override;
-};
+namespace cliService {
+
+  class GetAnalyticsCommand : public Command {
+  public:
+    GetAnalyticsCommand(AccessLevel accessLevel) : Command(accessLevel) {}
+    void execute(const CommandRequest& request, std::string& response) override;
+    std::string getName() const override;
+    std::string getUsage() const override;
+  };
+
+}

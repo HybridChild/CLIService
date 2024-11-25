@@ -5,28 +5,35 @@
 #include <memory>
 #include <string>
 
-class MenuNode {
-public:
-  MenuNode(const std::string& name, MenuNode* parent = nullptr, Command::AccessLevel accessLevel = Command::AccessLevel::Basic)
-    : _name(name), _parent(parent), _accessLevel(accessLevel)
-  {}
+namespace cliService {
 
-  MenuNode* addSubMenu(const std::string& name, Command::AccessLevel accessLevel = Command::AccessLevel::Basic);
-  void addCommand(std::unique_ptr<Command> command);
-  MenuNode* getSubMenu(const std::string& name) const;
-  Command* getCommand(const std::string& name) const;
+  enum class AccessLevel;
 
-  std::string getName() const { return _name; }
-  MenuNode* getParent() const { return _parent; }
-  Command::AccessLevel getAccessLevel() const { return _accessLevel; }
+  class MenuNode {
+  public:
+    MenuNode(const std::string& name, AccessLevel accessLevel, MenuNode* parent = nullptr)
+      : _name(name), _accessLevel(accessLevel), _parent(parent)
+    {}
 
-  const std::unordered_map<std::string, std::unique_ptr<MenuNode>>& getSubMenus() const { return _subMenus; }
-  const std::unordered_map<std::string, std::unique_ptr<Command>>& getCommands() const { return _commands; }
+    MenuNode* addSubMenu(const std::string& name, AccessLevel accessLevel);
+    void addCommand(std::unique_ptr<Command> command);
+    MenuNode* getSubMenu(const std::string& name) const;
+    Command* getCommand(const std::string& name) const;
 
-private:
-  std::string _name;
-  MenuNode* _parent;
-  Command::AccessLevel _accessLevel;
-  std::unordered_map<std::string, std::unique_ptr<MenuNode>> _subMenus;
-  std::unordered_map<std::string, std::unique_ptr<Command>> _commands;
-};
+    std::string getName() const { return _name; }
+    MenuNode* getParent() const { return _parent; }
+    AccessLevel getAccessLevel() const { return _accessLevel; }
+
+    const std::unordered_map<std::string, std::unique_ptr<MenuNode>>& getSubMenus() const { return _subMenus; }
+    const std::unordered_map<std::string, std::unique_ptr<Command>>& getCommands() const { return _commands; }
+
+  private:
+    std::string _name;
+    AccessLevel _accessLevel;
+    MenuNode* _parent;
+    
+    std::unordered_map<std::string, std::unique_ptr<MenuNode>> _subMenus;
+    std::unordered_map<std::string, std::unique_ptr<Command>> _commands;
+  };
+  
+}

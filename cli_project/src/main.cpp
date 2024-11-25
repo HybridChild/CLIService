@@ -1,28 +1,30 @@
+#include <unordered_map>
+
 #include "cli/CLIService.hpp"
 #include "factory/CommandMenuTreeFactory.hpp"
-#include "io/StdIOStream.hpp"
 #include "user/User.hpp"
 #include "menu/Command.hpp"
-#include <unordered_map>
+#include "commands/accessLevel.hpp"
+#include "io/StdIOStream.hpp"
 
 
 int main() {
-  auto inOutStream = std::make_unique<StdIOStream>();
-  auto tree = CommandMenuTreeFactory::createDefaultTree();
+  auto ioStream = std::make_unique<StdIOStream>();
+  auto tree = cliService::CommandMenuTreeFactory::createDefaultTree();
 
-  std::unordered_map<std::string, User> users = {
-    {"admin"    , User("admin"    , "admin123", Command::AccessLevel::Admin)},
-    {"poweruser", User("poweruser", "power123", Command::AccessLevel::Advanced)},
-    {"user"     , User("user"     , "user123" , Command::AccessLevel::Basic)}
+  std::unordered_map<std::string, cliService::User> users = {
+    {"admin"    , cliService::User("admin"    , "admin123", cliService::AccessLevel::Admin)},
+    {"poweruser", cliService::User("poweruser", "power123", cliService::AccessLevel::Advanced)},
+    {"user"     , cliService::User("user"     , "user123" , cliService::AccessLevel::Basic)}
   };
 
-  auto config = std::make_unique<CLIServiceConfiguration>(
+  auto config = std::make_unique<cliService::CLIServiceConfiguration>(
     std::move(tree),
-    std::move(inOutStream),
+    std::move(ioStream),
     std::move(users)
   );
 
-  CLIService cli(std::move(config));
+  cliService::CLIService cli(std::move(config));
   cli.activate();
 
   while (cli.isRunning()) {
