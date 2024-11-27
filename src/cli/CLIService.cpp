@@ -19,9 +19,9 @@ namespace cliService {
 
   void CLIService::service() {
     std::string commandString{};
-    parseInputStream(commandString);
-
-    if (commandString.empty()) { return; }
+    if (!parseInputStream(commandString)) {
+      return;
+    }
 
     std::string response{};
 
@@ -30,6 +30,7 @@ namespace cliService {
         if (authenticateUser(commandString)) {
           _state = State::LoggedIn;
           response = _config->getWelcomeMessage();
+          response += generatePromptString();
         }
         else {
           response = "Invalid username or password\n";
@@ -38,7 +39,15 @@ namespace cliService {
         break;
 
       case State::LoggedIn:
-        if (commandString == "exit") {
+        if (commandString.empty()) {
+          response = "";
+        }
+        else if (commandString == "logout") {
+          _state = State::LoggedOut;
+          _currentUser = nullptr;
+          response = _config->getLogInPrompt();
+        }
+        else if (commandString == "exit") {
           _state = State::Stopped;
           _currentUser = nullptr;
           response = _config->getExitString();
@@ -50,22 +59,20 @@ namespace cliService {
           CommandRequest cmdRequest(commandString);
           processCommand(cmdRequest, response);
         }
+
+        response += generatePromptString();
         break;
 
       case State::Stopped:
       default:
         break;
     }
-
-    if (_state != State::Stopped && _currentUser != nullptr) {
-      response += generatePromptString();
-    }
     
     outputResponse(response);
   }
 
 
-  void CLIService::parseInputStream(std::string& cmdString) {
+  bool CLIService::parseInputStream(std::string& cmdString) {
     char c;
 
     while (_io->getCharTimeout(c, 1)) {
@@ -74,6 +81,7 @@ namespace cliService {
           cmdString.assign(_inputBuffer.begin(), _inputBuffer.end());
           _inputBuffer.clear();
         }
+        return true;
       }
       else if (c == '\b' || c == 127) {  // Handle backspace and delete
         if (!_inputBuffer.empty()) {
@@ -84,6 +92,8 @@ namespace cliService {
         _inputBuffer.push_back(c);
       }
     }
+
+    return false;
   }
 
 
@@ -206,6 +216,10 @@ namespace cliService {
   }
 
   std::string CLIService::generatePromptString() {
+    if (_currentUser == nullptr) {
+      return "";
+    }
+
     return _currentUser->getUsername() + "@" + _tree->getPath(_tree->getCurrentNode()) + " > ";
   }
 

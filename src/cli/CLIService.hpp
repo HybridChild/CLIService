@@ -30,7 +30,7 @@ namespace cliService {
     CommandMenuTree* _tree = nullptr;
     IOStreamIf* _io = nullptr;
 
-    void parseInputStream(std::string& cmdString);
+    bool parseInputStream(std::string& cmdString);
     bool authenticateUser(const std::string& commandString);
 
     void processCommand(const CommandRequest& request, std::string& response);
