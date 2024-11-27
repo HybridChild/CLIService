@@ -47,6 +47,7 @@ namespace cliService {
     for (const auto& pathSegment : path) {
       if (pathSegment == "..") {
         MenuNode* parent = _currentNode->getParent();
+
         if (parent) {
           _currentNode = parent;
         } else {
@@ -56,6 +57,7 @@ namespace cliService {
       }
       else {
         MenuNode* nextNode = _currentNode->getSubMenu(pathSegment);
+        
         if (!nextNode) {
           _currentNode = originalNode;
           return false;

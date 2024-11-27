@@ -13,7 +13,7 @@ namespace cliService {
 
   void CLIService::activate() {
     _state = State::LoggedOut;
-    outputResponse(_config->getLogInPrompt());
+    _io->putString(_config->getLogInPrompt());
   }
 
 
@@ -23,7 +23,7 @@ namespace cliService {
 
     if (commandString.empty()) { return; }
 
-    std::string response;
+    std::string response{};
 
     switch (_state) {
       case State::LoggedOut:
@@ -40,6 +40,7 @@ namespace cliService {
       case State::LoggedIn:
         if (commandString == "exit") {
           _state = State::Stopped;
+          _currentUser = nullptr;
           response = _config->getExitString();
         }
         else if (commandString == "?") {
@@ -88,9 +89,11 @@ namespace cliService {
 
   bool CLIService::authenticateUser(const std::string& commandString) {
     size_t colonPos = commandString.find(':');
+
     if (colonPos == std::string::npos) {
       return false;
     }
+
     std::string username = commandString.substr(0, colonPos);
     std::string password = commandString.substr(colonPos + 1);
 
@@ -121,11 +124,14 @@ namespace cliService {
     }
     else if (request.getType() == CommandRequest::Type::Navigation) {
       MenuNode* originalNode = _tree->getCurrentNode();
+      bool success = _tree->navigateToNode(request.getPath(), request.isAbsolute());
 
-      if (!_tree->navigateToNode(request.getPath(), request.isAbsolute())) {
-        response = "Invalid path: " + request.getPath().back() + "\n";
+      if (!success) {
+        response = "Invalid path\n";
+        return;
       }
-      else if (validateAccessLevel(*_tree->getCurrentNode())) {
+
+      if (validateAccessLevel(*_tree->getCurrentNode())) {
         response = "Access denied\n";
         _tree->setCurrentNode(originalNode);
       }
@@ -135,12 +141,15 @@ namespace cliService {
 
   void CLIService::handleExecution(const CommandRequest& request, std::string& response) {
     MenuNode* originalNode = _tree->getCurrentNode();
-    if (!_tree->navigateToNode(request.getPath(), request.isAbsolute())) {
-      response = "Invalid path: " + request.getPath().back() + "\n";
+    bool success = _tree->navigateToNode(request.getPath(), request.isAbsolute());
+
+    if (!success) {
+      response = "Invalid path\n";
       return;
     }
 
     Command* cmd = _tree->getCurrentNode()->getCommand(request.getCommandName());
+
     if (cmd) {
       if (validateAccessLevel(*cmd)) {
         response = "Access denied\n";
@@ -148,8 +157,6 @@ namespace cliService {
       else {
         cmd->execute(request, response);
       }
-
-      _tree->setCurrentNode(originalNode);  // Reset to original position
     }
     else {
       response = "Invalid command: " + request.getCommandName() + "\n";
@@ -177,20 +184,24 @@ namespace cliService {
 
 
   std::string CLIService::generateHelpString() {
-    std::string helpString = "";
+    std::string helpString{};
     helpString += _config->getIndent(1) + "Current location: " + _tree->getPath(_tree->getCurrentNode()) + "\n";
     helpString += _config->getIndent(1) + "Available commands:\n";
+
     for (const auto& [name, cmd] : _tree->getCurrentNode()->getCommands()) {
-      if (static_cast<int>(_currentUser->getAccessLevel()) >= static_cast<int>(cmd->getAccessLevel())) {
+      if (static_cast<uint32_t>(_currentUser->getAccessLevel()) >= static_cast<uint32_t>(cmd->getAccessLevel())) {
         helpString += _config->getIndent(2) + name + " - Usage: " + cmd->getUsage() + "\n";
       }
     }
+
     helpString += _config->getIndent(1) + "Available submenus:\n";
+
     for (const auto& [name, submenu] : _tree->getCurrentNode()->getSubMenus()) {
-      if (static_cast<int>(_currentUser->getAccessLevel()) >= static_cast<int>(submenu->getAccessLevel())) {
+      if (static_cast<uint32_t>(_currentUser->getAccessLevel()) >= static_cast<uint32_t>(submenu->getAccessLevel())) {
         helpString += _config->getIndent(2) + name + "/" + "\n";
       }
     }
+
     return helpString;
   }
 

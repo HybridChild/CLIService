@@ -3,7 +3,6 @@
 #include <memory>
 #include <unordered_map>
 #include <string>
-
 #include "../menu/CommandMenuTree.hpp"
 #include "../io/IOStreamIf.hpp"
 #include "../user/User.hpp"

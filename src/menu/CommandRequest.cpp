@@ -9,7 +9,9 @@ namespace cliService {
   }
 
   void CommandRequest::parseInput(const std::string& input) {
-    if (input.empty() || input == "/") {
+    if (input.empty()) { return; }
+
+    if (input == "/") {
       _type = Type::RootNavigation;
       _absolute = true;
       return;
@@ -17,11 +19,6 @@ namespace cliService {
 
     _absolute = input[0] == '/';
     std::string processedInput = _absolute ? input.substr(1) : input;
-
-    if (processedInput.empty()) {
-      _type = Type::RootNavigation;
-      return;
-    }
 
     if (processedInput.back() == '/' || processedInput == "..") {
       _type = Type::Navigation;
