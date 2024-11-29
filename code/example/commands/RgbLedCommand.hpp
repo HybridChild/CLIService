@@ -5,11 +5,13 @@
 
 namespace cliService {
 
-  class RgbLedCommand : public Command {
+  class RgbLedCommand : public CommandIf {
   public:
-    RgbLedCommand(AccessLevel accessLevel) : Command(accessLevel) {}
+    RgbLedCommand(const std::string& name, AccessLevel accessLevel)
+      : CommandIf(name, accessLevel)
+    {}
+
     void execute(const CommandRequest& request, std::string& response) override;
-    std::string getName() const override;
     std::string getUsage() const override;
   };
 

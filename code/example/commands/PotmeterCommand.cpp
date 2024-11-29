@@ -11,7 +11,6 @@ namespace cliService {
     response = "Potmeter value: 512\n";
   }
 
-  std::string PotmeterCommand::getName() const { return "potmeter"; }
   std::string PotmeterCommand::getUsage() const { return "potmeter"; }
 
 }

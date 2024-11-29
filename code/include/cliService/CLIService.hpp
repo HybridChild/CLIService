@@ -37,7 +37,7 @@ namespace cliService {
     void handleNavigation(const CommandRequest& request, std::string& response);
     void handleExecution(const CommandRequest& request, std::string& response);
 
-    bool validateAccessLevel(const Command& command);
+    bool validateAccessLevel(const CommandIf& command);
     bool validateAccessLevel(const MenuNode& node);
 
     void outputResponse(const std::string& response);

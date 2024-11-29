@@ -158,7 +158,7 @@ namespace cliService {
       return;
     }
 
-    Command* cmd = _tree->getCurrentNode()->getCommand(request.getCommandName());
+    CommandIf* cmd = _tree->getCurrentNode()->getCommand(request.getCommandName());
 
     if (cmd) {
       if (validateAccessLevel(*cmd)) {
@@ -176,7 +176,7 @@ namespace cliService {
   }
 
 
-  bool CLIService::validateAccessLevel(const Command& command) {
+  bool CLIService::validateAccessLevel(const CommandIf& command) {
     return static_cast<uint32_t>(_currentUser->getAccessLevel()) < static_cast<uint32_t>(command.getAccessLevel());
   }
 

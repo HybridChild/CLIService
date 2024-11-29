@@ -23,7 +23,6 @@ namespace cliService {
     }
   }
 
-  std::string RgbLedCommand::getName() const { return "rgbLed"; }
   std::string RgbLedCommand::getUsage() const { return "rgbLed <red> <green> <blue>"; }
 
 }

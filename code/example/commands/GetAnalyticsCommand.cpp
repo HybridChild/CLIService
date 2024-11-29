@@ -11,7 +11,6 @@ namespace cliService {
     response = "DataPoint[1] = User is an idiot\n";
   }
 
-  std::string GetAnalyticsCommand::getName() const { return "getData"; }
   std::string GetAnalyticsCommand::getUsage() const { return "getData"; }
 
 }

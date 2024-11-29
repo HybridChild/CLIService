@@ -5,11 +5,13 @@
 
 namespace cliService {
 
-  class GetAnalyticsCommand : public Command {
+  class GetAnalyticsCommand : public CommandIf {
   public:
-    GetAnalyticsCommand(AccessLevel accessLevel) : Command(accessLevel) {}
+    GetAnalyticsCommand(const std::string& name, AccessLevel accessLevel)
+      : CommandIf(name, accessLevel)
+    {}
+    
     void execute(const CommandRequest& request, std::string& response) override;
-    std::string getName() const override;
     std::string getUsage() const override;
   };
 

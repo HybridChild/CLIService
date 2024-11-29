@@ -1,25 +1,23 @@
 #pragma once
 
 #include <string>
-#include "CommandRequest.hpp"
+#include "cliService/MenuItemIf.hpp"
+#include "cliService/CommandRequest.hpp"
 
 namespace cliService {
 
   enum class AccessLevel;
 
-  class Command {
+  class CommandIf : public MenuItemIf{
   public:
-    Command(AccessLevel accessLevel) : _accessLevel(accessLevel) {}
-    virtual ~Command() = default;
+    CommandIf(const std::string& name, AccessLevel accessLevel)
+      : MenuItemIf(name, accessLevel)
+    {}
+
+    virtual ~CommandIf() = default;
 
     virtual void execute(const CommandRequest& request, std::string& response) = 0;
-    virtual std::string getName() const = 0;
     virtual std::string getUsage() const = 0;
-    
-    AccessLevel getAccessLevel() const { return _accessLevel; }
-
-  private:
-    AccessLevel _accessLevel;
   };
 
 }

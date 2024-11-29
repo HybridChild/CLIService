@@ -7,7 +7,7 @@ namespace cliService {
     return it->second.get();
   }
 
-  void MenuNode::addCommand(std::unique_ptr<Command> command) {
+  void MenuNode::addCommand(std::unique_ptr<CommandIf> command) {
     _commands[command->getName()] = std::move(command);
   }
 
@@ -16,7 +16,7 @@ namespace cliService {
     return (it != _subMenus.end()) ? it->second.get() : nullptr;
   }
 
-  Command* MenuNode::getCommand(const std::string& name) const {
+  CommandIf* MenuNode::getCommand(const std::string& name) const {
     auto it = _commands.find(name);
     return (it != _commands.end()) ? it->second.get() : nullptr;
   }

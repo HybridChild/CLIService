@@ -5,11 +5,13 @@
 
 namespace cliService {
 
-  class PotmeterCommand : public Command {
+  class PotmeterCommand : public CommandIf {
   public:
-    PotmeterCommand(AccessLevel accessLevel) : Command(accessLevel) {}
+    PotmeterCommand(const std::string& name, AccessLevel accessLevel)
+      : CommandIf(name, accessLevel)
+    {}
+
     void execute(const CommandRequest& request, std::string& response) override;
-    std::string getName() const override;
     std::string getUsage() const override;
   };
 

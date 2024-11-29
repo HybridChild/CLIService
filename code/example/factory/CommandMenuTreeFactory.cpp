@@ -13,14 +13,14 @@ namespace cliService {
     // Get branch
     MenuNode* getNode = root->addSubMenu("get", AccessLevel::Basic);
     MenuNode* getHwNode = getNode->addSubMenu("hw", AccessLevel::Basic);
-    getHwNode->addCommand(std::make_unique<PotmeterCommand>(AccessLevel::Basic));
+    getHwNode->addCommand(std::make_unique<PotmeterCommand>("potmeter", AccessLevel::Basic));
     MenuNode* getAnalyticsNode = getNode->addSubMenu("analytics", AccessLevel::Admin);
-    getAnalyticsNode->addCommand(std::make_unique<GetAnalyticsCommand>(AccessLevel::Admin));
+    getAnalyticsNode->addCommand(std::make_unique<GetAnalyticsCommand>("getData", AccessLevel::Admin));
 
     // Set branch
     MenuNode* setNode = root->addSubMenu("set", AccessLevel::Advanced);
     MenuNode* setHwNode = setNode->addSubMenu("hw", AccessLevel::Advanced);
-    setHwNode->addCommand(std::make_unique<RgbLedCommand>(AccessLevel::Advanced));
+    setHwNode->addCommand(std::make_unique<RgbLedCommand>("rgbLed", AccessLevel::Advanced));
     
     return tree;
   }
