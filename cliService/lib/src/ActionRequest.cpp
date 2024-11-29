@@ -1,9 +1,9 @@
-#include "CliRequest.hpp"
+#include "cliService/ActionRequest.hpp"
 
 namespace cliService
 {
 
-  CliRequest::CliRequest(std::string inputStr)
+  ActionRequest::ActionRequest(std::string inputStr)
   {
     // Empty string check
     if (inputStr.empty()) {
@@ -56,8 +56,8 @@ namespace cliService
     }
   }
 
-  const std::vector<std::string>& CliRequest::getPath() const { return _path; }
-  const std::vector<std::string>& CliRequest::getArgs() const { return _args; }
-  bool CliRequest::isAbsolutePath() const { return _absolutePath; }
+  const std::vector<std::string>& ActionRequest::getPath() const { return _path; }
+  const std::vector<std::string>& ActionRequest::getArgs() const { return _args; }
+  bool ActionRequest::isAbsolutePath() const { return _absolutePath; }
 
 }

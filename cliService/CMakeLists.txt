@@ -9,5 +9,5 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(GTest REQUIRED)
 include(GoogleTest)
 
-add_subdirectory(cliService)
+add_subdirectory(lib)
 add_subdirectory(test)

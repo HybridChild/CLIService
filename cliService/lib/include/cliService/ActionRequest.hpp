@@ -7,10 +7,10 @@
 
 namespace cliService
 {
-  class CliRequest
+  class ActionRequest
   {
   public:
-    CliRequest(std::string inputStr);
+    ActionRequest(std::string inputStr);
 
     const std::vector<std::string>& getPath() const;
     const std::vector<std::string>& getArgs() const;

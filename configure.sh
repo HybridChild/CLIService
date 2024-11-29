@@ -6,4 +6,4 @@ then
 	mkdir out/build
 fi
 
-cmake -S ./code -B out/build
+cmake -S ./cliService -B out/build
