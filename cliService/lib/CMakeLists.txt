@@ -1,5 +1,5 @@
 set(SOURCES
-  src/ActionRequest.cpp
+  src/actionRequest/ActionRequest.cpp
 )
 
 add_library(${PROJECT_NAME}_lib
