@@ -6,10 +6,10 @@
 namespace cliService
 {
 
-  class Command : public NodeIf
+  class CommandIf : public NodeIf
   {
   public:
-    explicit Command(std::string name);
+    explicit CommandIf(std::string name);
     
     bool isDirectory() const override;
     virtual void execute(const std::vector<std::string>& args) = 0;

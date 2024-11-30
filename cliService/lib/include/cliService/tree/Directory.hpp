@@ -1,6 +1,6 @@
 #pragma once
 #include "NodeIf.hpp"
-#include "Command.hpp"
+#include "CommandIf.hpp"
 #include <memory>
 #include <vector>
 #include <functional>

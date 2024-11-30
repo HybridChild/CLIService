@@ -1,6 +1,6 @@
 set(SOURCES
   src/actionRequest/ActionRequest.cpp
-  src/tree/Command.cpp
+  src/tree/CommandIf.cpp
   src/tree/Directory.cpp
   src/tree/NodeIf.cpp
 )

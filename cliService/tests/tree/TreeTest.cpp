@@ -4,11 +4,11 @@
 using namespace cliService;
 
 // Test command that tracks execution
-class TestCommand : public Command
+class TestCommand : public CommandIf
 {
 public:
   TestCommand()
-    : Command("test")
+    : CommandIf("test")
     , _wasExecuted(false)
     , _lastArgs()
   {}
