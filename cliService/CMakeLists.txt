@@ -10,4 +10,4 @@ find_package(GTest REQUIRED)
 include(GoogleTest)
 
 add_subdirectory(lib)
-add_subdirectory(test)
+add_subdirectory(tests)
