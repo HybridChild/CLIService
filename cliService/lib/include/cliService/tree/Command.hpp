@@ -1,12 +1,12 @@
 #pragma once
 
-#include "cliService/tree/Node.hpp"
+#include "cliService/tree/NodeIf.hpp"
 #include <vector>
 
 namespace cliService
 {
 
-  class Command : public Node
+  class Command : public NodeIf
   {
   public:
     explicit Command(std::string name);

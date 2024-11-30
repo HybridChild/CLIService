@@ -4,7 +4,7 @@ namespace cliService
 {
 
   Command::Command(std::string name)
-    : Node(std::move(name))
+    : NodeIf(std::move(name))
   {}
 
   bool Command::isDirectory() const { return false; }

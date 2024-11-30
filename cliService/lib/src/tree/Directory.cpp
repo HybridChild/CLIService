@@ -5,7 +5,7 @@ namespace cliService
 {
 
   Directory::Directory(std::string name)
-    : Node(std::move(name))
+    : NodeIf(std::move(name))
   {}
 
   bool Directory::isDirectory() const
@@ -21,7 +21,7 @@ namespace cliService
     return *dirPtr;
   }
 
-  Node* Directory::findNode(const std::vector<std::string>& path)
+  NodeIf* Directory::findNode(const std::vector<std::string>& path)
   {
     if (path.empty()) {
       return this;
@@ -48,7 +48,7 @@ namespace cliService
     return static_cast<Directory*>(it->get())->findNode(subPath);
   }
 
-  void Directory::traverse(const std::function<void(const Node&, int)>& visitor, int depth) const
+  void Directory::traverse(const std::function<void(const NodeIf&, int)>& visitor, int depth) const
   {
     visitor(*this, depth);
     for (const auto& child : _children)
@@ -62,7 +62,7 @@ namespace cliService
     }
   }
 
-  void Directory::addChild(std::unique_ptr<Node> child)
+  void Directory::addChild(std::unique_ptr<NodeIf> child)
   {
     auto it = std::find_if(_children.begin(), _children.end(),
       [&child](const auto& existing) {

@@ -4,22 +4,22 @@
 namespace cliService
 {
 
-  class Node
+  class NodeIf
   {
   public:
-    explicit Node(std::string name);
-    virtual ~Node() = default;
+    explicit NodeIf(std::string name);
+    virtual ~NodeIf() = default;
     
     const std::string& getName() const;
-    Node* getParent() const;
-    void setParent(Node* parent);
+    NodeIf* getParent() const;
+    void setParent(NodeIf* parent);
     
     bool isCommand() const;
     virtual bool isDirectory() const = 0;
 
   protected:
     std::string _name;
-    Node* _parent;
+    NodeIf* _parent;
   };
   
 }

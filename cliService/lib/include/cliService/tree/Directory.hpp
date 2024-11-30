@@ -1,5 +1,5 @@
 #pragma once
-#include "Node.hpp"
+#include "NodeIf.hpp"
 #include "Command.hpp"
 #include <memory>
 #include <vector>
@@ -9,7 +9,7 @@
 namespace cliService
 {
 
-  class Directory : public Node
+  class Directory : public NodeIf
   {
   public:
     explicit Directory(std::string name);
@@ -26,12 +26,12 @@ namespace cliService
       return *cmdPtr;
     }
 
-    Node* findNode(const std::vector<std::string>& path);
-    void traverse(const std::function<void(const Node&, int)>& visitor, int depth = 0) const;
+    NodeIf* findNode(const std::vector<std::string>& path);
+    void traverse(const std::function<void(const NodeIf&, int)>& visitor, int depth = 0) const;
 
   private:
-    void addChild(std::unique_ptr<Node> child);
-    std::vector<std::unique_ptr<Node>> _children;
+    void addChild(std::unique_ptr<NodeIf> child);
+    std::vector<std::unique_ptr<NodeIf>> _children;
   };
 
 }

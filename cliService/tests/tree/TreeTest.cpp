@@ -64,7 +64,7 @@ TEST_F(TreeTest, FindNodeInRoot)
 {
   auto& cmd = _root->addCommand<TestCommand>();
   
-  Node* found = _root->findNode({"test"});
+  NodeIf* found = _root->findNode({"test"});
   EXPECT_EQ(found, &cmd);
 }
 
@@ -73,7 +73,7 @@ TEST_F(TreeTest, FindNodeInSubdirectory)
   auto& dir = _root->addDirectory("subdir");
   auto& cmd = dir.addCommand<TestCommand>();
   
-  Node* found = _root->findNode({"subdir", "test"});
+  NodeIf* found = _root->findNode({"subdir", "test"});
   EXPECT_EQ(found, &cmd);
 }
 
@@ -84,13 +84,13 @@ TEST_F(TreeTest, FindNodeInDeepStructure)
   auto& level3 = level2.addDirectory("level3");
   auto& cmd = level3.addCommand<TestCommand>();
   
-  Node* found = _root->findNode({"level1", "level2", "level3", "test"});
+  NodeIf* found = _root->findNode({"level1", "level2", "level3", "test"});
   EXPECT_EQ(found, &cmd);
 }
 
 TEST_F(TreeTest, FindNonExistentNode)
 {
-  Node* found = _root->findNode({"nonexistent"});
+  NodeIf* found = _root->findNode({"nonexistent"});
   EXPECT_EQ(found, nullptr);
 }
 
@@ -99,7 +99,7 @@ TEST_F(TreeTest, FindWithInvalidPath)
   auto& cmd = _root->addCommand<TestCommand>();
   
   // Trying to traverse through a command
-  Node* found = _root->findNode({"test", "subpath"});
+  NodeIf* found = _root->findNode({"test", "subpath"});
   EXPECT_EQ(found, nullptr);
 }
 
@@ -108,7 +108,7 @@ TEST_F(TreeTest, CommandExecution)
   auto& cmd = _root->addCommand<TestCommand>();
   
   std::vector<std::string> args = {"arg1", "arg2"};
-  Node* found = _root->findNode({"test"});
+  NodeIf* found = _root->findNode({"test"});
   auto* testCmd = dynamic_cast<TestCommand*>(found);
   ASSERT_NE(testCmd, nullptr);
   
@@ -120,7 +120,7 @@ TEST_F(TreeTest, CommandExecution)
 TEST_F(TreeTest, TraverseEmptyTree)
 {
   std::vector<std::string> visited;
-  _root->traverse([&visited](const Node& node, int depth) {
+  _root->traverse([&visited](const NodeIf& node, int depth) {
     visited.push_back(node.getName());
   });
   
@@ -136,7 +136,7 @@ TEST_F(TreeTest, TraverseComplexTree)
   dir2.addCommand<TestCommand>();
   
   std::vector<std::pair<std::string, int>> visited;
-  _root->traverse([&visited](const Node& node, int depth) {
+  _root->traverse([&visited](const NodeIf& node, int depth) {
     visited.push_back({node.getName(), depth});
   });
   
@@ -169,7 +169,7 @@ TEST_F(TreeTest, DirectoryNameCollision)
 
 TEST_F(TreeTest, FindEmptyPath)
 {
-  Node* found = _root->findNode({});
+  NodeIf* found = _root->findNode({});
   EXPECT_EQ(found, _root.get());
 }
 

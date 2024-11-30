@@ -2,7 +2,7 @@ set(SOURCES
   src/actionRequest/ActionRequest.cpp
   src/tree/Command.cpp
   src/tree/Directory.cpp
-  src/tree/Node.cpp
+  src/tree/NodeIf.cpp
 )
 
 add_library(${PROJECT_NAME}_lib
