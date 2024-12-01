@@ -1,11 +1,12 @@
 #pragma once
 
+#include "cliService/io/RequestBase.hpp"
 #include <string>
 
 namespace cliService
 {
 
-  class LoginRequest
+  class LoginRequest : public RequestBase
   {
   public:
     explicit LoginRequest(const std::string& input);
@@ -20,4 +21,4 @@ namespace cliService
     bool _isExitRequest;
   };
 
-} // namespace cliService
+}

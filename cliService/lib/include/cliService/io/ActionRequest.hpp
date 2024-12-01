@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cliService/io/RequestBase.hpp"
 #include <vector>
 #include <string>
 #include <sstream>
@@ -7,7 +8,7 @@
 
 namespace cliService
 {
-  class ActionRequest
+  class ActionRequest : public RequestBase
   {
   public:
     ActionRequest(std::string inputStr);
