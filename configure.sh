@@ -1,9 +1,7 @@
 #!/bin/bash
 
-if [ ! -d "out" ]
-then
-	mkdir out
-	mkdir out/build
-fi
+rm -rf out
+mkdir out
+mkdir out/build
 
 cmake -S ./cliService -B out/build
