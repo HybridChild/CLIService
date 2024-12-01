@@ -10,6 +10,20 @@ target_link_libraries(${PROJECT_NAME}_ActionRequest_test
     GTest::Main
 )
 
+
+# LoginRequest tests
+add_executable(${PROJECT_NAME}_LoginRequest_test
+  io/LoginRequestTest.cpp
+)
+
+target_link_libraries(${PROJECT_NAME}_LoginRequest_test
+  PRIVATE
+    ${PROJECT_NAME}_lib
+    GTest::GTest
+    GTest::Main
+)
+
+
 # Tree tests
 add_executable(${PROJECT_NAME}_Tree_test
   tree/TreeTest.cpp
@@ -28,4 +42,5 @@ target_link_libraries(${PROJECT_NAME}_Tree_test
 )
 
 gtest_discover_tests(${PROJECT_NAME}_ActionRequest_test)
+gtest_discover_tests(${PROJECT_NAME}_LoginRequest_test)
 gtest_discover_tests(${PROJECT_NAME}_Tree_test)
