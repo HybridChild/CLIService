@@ -1,4 +1,4 @@
-#include "cliService/actionRequest/ActionRequest.hpp"
+#include "cliService/io/ActionRequest.hpp"
 
 namespace cliService
 {

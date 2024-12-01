@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "cliService/actionRequest/ActionRequest.hpp"
+#include "cliService/io/ActionRequest.hpp"
 
 using namespace cliService;
 
