@@ -1,6 +1,6 @@
 # ActionRequest tests
 add_executable(${PROJECT_NAME}_ActionRequest_test
-  io/ActionRequestTest.cpp
+  tests/parser/requests/ActionRequestTest.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}_ActionRequest_test
@@ -13,7 +13,7 @@ target_link_libraries(${PROJECT_NAME}_ActionRequest_test
 
 # LoginRequest tests
 add_executable(${PROJECT_NAME}_LoginRequest_test
-  io/LoginRequestTest.cpp
+  tests/parser/requests/LoginRequestTest.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}_LoginRequest_test
@@ -26,7 +26,7 @@ target_link_libraries(${PROJECT_NAME}_LoginRequest_test
 
 # Tree tests
 add_executable(${PROJECT_NAME}_Tree_test
-  tree/TreeTest.cpp
+  tests/tree/TreeTest.cpp
 )
 
 target_include_directories(${PROJECT_NAME}_Tree_test

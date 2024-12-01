@@ -1,6 +1,6 @@
 set(SOURCES
-  src/io/ActionRequest.cpp
-  src/io/LoginRequest.cpp
+  src/parser/requests/ActionRequest.cpp
+  src/parser/requests/LoginRequest.cpp
   src/tree/CommandIf.cpp
   src/tree/Directory.cpp
   src/tree/NodeIf.cpp

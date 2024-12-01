@@ -1,4 +1,4 @@
-#include "cliService/io/LoginRequest.hpp"
+#include "cliService/parser/requests/LoginRequest.hpp"
 #include <gtest/gtest.h>
 
 using namespace cliService;
