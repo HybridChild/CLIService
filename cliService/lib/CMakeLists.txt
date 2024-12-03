@@ -1,5 +1,5 @@
 set(SOURCES
-  src/parser/InputHandler.cpp
+  src/parser/CommandParser.cpp
   src/requests/ActionRequest.cpp
   src/requests/LoginRequest.cpp
   src/tree/CommandIf.cpp

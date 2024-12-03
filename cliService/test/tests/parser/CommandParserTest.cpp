@@ -1,34 +1,34 @@
 #include <gtest/gtest.h>
-#include "cliService/parser/InputHandler.hpp"
+#include "cliService/parser/CommandParser.hpp"
 #include "mock/terminal/TerminalMock.hpp"
 
 using namespace cliService;
 
-class InputHandlerTest : public ::testing::Test
+class CommandParserTest : public ::testing::Test
 {
 protected:
   void SetUp() override
   {
     _terminal = std::make_unique<TerminalMock>();
-    _handler = std::make_unique<InputHandler>(*_terminal, _cliState);
+    _parser = std::make_unique<CommandParser>(*_terminal, _cliState);
   }
 
   std::unique_ptr<TerminalMock> _terminal;
-  std::unique_ptr<InputHandler> _handler;
+  std::unique_ptr<CommandParser> _parser;
   CLIState _cliState{CLIState::LoggedOut};
 };
 
-TEST_F(InputHandlerTest, NoInputReturnsNullopt)
+TEST_F(CommandParserTest, NoInputReturnsNullopt)
 {
-  auto result = _handler->service();
+  auto result = _parser->service();
   EXPECT_FALSE(result.has_value());
 }
 
-TEST_F(InputHandlerTest, SimpleLoginRequest)
+TEST_F(CommandParserTest, SimpleLoginRequest)
 {
   _terminal->queueInput("user:pass\r");
   
-  auto result = _handler->service();
+  auto result = _parser->service();
   ASSERT_TRUE(result.has_value());
   
   auto* loginRequest = dynamic_cast<LoginRequest*>(result->get());
@@ -43,11 +43,11 @@ TEST_F(InputHandlerTest, SimpleLoginRequest)
   EXPECT_TRUE(output.find("****") != std::string::npos);
 }
 
-TEST_F(InputHandlerTest, ExitLoginRequest)
+TEST_F(CommandParserTest, ExitLoginRequest)
 {
   _terminal->queueInput("exit\r");
   
-  auto result = _handler->service();
+  auto result = _parser->service();
   ASSERT_TRUE(result.has_value());
   
   auto* loginRequest = dynamic_cast<LoginRequest*>(result->get());
@@ -55,12 +55,12 @@ TEST_F(InputHandlerTest, ExitLoginRequest)
   EXPECT_TRUE(loginRequest->isExitRequest());
 }
 
-TEST_F(InputHandlerTest, LoggedInActionRequest)
+TEST_F(CommandParserTest, LoggedInActionRequest)
 {
   _cliState = CLIState::LoggedIn;
   _terminal->queueInput("/test/path arg1\r");
   
-  auto result = _handler->service();
+  auto result = _parser->service();
   ASSERT_TRUE(result.has_value());
   
   auto* actionRequest = dynamic_cast<ActionRequest*>(result->get());
@@ -73,17 +73,17 @@ TEST_F(InputHandlerTest, LoggedInActionRequest)
   EXPECT_EQ(actionRequest->getArgs(), expectedArgs);
 }
 
-TEST_F(InputHandlerTest, TabCompletion)
+TEST_F(CommandParserTest, TabCompletion)
 {
   _cliState = CLIState::LoggedIn;
   // First queue some input so we have something to complete
   _terminal->queueInput("/test/pa");
-  _handler->service();  // Process the input
+  _parser->service();  // Process the input
   
   // Now send tab
   _terminal->queueInput("\t");
   
-  auto result = _handler->service();
+  auto result = _parser->service();
   ASSERT_TRUE(result.has_value());
   
   auto* actionRequest = dynamic_cast<ActionRequest*>(result->get());
@@ -94,17 +94,17 @@ TEST_F(InputHandlerTest, TabCompletion)
   EXPECT_EQ(actionRequest->getPath(), expectedPath);
 }
 
-TEST_F(InputHandlerTest, ArrowUpHistory)
+TEST_F(CommandParserTest, ArrowUpHistory)
 {
   _cliState = CLIState::LoggedIn;
   // First queue some input to ensure we have a non-empty buffer
   _terminal->queueInput("command");
-  _handler->service();
+  _parser->service();
   
   // Now send arrow up
   _terminal->queueInput("\x1B[A");  // ESC [ A for up arrow
   
-  auto result = _handler->service();
+  auto result = _parser->service();
   ASSERT_TRUE(result.has_value());
   
   auto* actionRequest = dynamic_cast<ActionRequest*>(result->get());
@@ -112,17 +112,17 @@ TEST_F(InputHandlerTest, ArrowUpHistory)
   EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::ArrowUp);
 }
 
-TEST_F(InputHandlerTest, ArrowDownHistory)
+TEST_F(CommandParserTest, ArrowDownHistory)
 {
   _cliState = CLIState::LoggedIn;
   // First queue some input to ensure we have a non-empty buffer
   _terminal->queueInput("command");
-  _handler->service();
+  _parser->service();
   
   // Now send arrow down
   _terminal->queueInput("\x1B[B");  // ESC [ B for down arrow
   
-  auto result = _handler->service();
+  auto result = _parser->service();
   ASSERT_TRUE(result.has_value());
   
   auto* actionRequest = dynamic_cast<ActionRequest*>(result->get());
@@ -130,12 +130,12 @@ TEST_F(InputHandlerTest, ArrowDownHistory)
   EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::ArrowDown);
 }
 
-TEST_F(InputHandlerTest, Backspace)
+TEST_F(CommandParserTest, Backspace)
 {
   _cliState = CLIState::LoggedIn;
   _terminal->queueInput("abcd\x7F\r");  // Type "abcd", backspace, enter
   
-  auto result = _handler->service();
+  auto result = _parser->service();
   ASSERT_TRUE(result.has_value());
   
   auto* actionRequest = dynamic_cast<ActionRequest*>(result->get());
@@ -145,18 +145,18 @@ TEST_F(InputHandlerTest, Backspace)
   EXPECT_EQ(actionRequest->getPath(), expectedPath);
 }
 
-TEST_F(InputHandlerTest, MultipleServiceCalls)
+TEST_F(CommandParserTest, MultipleServiceCalls)
 {
   _cliState = CLIState::LoggedIn;
   _terminal->queueInput("abc");
   
   // First service call - no complete command yet
-  auto result = _handler->service();
+  auto result = _parser->service();
   EXPECT_FALSE(result.has_value());
   
   // Add enter and service again
   _terminal->queueInput("\r");
-  result = _handler->service();
+  result = _parser->service();
   ASSERT_TRUE(result.has_value());
   
   auto* actionRequest = dynamic_cast<ActionRequest*>(result->get());

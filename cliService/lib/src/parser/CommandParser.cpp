@@ -1,10 +1,10 @@
-#include "cliService/parser/InputHandler.hpp"
+#include "cliService/parser/CommandParser.hpp"
 #include <cassert>
 
 namespace cliService
 {
 
-  InputHandler::InputHandler(TerminalIf& terminal, const CLIState& currentState)
+  CommandParser::CommandParser(TerminalIf& terminal, const CLIState& currentState)
     : _terminal(terminal)
     , _currentState(currentState)
     , _inEscapeSequence(false)
@@ -13,7 +13,7 @@ namespace cliService
   {
   }
 
-  std::optional<std::unique_ptr<RequestBase>> InputHandler::service()
+  std::optional<std::unique_ptr<RequestBase>> CommandParser::service()
   {
     while (_terminal.available())
     {
@@ -26,7 +26,7 @@ namespace cliService
     return std::nullopt;
   }
 
-  bool InputHandler::processNextChar()
+  bool CommandParser::processNextChar()
   {
     char c;
 
@@ -73,7 +73,7 @@ namespace cliService
     return false;
   }
 
-  bool InputHandler::handleControlCharacter(char c)
+  bool CommandParser::handleControlCharacter(char c)
   {
     switch (c)
     {
@@ -97,7 +97,7 @@ namespace cliService
     return false;
   }
 
-  bool InputHandler::handleEscapeSequence()
+  bool CommandParser::handleEscapeSequence()
   {
     _inEscapeSequence = false;
 
@@ -133,13 +133,13 @@ namespace cliService
     return false;
   }
 
-  void InputHandler::handleRegularCharacter(char c)
+  void CommandParser::handleRegularCharacter(char c)
   {
     _buffer += c;
     echoCharacter(c);
   }
 
-  void InputHandler::echoCharacter(char c)
+  void CommandParser::echoCharacter(char c)
   {
     if (_currentState == CLIState::LoggedOut)
     {
@@ -160,7 +160,7 @@ namespace cliService
     }
   }
 
-  std::unique_ptr<RequestBase> InputHandler::createRequest()
+  std::unique_ptr<RequestBase> CommandParser::createRequest()
   {
     assert(!_buffer.empty() && "Empty input received");
 

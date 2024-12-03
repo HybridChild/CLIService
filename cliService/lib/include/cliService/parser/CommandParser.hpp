@@ -11,10 +11,10 @@
 namespace cliService
 {
 
-  class InputHandler 
+  class CommandParser 
   {
   public:
-    InputHandler(TerminalIf& terminal, const CLIState& currentState);
+    CommandParser(TerminalIf& terminal, const CLIState& currentState);
 
     std::optional<std::unique_ptr<RequestBase>> service();
 
