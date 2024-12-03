@@ -4,8 +4,8 @@
 namespace cliService
 {
 
-  Directory::Directory(std::string name)
-    : NodeIf(std::move(name))
+  Directory::Directory(std::string name, AccessLevel level)
+    : NodeIf(std::move(name), level)
   {}
 
   bool Directory::isDirectory() const
@@ -13,9 +13,9 @@ namespace cliService
     return true;
   }
 
-  Directory& Directory::addDirectory(const std::string& name)
+  Directory& Directory::addDirectory(const std::string& name, AccessLevel level)
   {
-    auto dir = std::make_unique<Directory>(name);
+    auto dir = std::make_unique<Directory>(name, level);
     Directory* dirPtr = dir.get();
     addChild(std::move(dir));
     return *dirPtr;

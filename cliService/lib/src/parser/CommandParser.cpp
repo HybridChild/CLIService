@@ -179,6 +179,13 @@ namespace cliService
         _buffer.clear();
         return request;
       }
+
+      case CLIState::Inactive:
+      default:
+      {
+        assert(false && "Invalid CLI state");
+        break;
+      }
     }
 
     assert(false && "Invalid CLI state");

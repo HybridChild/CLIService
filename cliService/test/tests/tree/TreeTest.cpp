@@ -1,6 +1,15 @@
 #include <gtest/gtest.h>
 #include "cliService/tree/Directory.hpp"
 
+namespace cliService
+{
+  enum class AccessLevel
+  {
+    User,
+    Admin
+  };
+}
+
 using namespace cliService;
 
 // Test command that tracks execution
@@ -8,7 +17,7 @@ class TestCommand : public CommandIf
 {
 public:
   TestCommand()
-    : CommandIf("test")
+    : CommandIf("test", AccessLevel::User)
     , _wasExecuted(false)
     , _lastArgs()
   {}
@@ -32,7 +41,7 @@ class TreeTest : public ::testing::Test
 protected:
   void SetUp() override
   {
-    _root = std::make_unique<Directory>("root");
+    _root = std::make_unique<Directory>("root", AccessLevel::User);
   }
 
   std::unique_ptr<Directory> _root;
@@ -46,7 +55,7 @@ TEST_F(TreeTest, RootDirectoryHasCorrectName)
 
 TEST_F(TreeTest, AddDirectory)
 {
-  Directory& dir = _root->addDirectory("test");
+  Directory& dir = _root->addDirectory("test", AccessLevel::User);
   EXPECT_EQ(dir.getName(), "test");
   EXPECT_TRUE(dir.isDirectory());
   EXPECT_EQ(dir.getParent(), _root.get());
@@ -70,7 +79,7 @@ TEST_F(TreeTest, FindNodeInRoot)
 
 TEST_F(TreeTest, FindNodeInSubdirectory)
 {
-  auto& dir = _root->addDirectory("subdir");
+  auto& dir = _root->addDirectory("subdir", AccessLevel::User);
   auto& cmd = dir.addCommand<TestCommand>();
   
   NodeIf* found = _root->findNode({"subdir", "test"});
@@ -79,9 +88,9 @@ TEST_F(TreeTest, FindNodeInSubdirectory)
 
 TEST_F(TreeTest, FindNodeInDeepStructure)
 {
-  auto& level1 = _root->addDirectory("level1");
-  auto& level2 = level1.addDirectory("level2");
-  auto& level3 = level2.addDirectory("level3");
+  auto& level1 = _root->addDirectory("level1", AccessLevel::User);
+  auto& level2 = level1.addDirectory("level2", AccessLevel::User);
+  auto& level3 = level2.addDirectory("level3", AccessLevel::User);
   auto& cmd = level3.addCommand<TestCommand>();
   
   NodeIf* found = _root->findNode({"level1", "level2", "level3", "test"});
@@ -130,9 +139,9 @@ TEST_F(TreeTest, TraverseEmptyTree)
 
 TEST_F(TreeTest, TraverseComplexTree)
 {
-  auto& dir1 = _root->addDirectory("dir1");
+  auto& dir1 = _root->addDirectory("dir1", AccessLevel::User);
   dir1.addCommand<TestCommand>();
-  auto& dir2 = dir1.addDirectory("dir2");
+  auto& dir2 = dir1.addDirectory("dir2", AccessLevel::User);
   dir2.addCommand<TestCommand>();
   
   std::vector<std::pair<std::string, int>> visited;
@@ -156,15 +165,15 @@ TEST_F(TreeTest, NameCollisionInDirectory)
 
 TEST_F(TreeTest, NameCollisionInSubdirectory)
 {
-  auto& dir = _root->addDirectory("subdir");
+  auto& dir = _root->addDirectory("subdir", AccessLevel::User);
   dir.addCommand<TestCommand>();
   EXPECT_DEATH(dir.addCommand<TestCommand>(), "");
 }
 
 TEST_F(TreeTest, DirectoryNameCollision)
 {
-  _root->addDirectory("test");
-  EXPECT_DEATH(_root->addDirectory("test"), "");
+  _root->addDirectory("test", AccessLevel::User);
+  EXPECT_DEATH(_root->addDirectory("test", AccessLevel::User), "");
 }
 
 TEST_F(TreeTest, FindEmptyPath)
@@ -175,6 +184,6 @@ TEST_F(TreeTest, FindEmptyPath)
 
 TEST_F(TreeTest, MixedNameCollision)
 {
-  _root->addDirectory("test");
+  _root->addDirectory("test", AccessLevel::User);
   EXPECT_DEATH(_root->addCommand<TestCommand>(), "");
 }

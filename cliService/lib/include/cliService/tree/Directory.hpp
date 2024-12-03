@@ -12,10 +12,10 @@ namespace cliService
   class Directory : public NodeIf
   {
   public:
-    explicit Directory(std::string name);
+    explicit Directory(std::string name, AccessLevel level);
     bool isDirectory() const override;
 
-    Directory& addDirectory(const std::string& name);
+    Directory& addDirectory(const std::string& name, AccessLevel level);
     
     template<typename T>
     T& addCommand()
