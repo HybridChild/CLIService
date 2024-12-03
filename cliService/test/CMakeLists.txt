@@ -1,6 +1,6 @@
 # ActionRequest tests
 add_executable(${PROJECT_NAME}_ActionRequest_test
-  tests/parser/requests/ActionRequestTest.cpp
+  tests/requests/ActionRequestTest.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}_ActionRequest_test
@@ -13,7 +13,7 @@ target_link_libraries(${PROJECT_NAME}_ActionRequest_test
 
 # LoginRequest tests
 add_executable(${PROJECT_NAME}_LoginRequest_test
-  tests/parser/requests/LoginRequestTest.cpp
+  tests/requests/LoginRequestTest.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}_LoginRequest_test

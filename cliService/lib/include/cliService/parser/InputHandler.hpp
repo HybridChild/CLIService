@@ -1,8 +1,8 @@
 #pragma once
 
 #include "cliService/terminal/TerminalIf.hpp"
-#include "cliService/parser/requests/ActionRequest.hpp"
-#include "cliService/parser/requests/LoginRequest.hpp"
+#include "cliService/requests/ActionRequest.hpp"
+#include "cliService/requests/LoginRequest.hpp"
 #include "cliService/cli/CLIState.hpp"
 #include <memory>
 #include <string>

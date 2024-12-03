@@ -1,4 +1,4 @@
-#include "cliService/parser/requests/ActionRequest.hpp"
+#include "cliService/requests/ActionRequest.hpp"
 #include <sstream>
 #include <cassert>
 

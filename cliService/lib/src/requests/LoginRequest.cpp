@@ -1,4 +1,4 @@
-#include "cliService/parser/requests/LoginRequest.hpp"
+#include "cliService/requests/LoginRequest.hpp"
 #include <cassert>
 
 namespace cliService

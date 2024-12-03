@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cliService/parser/requests/RequestBase.hpp"
+#include "cliService/requests/RequestBase.hpp"
 #include <string>
 #include <vector>
 
