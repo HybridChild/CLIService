@@ -15,7 +15,7 @@ protected:
     _rootDir = root.get();
     
     auto& subDir = _rootDir->addDirectory("sub", AccessLevel::User);
-    _mockCmd = &subDir.addCommand<CommandMock>();
+    _mockCmd = &subDir.addCommand<CommandMock>("test", AccessLevel::Admin);
     
     std::vector<User> users = {
       {"admin", "admin123", AccessLevel::Admin},

@@ -18,9 +18,9 @@ namespace cliService
     Directory& addDirectory(const std::string& name, AccessLevel level);
     
     template<typename T>
-    T& addCommand()
+    T& addCommand(std::string name, AccessLevel level)
     {
-      auto cmd = std::make_unique<T>();
+      auto cmd = std::make_unique<T>(name, level);
       T* cmdPtr = cmd.get();
       addChild(std::move(cmd));
       return *cmdPtr;

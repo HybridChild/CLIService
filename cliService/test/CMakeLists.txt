@@ -60,7 +60,7 @@ target_link_libraries(${PROJECT_NAME}_Tree_test
 add_executable(${PROJECT_NAME}_CLIService_test
   tests/cli/CLIServiceTest.cpp
   mock/terminal/TerminalMock.cpp
-  mock/tree/CommandMock.cpp
+  mock/tree/CommandMock.hpp
 )
 
 target_include_directories(${PROJECT_NAME}_CLIService_test
