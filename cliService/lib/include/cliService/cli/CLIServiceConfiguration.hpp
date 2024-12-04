@@ -1,13 +1,12 @@
 #pragma once
 #include "cliService/user/User.hpp"
 #include "cliService/tree/Directory.hpp"
+#include "cliService/terminal/TerminalIf.hpp"
 #include <vector>
 #include <memory>
 
 namespace cliService
 {
-
-class TerminalIf;
 
   struct CLIServiceConfiguration
   {
