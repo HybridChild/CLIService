@@ -3,9 +3,7 @@ set(SOURCES
   src/parser/CommandParser.cpp
   src/requests/ActionRequest.cpp
   src/requests/LoginRequest.cpp
-  src/tree/CommandIf.cpp
   src/tree/Directory.cpp
-  src/tree/NodeIf.cpp
   src/user/User.cpp
 )
 

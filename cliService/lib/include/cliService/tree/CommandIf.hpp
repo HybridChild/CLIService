@@ -9,9 +9,11 @@ namespace cliService
   class CommandIf : public NodeIf
   {
   public:
-    explicit CommandIf(std::string name, AccessLevel level);
+    explicit CommandIf(std::string name, AccessLevel level)
+      : NodeIf(std::move(name), level)
+    {}
     
-    bool isDirectory() const override;
+    bool isDirectory() const override { return false; };
     virtual void execute(const std::vector<std::string>& args) = 0;
   };
 
