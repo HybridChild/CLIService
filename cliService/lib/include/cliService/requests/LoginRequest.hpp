@@ -1,5 +1,4 @@
 #pragma once
-
 #include "cliService/requests/RequestBase.hpp"
 #include <string>
 

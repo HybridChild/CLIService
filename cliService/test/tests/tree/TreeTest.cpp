@@ -18,7 +18,7 @@ class TestCommand : public CommandIf
 {
 public:
   TestCommand(std::string name, AccessLevel level)
-    : CommandIf(name, level)
+    : CommandIf(std::move(name), level)
     , _wasExecuted(false)
     , _lastArgs()
   {}

@@ -1,5 +1,4 @@
 #pragma once
-
 #include "cliService/tree/NodeIf.hpp"
 #include "cliService/tree/CommandResponse.hpp"
 #include <vector>

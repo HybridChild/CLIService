@@ -17,7 +17,7 @@ namespace cliService
   {
   public:
     explicit CommandMock(std::string name, AccessLevel level)
-      : CommandIf(name, level)
+      : CommandIf(std::move(name), level)
     {}
     
     MOCK_METHOD(CommandResponse, execute, (const std::vector<std::string>&), (override));
