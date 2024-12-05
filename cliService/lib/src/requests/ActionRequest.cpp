@@ -67,24 +67,4 @@ namespace cliService
     }
   }
 
-  const std::vector<std::string>& ActionRequest::getPath() const
-  {
-    return _path;
-  }
-
-  const std::vector<std::string>& ActionRequest::getArgs() const
-  {
-    return _args;
-  }
-
-  bool ActionRequest::isAbsolutePath() const
-  {
-    return _absolutePath;
-  }
-
-  ActionRequest::Trigger ActionRequest::getTrigger() const
-  {
-    return _trigger;
-  }
-
 }

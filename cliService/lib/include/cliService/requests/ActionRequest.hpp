@@ -14,17 +14,17 @@ namespace cliService
     {
       Enter,      // Normal command completion with enter
       Tab,        // Tab completion request
-      ArrowUp,    // Command history navigation
+      ArrowUp,
       ArrowDown,
       // Add more triggers as needed
     };
     
     ActionRequest(std::string inputStr, Trigger trigger);
 
-    const std::vector<std::string>& getPath() const;
-    const std::vector<std::string>& getArgs() const;
-    bool isAbsolutePath() const;
-    Trigger getTrigger() const;
+    const std::vector<std::string>& getPath() const { return _path; }
+    const std::vector<std::string>& getArgs() const { return _args; }
+    bool isAbsolutePath() const { return _absolutePath; }
+    Trigger getTrigger() const { return _trigger; }
 
   private:
     std::vector<std::string> _path;

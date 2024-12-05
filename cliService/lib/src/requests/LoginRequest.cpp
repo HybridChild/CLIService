@@ -23,19 +23,4 @@ namespace cliService
     assert(!_password.empty() && "Password cannot be empty");
   }
 
-  bool LoginRequest::isExitRequest() const
-  {
-    return _isExitRequest;
-  }
-
-  const std::string& LoginRequest::getUsername() const
-  {
-    return _username;
-  }
-
-  const std::string& LoginRequest::getPassword() const
-  {
-    return _password;
-  }
-
 }
