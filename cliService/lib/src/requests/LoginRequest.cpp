@@ -5,14 +5,7 @@ namespace cliService
 {
 
   LoginRequest::LoginRequest(const std::string& input)
-    : _isExitRequest(false)
   {
-    if (input == "exit")
-    {
-      _isExitRequest = true;
-      return;
-    }
-
     size_t delimPos = input.find(':');
     assert(delimPos != std::string::npos && "Invalid login format");
 

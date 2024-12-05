@@ -43,18 +43,6 @@ TEST_F(CommandParserTest, SimpleLoginRequest)
   EXPECT_TRUE(output.find("****") != std::string::npos);
 }
 
-TEST_F(CommandParserTest, ExitLoginRequest)
-{
-  _terminal->queueInput("exit\r");
-  
-  auto result = _parser->service();
-  ASSERT_TRUE(result.has_value());
-  
-  auto* loginRequest = dynamic_cast<LoginRequest*>(result->get());
-  ASSERT_NE(loginRequest, nullptr);
-  EXPECT_TRUE(loginRequest->isExitRequest());
-}
-
 TEST_F(CommandParserTest, LoggedInActionRequest)
 {
   _cliState = CLIState::LoggedIn;

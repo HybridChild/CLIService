@@ -86,33 +86,8 @@ namespace cliService
   }
 
 
-  void CLIService::handleGlobalCommand(const std::string& command, const std::vector<std::string>& args) 
-  {
-    if (command == "exit")
-    {
-      deactivate();
-      return;
-    }
-    
-    if (command == "logout")
-    {
-      _currentState = CLIState::LoggedOut;
-      _currentUser = std::nullopt;
-      resetToRoot();
-      _terminal.putString(LOGOUT_MESSAGE);
-      _terminal.putChar('\n');
-    }
-  }
-
-
   void CLIService::handleLoginRequest(const LoginRequest& request) 
   {
-    if (request.isExitRequest())
-    {
-      deactivate();
-      return;
-    }
-
     const auto& username = request.getUsername();
     const auto& password = request.getPassword();
 
@@ -171,6 +146,19 @@ namespace cliService
     else
     {
       _terminal.putString("Invalid path\n");
+    }
+  }
+
+
+  void CLIService::handleGlobalCommand(const std::string& command, const std::vector<std::string>& args) 
+  {
+    if (command == "logout")
+    {
+      _currentState = CLIState::LoggedOut;
+      _currentUser = std::nullopt;
+      resetToRoot();
+      _terminal.putString(LOGOUT_MESSAGE);
+      _terminal.putChar('\n');
     }
   }
 

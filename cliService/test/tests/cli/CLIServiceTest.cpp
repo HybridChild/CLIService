@@ -105,13 +105,3 @@ TEST_F(CLIServiceTest, NavigateToDirectory)
  
  EXPECT_THAT(_terminal.getOutput(), testing::EndsWith("admin@> "));
 }
-
-TEST_F(CLIServiceTest, ExitFromAnyState) 
-{
- _terminal.queueInput("exit\r");
- 
- _service->activate();
- _service->service();
- 
- EXPECT_THAT(_terminal.getOutput(), testing::HasSubstr("inactive"));
-}
