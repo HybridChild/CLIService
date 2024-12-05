@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cliService/tree/NodeIf.hpp"
+#include "cliService/tree/CommandResponse.hpp"
 #include <vector>
 
 namespace cliService
@@ -14,7 +15,7 @@ namespace cliService
     {}
     
     bool isDirectory() const override { return false; };
-    virtual void execute(const std::vector<std::string>& args) = 0;
+    virtual CommandResponse execute(const std::vector<std::string>& args) = 0;
   };
 
 }

@@ -20,7 +20,7 @@ namespace cliService
       : CommandIf(name, level)
     {}
     
-    MOCK_METHOD(void, execute, (const std::vector<std::string>&), (override));
+    MOCK_METHOD(CommandResponse, execute, (const std::vector<std::string>&), (override));
   };
 
 }

@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "cliService/tree/Directory.hpp"
+#include "cliService/tree/CommandResponse.hpp"
 
 namespace cliService
 {
@@ -22,10 +23,11 @@ public:
     , _lastArgs()
   {}
 
-  void execute(const std::vector<std::string>& args) override
+  CommandResponse execute(const std::vector<std::string>& args) override
   {
     _wasExecuted = true;
     _lastArgs = args;
+    return CommandResponse::success();
   }
 
   bool wasExecuted() const { return _wasExecuted; }

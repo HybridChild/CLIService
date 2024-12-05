@@ -140,7 +140,18 @@ namespace cliService
       else
       {
         auto* cmd = static_cast<CommandIf*>(node);
-        cmd->execute(request.getArgs());
+        CommandResponse response = cmd->execute(request.getArgs());
+
+        if (!response.getMessage().empty())
+        {
+          _terminal.putString(response.getMessage());
+          _terminal.putChar('\n');
+        }
+
+        if (response.shouldShowPrompt())
+        {
+          displayPrompt();
+        }
       }
     }
     else
