@@ -19,7 +19,7 @@ namespace cliService
 
   private:
     static constexpr char BACKSPACE = 0x7F;
-    static constexpr char ENTER = 0x0D;
+    static constexpr char ENTER = 0x0A;
     static constexpr char TAB = 0x09;
     static constexpr char ESC = 0x1B;
 

@@ -36,7 +36,7 @@ protected:
 
 TEST_F(CLIServiceTest, LoginSuccess) 
 {
-  _terminal.queueInput("admin:admin123\r");
+  _terminal.queueInput("admin:admin123\n");
   
   _service->activate();
   _service->service();
@@ -46,8 +46,8 @@ TEST_F(CLIServiceTest, LoginSuccess)
 
 TEST_F(CLIServiceTest, ExecuteCommand) 
 {
- _terminal.queueInput("admin:admin123\r");  // Login first
- _terminal.queueInput("sub/test arg1 arg2\r");
+ _terminal.queueInput("admin:admin123\n");  // Login first
+ _terminal.queueInput("sub/test arg1 arg2\n");
  
  EXPECT_CALL(*_mockCmd, execute(testing::ElementsAre("arg1", "arg2")));
  
@@ -58,8 +58,8 @@ TEST_F(CLIServiceTest, ExecuteCommand)
 
 TEST_F(CLIServiceTest, AccessDenied) 
 {
- _terminal.queueInput("user:pass123\r");  // Login as regular user
- _terminal.queueInput("sub/test arg1\r"); // Try to access admin command
+ _terminal.queueInput("user:pass123\n");  // Login as regular user
+ _terminal.queueInput("sub/test arg1\n"); // Try to access admin command
  
  EXPECT_CALL(*_mockCmd, execute).Times(0);
  
@@ -72,8 +72,8 @@ TEST_F(CLIServiceTest, AccessDenied)
 
 TEST_F(CLIServiceTest, GlobalCommandLogout) 
 {
- _terminal.queueInput("admin:admin123\r");
- _terminal.queueInput("logout\r");
+ _terminal.queueInput("admin:admin123\n");
+ _terminal.queueInput("logout\n");
  
  _service->activate();
  _service->service();
@@ -84,8 +84,8 @@ TEST_F(CLIServiceTest, GlobalCommandLogout)
 
 TEST_F(CLIServiceTest, InvalidPath) 
 {
- _terminal.queueInput("admin:admin123\r");
- _terminal.queueInput("invalid/path\r");
+ _terminal.queueInput("admin:admin123\n");
+ _terminal.queueInput("invalid/path\n");
  
  _service->activate();
  _service->service();
@@ -96,8 +96,8 @@ TEST_F(CLIServiceTest, InvalidPath)
 
 TEST_F(CLIServiceTest, NavigateToDirectory) 
 {
- _terminal.queueInput("admin:admin123\r");
- _terminal.queueInput("sub\r");
+ _terminal.queueInput("admin:admin123\n");
+ _terminal.queueInput("sub\n");
  
  _service->activate();
  _service->service();

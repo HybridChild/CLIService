@@ -26,7 +26,7 @@ TEST_F(CommandParserTest, NoInputReturnsNullopt)
 
 TEST_F(CommandParserTest, SimpleLoginRequest)
 {
-  _terminal->queueInput("user:pass\r");
+  _terminal->queueInput("user:pass\n");
   
   auto result = _parser->service();
   ASSERT_TRUE(result.has_value());
@@ -46,7 +46,7 @@ TEST_F(CommandParserTest, SimpleLoginRequest)
 TEST_F(CommandParserTest, LoggedInActionRequest)
 {
   _cliState = CLIState::LoggedIn;
-  _terminal->queueInput("/test/path arg1\r");
+  _terminal->queueInput("/test/path arg1\n");
   
   auto result = _parser->service();
   ASSERT_TRUE(result.has_value());
@@ -121,7 +121,7 @@ TEST_F(CommandParserTest, ArrowDownHistory)
 TEST_F(CommandParserTest, Backspace)
 {
   _cliState = CLIState::LoggedIn;
-  _terminal->queueInput("abcd\x7F\r");  // Type "abcd", backspace, enter
+  _terminal->queueInput("abcd\x7F\n");  // Type "abcd", backspace, enter
   
   auto result = _parser->service();
   ASSERT_TRUE(result.has_value());
@@ -143,7 +143,7 @@ TEST_F(CommandParserTest, MultipleServiceCalls)
   EXPECT_FALSE(result.has_value());
   
   // Add enter and service again
-  _terminal->queueInput("\r");
+  _terminal->queueInput("\n");
   result = _parser->service();
   ASSERT_TRUE(result.has_value());
   
