@@ -15,7 +15,6 @@ namespace cliService
     explicit CLIService(CLIServiceConfiguration config);
     
     void activate();
-    void deactivate();
     void service();
 
   private:
@@ -41,8 +40,8 @@ namespace cliService
     CLIState _currentState;
 
     static const std::unordered_set<std::string_view> GLOBAL_COMMANDS;
-    static constexpr std::string_view WELCOME_MESSAGE = "Welcome to CLI Service. Please login.";
-    static constexpr std::string_view LOGOUT_MESSAGE = "Logged out. Please login.";
+    static constexpr std::string_view WELCOME_MESSAGE = "Welcome to CLI Service. Please login. <username>:<password>";
+    static constexpr std::string_view LOGOUT_MESSAGE = "Logged out. Please enter <username>:<password>";
     static constexpr std::string_view INACTIVE_MESSAGE = "CLI Service inactive.";
   };
 

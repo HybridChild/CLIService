@@ -38,17 +38,6 @@ namespace cliService
   }
 
 
-  void CLIService::deactivate() 
-  {
-    assert(_currentState != CLIState::Inactive && "Service already inactive");
-    _currentState = CLIState::Inactive;
-    resetToRoot();
-    _currentUser = std::nullopt;
-    _terminal.putString(INACTIVE_MESSAGE);
-    _terminal.putChar('\n');
-  }
-
-
   void CLIService::service() 
   {
     if (_currentState == CLIState::Inactive)
