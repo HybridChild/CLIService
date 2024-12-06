@@ -23,3 +23,4 @@ set(CMAKE_CTEST_COMMAND_ARGS "--test-dir ${UNITTEST_OUTPUT_DIR}")
 
 add_subdirectory(lib)
 add_subdirectory(test)
+add_subdirectory(example)
