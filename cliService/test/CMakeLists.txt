@@ -76,9 +76,38 @@ target_link_libraries(${PROJECT_NAME}_CLIService_test
     GTest::gmock
 )
 
+
+# Path tests
+add_executable(${PROJECT_NAME}_Path_test
+  tests/path/PathTest.cpp
+)
+
+target_link_libraries(${PROJECT_NAME}_Path_test
+  PRIVATE
+    ${PROJECT_NAME}_lib
+    GTest::GTest
+    GTest::Main
+)
+
+
+# PathResolver tests
+add_executable(${PROJECT_NAME}_PathResolver_test
+  tests/path/PathResolverTest.cpp
+)
+
+target_link_libraries(${PROJECT_NAME}_PathResolver_test
+  PRIVATE
+    ${PROJECT_NAME}_lib
+    GTest::GTest
+    GTest::Main
+)
+
+
 # Discover tests
 gtest_discover_tests(${PROJECT_NAME}_ActionRequest_test)
 gtest_discover_tests(${PROJECT_NAME}_LoginRequest_test)
 gtest_discover_tests(${PROJECT_NAME}_CommandParser_test)
 gtest_discover_tests(${PROJECT_NAME}_Tree_test)
 gtest_discover_tests(${PROJECT_NAME}_CLIService_test)
+gtest_discover_tests(${PROJECT_NAME}_Path_test)
+gtest_discover_tests(${PROJECT_NAME}_PathResolver_test)

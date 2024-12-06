@@ -17,12 +17,12 @@ namespace cliService
 
     std::optional<std::unique_ptr<RequestBase>> service();
 
-  private:
     static constexpr char BACKSPACE = 0x7F;
     static constexpr char ENTER = 0x0A;
     static constexpr char TAB = 0x09;
     static constexpr char ESC = 0x1B;
 
+  private:
     bool processNextChar();
     bool handleControlCharacter(char c);
     bool handleEscapeSequence();

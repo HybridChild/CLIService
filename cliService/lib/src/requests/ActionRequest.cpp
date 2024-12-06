@@ -1,68 +1,64 @@
 #include "cliService/requests/ActionRequest.hpp"
-#include <sstream>
 #include <cassert>
+#include <sstream>
+#include <istream>
+#include <string>
 
 namespace cliService
 {
 
-  ActionRequest::ActionRequest(std::string inputStr)
-    : _absolutePath(false)
+  void ActionRequest::parseInput(std::string_view input, std::string_view& pathStr, std::string_view& argsStr)
   {
-    // Empty string check
-    if (inputStr.empty())
-    {
-      _absolutePath = false;
-      return;
-    }
-
-    // Check if path is absolute
-    _absolutePath = (inputStr[0] == '/');
-
-    // Use stringstream to split input
-    std::stringstream ss(inputStr);
-    std::string token;
-
-    // Get the first token (path)
-    ss >> token;
-
-    // Check for invalid trailing slash with arguments
-    if (token.length() > 1 && token.back() == '/')
-    {
-      // If there are more tokens after a path with trailing slash, that's invalid
-      std::string nextToken;
-      ss >> nextToken;
-      assert(nextToken.empty() && "Paths with arguments must not end with a slash");
-    }
-
-    // Remove trailing slash if present (for valid cases)
-    if (token.length() > 1 && token.back() == '/')
-    {
-      token.pop_back();
-    }
-
-    // Split path into components
-    std::stringstream pathStream(token);
-    std::string pathComponent;
+    // Find first space that separates path from args
+    size_t spacePos = input.find(' ');
     
-    // Skip the first empty component for absolute paths
-    if (_absolutePath)
+    if (spacePos == std::string_view::npos)
     {
-      pathStream.get();
+      // No args, entire input is path
+      pathStr = input;
+      argsStr = std::string_view();
     }
-
-    // Parse path components
-    while (std::getline(pathStream, pathComponent, '/'))
+    else
     {
-      if (!pathComponent.empty())
+      // Split into path and args
+      pathStr = input.substr(0, spacePos);
+      
+      // Skip spaces between path and args
+      size_t argsStart = spacePos + 1;
+      while (argsStart < input.length() && input[argsStart] == ' ')
       {
-        _path.push_back(pathComponent);
+        argsStart++;
       }
+      
+      argsStr = input.substr(argsStart);
     }
-
-    // Parse remaining arguments
-    while (ss >> token)
+    
+    // Validate path doesn't end with slash when args present
+    if (!argsStr.empty())
     {
-      _args.push_back(token);
+      assert(pathStr.empty() || pathStr.back() != '/' && "Paths with arguments must not end with a slash");
+    }
+  }
+
+  ActionRequest::ActionRequest(std::string_view inputStr) 
+  {
+    // Split input into path and args
+    std::string_view pathStr, argsStr;
+    parseInput(inputStr, pathStr, argsStr);
+    
+    // Create path object
+    _path = Path(pathStr);
+    
+    // Parse args if present
+    if (!argsStr.empty())
+    {
+      // Fix for most vexing parse - use brace initialization
+      std::istringstream argStream{std::string(argsStr)};
+      std::string arg;
+      while (argStream >> arg)
+      {
+        _args.push_back(std::move(arg));
+      }
     }
   }
 

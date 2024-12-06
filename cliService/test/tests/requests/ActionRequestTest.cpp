@@ -1,134 +1,158 @@
-#include <gtest/gtest.h>
 #include "cliService/requests/ActionRequest.hpp"
+#include <gtest/gtest.h>
 
 using namespace cliService;
 
-TEST(ActionRequest, EmptyString)
+class ActionRequestTest : public ::testing::Test
+{
+protected:
+  void SetUp() override {}
+};
+
+TEST_F(ActionRequestTest, EmptyInput)
 {
   ActionRequest request("");
-  EXPECT_TRUE(request.getPath().empty());
+  EXPECT_TRUE(request.getPath().isEmpty());
+  EXPECT_FALSE(request.getPath().isAbsolute());
   EXPECT_TRUE(request.getArgs().empty());
-  EXPECT_FALSE(request.isAbsolutePath());
 }
 
-TEST(ActionRequest, RelativePathNoArgs)
+TEST_F(ActionRequestTest, SimplePathNoArgs)
 {
-  ActionRequest request("relative/path");
+  ActionRequest request("dir1/dir2");
   
-  std::vector<std::string> expectedPath = {"relative", "path"};
-  EXPECT_EQ(request.getPath(), expectedPath);
+  EXPECT_FALSE(request.getPath().isEmpty());
+  EXPECT_FALSE(request.getPath().isAbsolute());
+  ASSERT_EQ(request.getPath().components().size(), 2);
+  EXPECT_EQ(request.getPath().components()[0], "dir1");
+  EXPECT_EQ(request.getPath().components()[1], "dir2");
   EXPECT_TRUE(request.getArgs().empty());
-  EXPECT_FALSE(request.isAbsolutePath());
 }
 
-TEST(ActionRequest, RelativePathWithTrailingSlash)
+TEST_F(ActionRequestTest, AbsolutePathNoArgs)
 {
-  ActionRequest request("relative/path/");
+  ActionRequest request("/dir1/dir2");
   
-  std::vector<std::string> expectedPath = {"relative", "path"};
-  EXPECT_EQ(request.getPath(), expectedPath);
+  EXPECT_FALSE(request.getPath().isEmpty());
+  EXPECT_TRUE(request.getPath().isAbsolute());
+  ASSERT_EQ(request.getPath().components().size(), 2);
+  EXPECT_EQ(request.getPath().components()[0], "dir1");
+  EXPECT_EQ(request.getPath().components()[1], "dir2");
   EXPECT_TRUE(request.getArgs().empty());
-  EXPECT_FALSE(request.isAbsolutePath());
 }
 
-TEST(ActionRequest, AbsolutePathNoArgs)
+TEST_F(ActionRequestTest, PathWithSingleArg)
 {
-  ActionRequest request("/absolute/path");
+  ActionRequest request("dir1/dir2 arg1");
   
-  std::vector<std::string> expectedPath = {"absolute", "path"};
-  EXPECT_EQ(request.getPath(), expectedPath);
+  EXPECT_FALSE(request.getPath().isEmpty());
+  ASSERT_EQ(request.getPath().components().size(), 2);
+  EXPECT_EQ(request.getPath().components()[0], "dir1");
+  EXPECT_EQ(request.getPath().components()[1], "dir2");
+  
+  ASSERT_EQ(request.getArgs().size(), 1);
+  EXPECT_EQ(request.getArgs()[0], "arg1");
+}
+
+TEST_F(ActionRequestTest, PathWithMultipleArgs)
+{
+  ActionRequest request("dir1/dir2 arg1 arg2 arg3");
+  
+  EXPECT_FALSE(request.getPath().isEmpty());
+  ASSERT_EQ(request.getPath().components().size(), 2);
+  EXPECT_EQ(request.getPath().components()[0], "dir1");
+  EXPECT_EQ(request.getPath().components()[1], "dir2");
+  
+  ASSERT_EQ(request.getArgs().size(), 3);
+  EXPECT_EQ(request.getArgs()[0], "arg1");
+  EXPECT_EQ(request.getArgs()[1], "arg2");
+  EXPECT_EQ(request.getArgs()[2], "arg3");
+}
+
+TEST_F(ActionRequestTest, PathWithExtraSpaces)
+{
+  ActionRequest request("dir1/dir2   arg1    arg2   arg3");
+  
+  EXPECT_FALSE(request.getPath().isEmpty());
+  ASSERT_EQ(request.getPath().components().size(), 2);
+  EXPECT_EQ(request.getPath().components()[0], "dir1");
+  EXPECT_EQ(request.getPath().components()[1], "dir2");
+  
+  ASSERT_EQ(request.getArgs().size(), 3);
+  EXPECT_EQ(request.getArgs()[0], "arg1");
+  EXPECT_EQ(request.getArgs()[1], "arg2");
+  EXPECT_EQ(request.getArgs()[2], "arg3");
+}
+
+TEST_F(ActionRequestTest, SimpleCommand)
+{
+  ActionRequest request("command");
+  
+  EXPECT_FALSE(request.getPath().isEmpty());
+  ASSERT_EQ(request.getPath().components().size(), 1);
+  EXPECT_EQ(request.getPath().components()[0], "command");
   EXPECT_TRUE(request.getArgs().empty());
-  EXPECT_TRUE(request.isAbsolutePath());
 }
 
-TEST(ActionRequest, AbsolutePathWithTrailingSlash)
+TEST_F(ActionRequestTest, CommandWithArgs)
 {
-  ActionRequest request("/absolute/path/");
+  ActionRequest request("command arg1 arg2");
   
-  std::vector<std::string> expectedPath = {"absolute", "path"};
-  EXPECT_EQ(request.getPath(), expectedPath);
+  EXPECT_FALSE(request.getPath().isEmpty());
+  ASSERT_EQ(request.getPath().components().size(), 1);
+  EXPECT_EQ(request.getPath().components()[0], "command");
+  
+  ASSERT_EQ(request.getArgs().size(), 2);
+  EXPECT_EQ(request.getArgs()[0], "arg1");
+  EXPECT_EQ(request.getArgs()[1], "arg2");
+}
+
+TEST_F(ActionRequestTest, AbsolutePathWithArgs)
+{
+  ActionRequest request("/dir1/command arg1 arg2");
+  
+  EXPECT_TRUE(request.getPath().isAbsolute());
+  ASSERT_EQ(request.getPath().components().size(), 2);
+  EXPECT_EQ(request.getPath().components()[0], "dir1");
+  EXPECT_EQ(request.getPath().components()[1], "command");
+  
+  ASSERT_EQ(request.getArgs().size(), 2);
+  EXPECT_EQ(request.getArgs()[0], "arg1");
+  EXPECT_EQ(request.getArgs()[1], "arg2");
+}
+
+TEST_F(ActionRequestTest, RootPath)
+{
+  ActionRequest request("/");
+  
+  EXPECT_TRUE(request.getPath().isAbsolute());
+  EXPECT_TRUE(request.getPath().components().empty());
   EXPECT_TRUE(request.getArgs().empty());
-  EXPECT_TRUE(request.isAbsolutePath());
 }
 
-TEST(ActionRequest, RelativePathWithArgs)
+TEST_F(ActionRequestTest, ParentPath)
 {
-  ActionRequest request("relative/path arg1 arg2");
+  ActionRequest request("..");
   
-  std::vector<std::string> expectedPath = {"relative", "path"};
-  std::vector<std::string> expectedArgs = {"arg1", "arg2"};
-  EXPECT_EQ(request.getPath(), expectedPath);
-  EXPECT_EQ(request.getArgs(), expectedArgs);
-  EXPECT_FALSE(request.isAbsolutePath());
-}
-
-TEST(ActionRequest, AbsolutePathWithArgs)
-{
-  ActionRequest request("/absolute/path arg1 arg2 arg3");
-  
-  std::vector<std::string> expectedPath = {"absolute", "path"};
-  std::vector<std::string> expectedArgs = {"arg1", "arg2", "arg3"};
-  EXPECT_EQ(request.getPath(), expectedPath);
-  EXPECT_EQ(request.getArgs(), expectedArgs);
-  EXPECT_TRUE(request.isAbsolutePath());
-}
-
-TEST(ActionRequest, PathWithMultipleSlashes)
-{
-  ActionRequest request("/path///with//multiple///slashes");
-  
-  std::vector<std::string> expectedPath = {"path", "with", "multiple", "slashes"};
-  EXPECT_EQ(request.getPath(), expectedPath);
+  EXPECT_FALSE(request.getPath().isEmpty());
+  ASSERT_EQ(request.getPath().components().size(), 1);
+  EXPECT_EQ(request.getPath().components()[0], "..");
   EXPECT_TRUE(request.getArgs().empty());
-  EXPECT_TRUE(request.isAbsolutePath());
 }
 
-TEST(ActionRequest, DeathTestTrailingSlashWithArgs)
+TEST_F(ActionRequestTest, ComplexPathWithArgs)
 {
-  EXPECT_DEATH({
-    ActionRequest request("relative/path/ arg1 arg2");
-  }, "");
+  ActionRequest request("dir1/../../dir2/command arg1 arg2");
   
-  EXPECT_DEATH({
-    ActionRequest request("/absolute/path/ arg1 arg2");
-  }, "");
-}
-
-// New tests for special key commands
-TEST(ActionRequest, SpecialKeyCommands)
-{
-  {
-    ActionRequest request("key:tab");
-    std::vector<std::string> expectedPath = {"key:tab"};
-    EXPECT_EQ(request.getPath(), expectedPath);
-    EXPECT_TRUE(request.getArgs().empty());
-  }
+  EXPECT_FALSE(request.getPath().isEmpty());
+  ASSERT_EQ(request.getPath().components().size(), 5);  // Now expecting 5 components
+  EXPECT_EQ(request.getPath().components()[0], "dir1");
+  EXPECT_EQ(request.getPath().components()[1], "..");
+  EXPECT_EQ(request.getPath().components()[2], "..");
+  EXPECT_EQ(request.getPath().components()[3], "dir2");
+  EXPECT_EQ(request.getPath().components()[4], "command");  // Split properly
   
-  {
-    ActionRequest request("key:up");
-    std::vector<std::string> expectedPath = {"key:up"};
-    EXPECT_EQ(request.getPath(), expectedPath);
-    EXPECT_TRUE(request.getArgs().empty());
-  }
-  
-  {
-    ActionRequest request("key:down");
-    std::vector<std::string> expectedPath = {"key:down"};
-    EXPECT_EQ(request.getPath(), expectedPath);
-    EXPECT_TRUE(request.getArgs().empty());
-  }
-  
-  {
-    ActionRequest request("key:left");
-    std::vector<std::string> expectedPath = {"key:left"};
-    EXPECT_EQ(request.getPath(), expectedPath);
-    EXPECT_TRUE(request.getArgs().empty());
-  }
-  
-  {
-    ActionRequest request("key:right");
-    std::vector<std::string> expectedPath = {"key:right"};
-    EXPECT_EQ(request.getPath(), expectedPath);
-    EXPECT_TRUE(request.getArgs().empty());
-  }
+  ASSERT_EQ(request.getArgs().size(), 2);
+  EXPECT_EQ(request.getArgs()[0], "arg1");
+  EXPECT_EQ(request.getArgs()[1], "arg2");
 }

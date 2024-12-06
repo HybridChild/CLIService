@@ -1,6 +1,8 @@
 set(SOURCES
   src/cli/CLIService.cpp
   src/parser/CommandParser.cpp
+  src/path/Path.cpp
+  src/path/PathResolver.cpp
   src/requests/ActionRequest.cpp
   src/requests/LoginRequest.cpp
   src/tree/Directory.cpp

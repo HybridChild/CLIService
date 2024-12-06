@@ -25,6 +25,7 @@ namespace cliService
     , _currentDirectory(_root.get())
     , _currentUser(std::nullopt)
     , _currentState(CLIState::Inactive)
+    , _pathResolver(*_root)
   {
     assert(!_users.empty() && "User list cannot be empty");
     assert(_root != nullptr && "Root directory cannot be null");
@@ -108,47 +109,48 @@ namespace cliService
 
     const auto& path = request.getPath();
     
-    // First check global commands
-    if (!path.empty() && GLOBAL_COMMANDS.find(path[0]) != GLOBAL_COMMANDS.end())
+    // Handle global commands
+    if (!path.isEmpty() && GLOBAL_COMMANDS.find(path.components().front()) != GLOBAL_COMMANDS.end())
     {
-      handleGlobalCommand(path[0], request.getArgs());
+      handleGlobalCommand(path.components().front(), request.getArgs());
       return;
     }
 
-    // Then try to resolve path
-    if (NodeIf* node = resolvePath(path, request.isAbsolutePath()))
+    // Resolve and validate path
+    NodeIf* node = resolvePath(path);
+    if (!node)
     {
-      if (!validatePathAccess(path, request.isAbsolutePath()))
-      {
-        _terminal.putString("Access denied\n");
-        return;
-      }
+      _terminal.putString("Invalid path\n");
+      return;
+    }
 
-      if (node->isDirectory())
-      {
-        _currentDirectory = static_cast<Directory*>(node);
-        displayPrompt();
-      }
-      else
-      {
-        auto* cmd = static_cast<CommandIf*>(node);
-        CommandResponse response = cmd->execute(request.getArgs());
+    if (!validatePathAccess(node))
+    {
+      _terminal.putString("Access denied\n");
+      return;
+    }
 
-        if (!response.getMessage().empty())
-        {
-          _terminal.putString(response.getMessage());
-          _terminal.putChar('\n');
-        }
-
-        if (response.shouldShowPrompt())
-        {
-          displayPrompt();
-        }
-      }
+    // Handle directory navigation or command execution
+    if (node->isDirectory())
+    {
+      _currentDirectory = static_cast<Directory*>(node);
+      displayPrompt();
     }
     else
     {
-      _terminal.putString("Invalid path\n");
+      auto* cmd = static_cast<CommandIf*>(node);
+      CommandResponse response = cmd->execute(request.getArgs());
+
+      if (!response.getMessage().empty())
+      {
+        _terminal.putString(response.getMessage());
+        _terminal.putChar('\n');
+      }
+
+      if (response.shouldShowPrompt())
+      {
+        displayPrompt();
+      }
     }
   }
 
@@ -190,43 +192,29 @@ namespace cliService
     }
   }
 
-
-  NodeIf* CLIService::resolvePath(const std::vector<std::string>& path, bool isAbsolute) const 
+  NodeIf* CLIService::resolvePath(const Path& path) const 
   {
-    if (path.empty())
-    {
-      return _currentDirectory;
-    }
-
-    return isAbsolute ? _root->findNode(path) : _currentDirectory->findNode(path);
+    return _pathResolver.resolve(path, *_currentDirectory);
   }
 
-
-  bool CLIService::validatePathAccess(const std::vector<std::string>& path, bool isAbsolute) const 
+  bool CLIService::validatePathAccess(const NodeIf* node) const 
   {
     assert(_currentUser && "No user logged in");
     
-    NodeIf* current = isAbsolute ? _root.get() : _currentDirectory;
-    
-    // For absolute paths, start with root
-    if (isAbsolute)
+    if (!node)
+    {
+      return false;
+    }
+
+    // Check access levels up the tree
+    const NodeIf* current = node;
+    while (current)
     {
       if (current->getAccessLevel() > _currentUser->getAccessLevel())
       {
         return false;
       }
-    }
-    
-    // Check each component of the path
-    for (const auto& component : path)
-    {
-      auto dir = static_cast<Directory*>(current);
-      NodeIf* next = dir->findNode({component});
-      if (!next || next->getAccessLevel() > _currentUser->getAccessLevel())
-      {
-        return false;
-      }
-      current = next;
+      current = current->getParent();
     }
     
     return true;
@@ -237,11 +225,11 @@ namespace cliService
   {
     _currentDirectory = _root.get();
   }
-  
+
 
   void CLIService::displayPrompt() const 
   {
-    if (_currentState == CLIState::LoggedIn)
+    if (_currentState == CLIState::LoggedIn && _currentUser)
     {
       _terminal.putString(_currentUser->getUsername());
       _terminal.putString("@");

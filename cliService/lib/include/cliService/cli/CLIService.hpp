@@ -1,8 +1,11 @@
+// CLIService.hpp
 #pragma once
 #include "CLIServiceConfiguration.hpp"
 #include "cliService/cli/CLIState.hpp"
 #include "cliService/parser/CommandParser.hpp"
 #include "cliService/tree/Directory.hpp"
+#include "cliService/path/Path.hpp"
+#include "cliService/path/PathResolver.hpp"
 #include <optional>
 #include <unordered_set>
 
@@ -18,14 +21,14 @@ namespace cliService
     void service();
 
   private:
-    // Path resolution and validation
-    NodeIf* resolvePath(const std::vector<std::string>& path, bool isAbsolute) const;
-    bool validatePathAccess(const std::vector<std::string>& path, bool isAbsolute) const;
-    
     // Request handlers
     void handleLoginRequest(const LoginRequest& request);
     void handleActionRequest(const ActionRequest& request);
     void handleGlobalCommand(const std::string_view& command, const std::vector<std::string>& args);
+    
+    // Path operations
+    NodeIf* resolvePath(const Path& path) const;
+    bool validatePathAccess(const NodeIf* node) const;
     
     // State management 
     void resetToRoot();
@@ -38,6 +41,7 @@ namespace cliService
     Directory* _currentDirectory;
     std::optional<User> _currentUser;
     CLIState _currentState;
+    PathResolver _pathResolver;
 
     static const std::unordered_set<std::string_view> GLOBAL_COMMANDS;
     static constexpr std::string_view WELCOME_MESSAGE = "Welcome to CLI Service. Please login. <username>:<password>";

@@ -1,6 +1,6 @@
 #pragma once
-#include "NodeIf.hpp"
-#include "CommandIf.hpp"
+#include "cliService/tree/NodeIf.hpp"
+#include "cliService/tree/CommandIf.hpp"
 #include <memory>
 #include <vector>
 #include <functional>
@@ -9,7 +9,7 @@
 namespace cliService
 {
 
-  class Directory : public NodeIf
+  class Directory : public NodeIf 
   {
   public:
     explicit Directory(std::string name, AccessLevel level);
@@ -26,7 +26,7 @@ namespace cliService
       return *cmdPtr;
     }
 
-    NodeIf* findNode(const std::vector<std::string>& path);
+    NodeIf* findNode(const std::vector<std::string>& path) const;
     void traverse(const std::function<void(const NodeIf&, int)>& visitor, int depth = 0) const;
 
   private:

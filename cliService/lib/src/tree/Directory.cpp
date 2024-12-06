@@ -21,10 +21,11 @@ namespace cliService
     return *dirPtr;
   }
 
-  NodeIf* Directory::findNode(const std::vector<std::string>& path)
+  NodeIf* Directory::findNode(const std::vector<std::string>& path) const
   {
-    if (path.empty()) {
-      return this;
+    if (path.empty())
+    {
+      return const_cast<Directory*>(this);
     }
 
     auto it = std::find_if(_children.begin(), _children.end(),

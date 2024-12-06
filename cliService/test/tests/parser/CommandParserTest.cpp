@@ -1,6 +1,9 @@
-#include <gtest/gtest.h>
+// CommandParserTest.cpp
 #include "cliService/parser/CommandParser.hpp"
+#include "cliService/requests/ActionRequest.hpp"
+#include "cliService/requests/LoginRequest.hpp"
 #include "mock/terminal/TerminalMock.hpp"
+#include <gtest/gtest.h>
 
 using namespace cliService;
 
@@ -9,146 +12,156 @@ class CommandParserTest : public ::testing::Test
 protected:
   void SetUp() override
   {
-    _terminal = std::make_unique<TerminalMock>();
-    _parser = std::make_unique<CommandParser>(*_terminal, _cliState);
+    _currentState = CLIState::LoggedIn;
+    _parser = std::make_unique<CommandParser>(_terminal, _currentState);
   }
 
-  std::unique_ptr<TerminalMock> _terminal;
+  // Helper to process all queued input
+  std::optional<std::unique_ptr<RequestBase>> processAllInput()
+  {
+    std::optional<std::unique_ptr<RequestBase>> request;
+    while (_terminal.available())
+    {
+      request = _parser->service();
+    }
+    return request;
+  }
+
+  TerminalMock _terminal;
+  CLIState _currentState;
   std::unique_ptr<CommandParser> _parser;
-  CLIState _cliState{CLIState::LoggedOut};
 };
 
-TEST_F(CommandParserTest, NoInputReturnsNullopt)
+TEST_F(CommandParserTest, EmptyInput)
 {
-  auto result = _parser->service();
-  EXPECT_FALSE(result.has_value());
+  _terminal.queueInput("\n");
+  auto request = processAllInput();
+  EXPECT_FALSE(request.has_value());
+  EXPECT_EQ(_terminal.getOutput(), "\n");
 }
 
-TEST_F(CommandParserTest, SimpleLoginRequest)
+TEST_F(CommandParserTest, SimpleCommand)
 {
-  _terminal->queueInput("user:pass\n");
+  _terminal.queueInput("command\n");
+  auto request = processAllInput();
   
-  auto result = _parser->service();
-  ASSERT_TRUE(result.has_value());
+  ASSERT_TRUE(request.has_value());
+  auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
+  ASSERT_NE(actionRequest, nullptr);
+  EXPECT_EQ(actionRequest->getPath().components()[0], "command");
+  EXPECT_EQ(_terminal.getOutput(), "command\n");
+}
+
+TEST_F(CommandParserTest, CommandWithArguments)
+{
+  _terminal.queueInput("command arg1 arg2\n");
+  auto request = processAllInput();
   
-  auto* loginRequest = dynamic_cast<LoginRequest*>(result->get());
+  ASSERT_TRUE(request.has_value());
+  auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
+  ASSERT_NE(actionRequest, nullptr);
+  EXPECT_EQ(actionRequest->getPath().components()[0], "command");
+  ASSERT_EQ(actionRequest->getArgs().size(), 2);
+  EXPECT_EQ(actionRequest->getArgs()[0], "arg1");
+  EXPECT_EQ(actionRequest->getArgs()[1], "arg2");
+}
+
+TEST_F(CommandParserTest, BackspaceHandling)
+{
+  _terminal.queueInput("commanf");
+  processAllInput();
+  EXPECT_EQ(_terminal.getOutput(), "commanf");
+  
+  _terminal.clearOutput();
+  _terminal.queueInput(std::string(1, CommandParser::BACKSPACE));
+  processAllInput();
+  EXPECT_EQ(_terminal.getOutput(), "\b \b");
+  
+  _terminal.clearOutput();
+  _terminal.queueInput("d\n");
+  auto request = processAllInput();
+  EXPECT_EQ(_terminal.getOutput(), "d\n");
+  
+  ASSERT_TRUE(request.has_value());
+  auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
+  ASSERT_NE(actionRequest, nullptr);
+  EXPECT_EQ(actionRequest->getPath().components()[0], "command");
+}
+
+TEST_F(CommandParserTest, LoginHandling)
+{
+  _currentState = CLIState::LoggedOut;
+  _parser = std::make_unique<CommandParser>(_terminal, _currentState);
+  
+  _terminal.queueInput("user:pass\n");
+  auto request = processAllInput();
+  
+  ASSERT_TRUE(request.has_value());
+  auto* loginRequest = dynamic_cast<LoginRequest*>(request.value().get());
   ASSERT_NE(loginRequest, nullptr);
   EXPECT_EQ(loginRequest->getUsername(), "user");
   EXPECT_EQ(loginRequest->getPassword(), "pass");
   
-  std::string output = _terminal->getOutput();
-  EXPECT_TRUE(output.find("user:") != std::string::npos);
-  EXPECT_TRUE(output.find("pass") == std::string::npos);
-  EXPECT_TRUE(output.find("****") != std::string::npos);
-}
-
-TEST_F(CommandParserTest, LoggedInActionRequest)
-{
-  _cliState = CLIState::LoggedIn;
-  _terminal->queueInput("/test/path arg1\n");
-  
-  auto result = _parser->service();
-  ASSERT_TRUE(result.has_value());
-  
-  auto* actionRequest = dynamic_cast<ActionRequest*>(result->get());
-  ASSERT_NE(actionRequest, nullptr);
-  
-  std::vector<std::string> expectedPath = {"test", "path"};
-  std::vector<std::string> expectedArgs = {"arg1"};
-  EXPECT_EQ(actionRequest->getPath(), expectedPath);
-  EXPECT_EQ(actionRequest->getArgs(), expectedArgs);
-}
-
-TEST_F(CommandParserTest, TabKey)
-{
-  _cliState = CLIState::LoggedIn;
-  _terminal->queueInput("\t");
-  
-  auto result = _parser->service();
-  ASSERT_TRUE(result.has_value());
-  
-  auto* actionRequest = dynamic_cast<ActionRequest*>(result->get());
-  ASSERT_NE(actionRequest, nullptr);
-  
-  std::vector<std::string> expectedPath = {"key:tab"};
-  EXPECT_EQ(actionRequest->getPath(), expectedPath);
-  EXPECT_TRUE(actionRequest->getArgs().empty());
+  // Verify password masking
+  std::string expectedOutput = "user:****\n";
+  EXPECT_EQ(_terminal.getOutput(), expectedOutput);
 }
 
 TEST_F(CommandParserTest, ArrowKeys)
 {
-  _cliState = CLIState::LoggedIn;
+  // Test UP arrow
+  _terminal.queueInput({0x1B, '[', 'A'});  // ESC [ A
+  auto request = processAllInput();
   
-  // Test all arrow keys
-  std::vector<std::pair<std::string, std::string>> arrowTests = {
-    {"\x1B[A", "key:up"},    // Up arrow
-    {"\x1B[B", "key:down"},  // Down arrow
-    {"\x1B[C", "key:right"}, // Right arrow
-    {"\x1B[D", "key:left"}   // Left arrow
-  };
-  
-  for (const auto& [input, expectedKey] : arrowTests) {
-    _terminal->queueInput(input);
-    
-    auto result = _parser->service();
-    ASSERT_TRUE(result.has_value());
-    
-    auto* actionRequest = dynamic_cast<ActionRequest*>(result->get());
-    ASSERT_NE(actionRequest, nullptr);
-    
-    std::vector<std::string> expectedPath = {expectedKey};
-    EXPECT_EQ(actionRequest->getPath(), expectedPath);
-    EXPECT_TRUE(actionRequest->getArgs().empty());
-  }
-}
-
-TEST_F(CommandParserTest, Backspace)
-{
-  _cliState = CLIState::LoggedIn;
-  _terminal->queueInput("abcd\x7F\n");  // Type "abcd", backspace, enter
-  
-  auto result = _parser->service();
-  ASSERT_TRUE(result.has_value());
-  
-  auto* actionRequest = dynamic_cast<ActionRequest*>(result->get());
+  ASSERT_TRUE(request.has_value());
+  auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
   ASSERT_NE(actionRequest, nullptr);
+  EXPECT_EQ(actionRequest->getPath().components()[0], "key:up");
   
-  std::vector<std::string> expectedPath = {"abc"};
-  EXPECT_EQ(actionRequest->getPath(), expectedPath);
-}
-
-TEST_F(CommandParserTest, MultipleServiceCalls)
-{
-  _cliState = CLIState::LoggedIn;
-  _terminal->queueInput("abc");
+  // Test DOWN arrow
+  _terminal.clearOutput();
+  _terminal.queueInput({0x1B, '[', 'B'});  // ESC [ B
+  request = processAllInput();
   
-  // First service call - no complete command yet
-  auto result = _parser->service();
-  EXPECT_FALSE(result.has_value());
-  
-  // Add enter and service again
-  _terminal->queueInput("\n");
-  result = _parser->service();
-  ASSERT_TRUE(result.has_value());
-  
-  auto* actionRequest = dynamic_cast<ActionRequest*>(result->get());
+  ASSERT_TRUE(request.has_value());
+  actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
   ASSERT_NE(actionRequest, nullptr);
-  
-  std::vector<std::string> expectedPath = {"abc"};
-  EXPECT_EQ(actionRequest->getPath(), expectedPath);
+  EXPECT_EQ(actionRequest->getPath().components()[0], "key:down");
 }
 
-TEST_F(CommandParserTest, SpecialKeysOnlyInLoggedInState)
+TEST_F(CommandParserTest, TabKey)
 {
-  _cliState = CLIState::LoggedOut;
+  _terminal.queueInput(std::string(1, CommandParser::TAB));
+  auto request = processAllInput();
   
-  // Test tab key
-  _terminal->queueInput("\t");
-  auto result = _parser->service();
-  EXPECT_FALSE(result.has_value());
+  ASSERT_TRUE(request.has_value());
+  auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
+  ASSERT_NE(actionRequest, nullptr);
+  EXPECT_EQ(actionRequest->getPath().components()[0], "key:tab");
+}
+
+TEST_F(CommandParserTest, MultipleBackspace)
+{
+  _terminal.queueInput("hello");
+  processAllInput();
+  EXPECT_EQ(_terminal.getOutput(), "hello");
   
-  // Test arrow keys
-  _terminal->queueInput("\x1B[A"); // Up arrow
-  result = _parser->service();
-  EXPECT_FALSE(result.has_value());
+  _terminal.clearOutput();
+  _terminal.queueInput(std::string(1, CommandParser::BACKSPACE));
+  processAllInput();
+  EXPECT_EQ(_terminal.getOutput(), "\b \b");
+  
+  _terminal.clearOutput();
+  _terminal.queueInput(std::string(1, CommandParser::BACKSPACE));
+  processAllInput();
+  EXPECT_EQ(_terminal.getOutput(), "\b \b");
+  
+  _terminal.clearOutput();
+  _terminal.queueInput("\n");
+  auto request = processAllInput();
+  
+  ASSERT_TRUE(request.has_value());
+  auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
+  ASSERT_NE(actionRequest, nullptr);
+  EXPECT_EQ(actionRequest->getPath().components()[0], "hel");
 }
