@@ -15,6 +15,8 @@ namespace cliService
       Tab,        // Tab completion request
       ArrowUp,
       ArrowDown,
+      ArrowLeft,
+      ArrowRight,
       // Add more triggers as needed
     };
     

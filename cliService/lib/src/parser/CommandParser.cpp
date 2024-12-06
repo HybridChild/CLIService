@@ -122,11 +122,19 @@ namespace cliService
           break;
 
         case 'C': // Right arrow
-          // Handle right arrow if needed
+          if (_currentState == CLIState::LoggedIn)
+          {
+            _lastTrigger = ActionRequest::Trigger::ArrowRight;
+            return true;
+          }
           break;
 
         case 'D': // Left arrow
-          // Handle left arrow if needed
+          if (_currentState == CLIState::LoggedIn)
+          {
+            _lastTrigger = ActionRequest::Trigger::ArrowLeft;
+            return true;
+          }
           break;
       }
     }
@@ -162,12 +170,11 @@ namespace cliService
 
   std::unique_ptr<RequestBase> CommandParser::createRequest()
   {
-    assert(!_buffer.empty() && "Empty input received");
-
     switch (_currentState)
     {
       case CLIState::LoggedOut:
       {
+        assert(!_buffer.empty() && "Empty input received in LoggedOut state");
         auto request = std::make_unique<LoginRequest>(_buffer);
         _buffer.clear();
         return request;
