@@ -1,5 +1,3 @@
-#pragma once
-
 #include "UnixWinTerminal.hpp"
 #include <cassert>
 
