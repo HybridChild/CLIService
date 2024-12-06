@@ -36,7 +36,6 @@ namespace cliService
     bool _inEscapeSequence;
     char _escapeBuffer[2];
     uint8_t _escapeIndex;
-    ActionRequest::Trigger _lastTrigger;
   };
 
 }

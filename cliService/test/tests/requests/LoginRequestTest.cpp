@@ -62,23 +62,3 @@ TEST_F(LoginRequestTest, SpecialCharacters)
   EXPECT_EQ(request.getUsername(), "user@domain.com");
   EXPECT_EQ(request.getPassword(), "p@ssw0rd!");
 }
-
-TEST_F(LoginRequestTest, NonExactExitStrings)
-{
-  // Test variations of "exit" that should be treated as regular login attempts
-  const std::string testCases[] = {
-    "EXIT",
-    "Exit",
-    "exit ",
-    " exit",
-    "exitnow"
-  };
-
-  for (const auto& input : testCases)
-  {
-    EXPECT_DEATH({
-      LoginRequest request(input);
-      request.getUsername(); // This should trigger the delimiter assertion
-    }, "Invalid login format") << "Test case: " << input;
-  }
-}

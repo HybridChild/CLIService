@@ -9,7 +9,6 @@ namespace cliService
     , _currentState(currentState)
     , _inEscapeSequence(false)
     , _escapeIndex(0)
-    , _lastTrigger(ActionRequest::Trigger::Enter)
   {
   }
 
@@ -51,7 +50,6 @@ namespace cliService
 
       if (!_buffer.empty())
       {
-        _lastTrigger = ActionRequest::Trigger::Enter;
         return true;
       }
       return false;
@@ -88,7 +86,7 @@ namespace cliService
       case TAB:
         if (_currentState == CLIState::LoggedIn)
         {
-          _lastTrigger = ActionRequest::Trigger::Tab;
+          _buffer = "key:tab";
           return true;
         }
         break;
@@ -108,7 +106,7 @@ namespace cliService
         case 'A': // Up arrow
           if (_currentState == CLIState::LoggedIn)
           {
-            _lastTrigger = ActionRequest::Trigger::ArrowUp;
+            _buffer = "key:up";
             return true;
           }
           break;
@@ -116,7 +114,7 @@ namespace cliService
         case 'B': // Down arrow
           if (_currentState == CLIState::LoggedIn)
           {
-            _lastTrigger = ActionRequest::Trigger::ArrowDown;
+            _buffer = "key:down";
             return true;
           }
           break;
@@ -124,7 +122,7 @@ namespace cliService
         case 'C': // Right arrow
           if (_currentState == CLIState::LoggedIn)
           {
-            _lastTrigger = ActionRequest::Trigger::ArrowRight;
+            _buffer = "key:right";
             return true;
           }
           break;
@@ -132,7 +130,7 @@ namespace cliService
         case 'D': // Left arrow
           if (_currentState == CLIState::LoggedIn)
           {
-            _lastTrigger = ActionRequest::Trigger::ArrowLeft;
+            _buffer = "key:left";
             return true;
           }
           break;
@@ -182,7 +180,7 @@ namespace cliService
 
       case CLIState::LoggedIn:
       {
-        auto request = std::make_unique<ActionRequest>(_buffer, _lastTrigger);
+        auto request = std::make_unique<ActionRequest>(_buffer);
         _buffer.clear();
         return request;
       }

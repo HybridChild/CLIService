@@ -11,7 +11,10 @@
 namespace cliService
 {
 
-  const std::unordered_set<std::string_view> CLIService::GLOBAL_COMMANDS = {"exit", "logout"};
+  const std::unordered_set<std::string_view> CLIService::GLOBAL_COMMANDS = {
+    "logout",
+    "key:tab", "key:up", "key:down", "key:left", "key:right"
+  };
 
 
   CLIService::CLIService(CLIServiceConfiguration config)
@@ -150,7 +153,7 @@ namespace cliService
   }
 
 
-  void CLIService::handleGlobalCommand(const std::string& command, const std::vector<std::string>& args) 
+  void CLIService::handleGlobalCommand(const std::string_view& command, const std::vector<std::string>& args) 
   {
     if (command == "logout")
     {
@@ -159,6 +162,31 @@ namespace cliService
       resetToRoot();
       _terminal.putString(LOGOUT_MESSAGE);
       _terminal.putChar('\n');
+    }
+    else if (command == "key:tab")
+    {
+      _terminal.putString("Tab pressed\n");
+      displayPrompt();
+    }
+    else if (command == "key:up")
+    {
+      _terminal.putString("Up arrow pressed\n");
+      displayPrompt();
+    }
+    else if (command == "key:down")
+    {
+      _terminal.putString("Down arrow pressed\n");
+      displayPrompt();
+    }
+    else if (command == "key:left")
+    {
+      _terminal.putString("Left arrow pressed\n");
+      displayPrompt();
+    }
+    else if (command == "key:right")
+    {
+      _terminal.putString("Right arrow pressed\n");
+      displayPrompt();
     }
   }
 

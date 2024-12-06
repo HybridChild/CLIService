@@ -36,10 +36,9 @@ TEST_F(CommandParserTest, SimpleLoginRequest)
   EXPECT_EQ(loginRequest->getUsername(), "user");
   EXPECT_EQ(loginRequest->getPassword(), "pass");
   
-  // Don't check exact output string as it might vary by platform
   std::string output = _terminal->getOutput();
   EXPECT_TRUE(output.find("user:") != std::string::npos);
-  EXPECT_TRUE(output.find("pass") == std::string::npos);  // Password should be masked
+  EXPECT_TRUE(output.find("pass") == std::string::npos);
   EXPECT_TRUE(output.find("****") != std::string::npos);
 }
 
@@ -53,7 +52,6 @@ TEST_F(CommandParserTest, LoggedInActionRequest)
   
   auto* actionRequest = dynamic_cast<ActionRequest*>(result->get());
   ASSERT_NE(actionRequest, nullptr);
-  EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::Enter);
   
   std::vector<std::string> expectedPath = {"test", "path"};
   std::vector<std::string> expectedArgs = {"arg1"};
@@ -61,14 +59,9 @@ TEST_F(CommandParserTest, LoggedInActionRequest)
   EXPECT_EQ(actionRequest->getArgs(), expectedArgs);
 }
 
-TEST_F(CommandParserTest, TabCompletion)
+TEST_F(CommandParserTest, TabKey)
 {
   _cliState = CLIState::LoggedIn;
-  // First queue some input so we have something to complete
-  _terminal->queueInput("/test/pa");
-  _parser->service();  // Process the input
-  
-  // Now send tab
   _terminal->queueInput("\t");
   
   auto result = _parser->service();
@@ -76,46 +69,37 @@ TEST_F(CommandParserTest, TabCompletion)
   
   auto* actionRequest = dynamic_cast<ActionRequest*>(result->get());
   ASSERT_NE(actionRequest, nullptr);
-  EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::Tab);
   
-  std::vector<std::string> expectedPath = {"test", "pa"};
+  std::vector<std::string> expectedPath = {"key:tab"};
   EXPECT_EQ(actionRequest->getPath(), expectedPath);
+  EXPECT_TRUE(actionRequest->getArgs().empty());
 }
 
-TEST_F(CommandParserTest, ArrowUpHistory)
+TEST_F(CommandParserTest, ArrowKeys)
 {
   _cliState = CLIState::LoggedIn;
-  // First queue some input to ensure we have a non-empty buffer
-  _terminal->queueInput("command");
-  _parser->service();
   
-  // Now send arrow up
-  _terminal->queueInput("\x1B[A");  // ESC [ A for up arrow
+  // Test all arrow keys
+  std::vector<std::pair<std::string, std::string>> arrowTests = {
+    {"\x1B[A", "key:up"},    // Up arrow
+    {"\x1B[B", "key:down"},  // Down arrow
+    {"\x1B[C", "key:right"}, // Right arrow
+    {"\x1B[D", "key:left"}   // Left arrow
+  };
   
-  auto result = _parser->service();
-  ASSERT_TRUE(result.has_value());
-  
-  auto* actionRequest = dynamic_cast<ActionRequest*>(result->get());
-  ASSERT_NE(actionRequest, nullptr);
-  EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::ArrowUp);
-}
-
-TEST_F(CommandParserTest, ArrowDownHistory)
-{
-  _cliState = CLIState::LoggedIn;
-  // First queue some input to ensure we have a non-empty buffer
-  _terminal->queueInput("command");
-  _parser->service();
-  
-  // Now send arrow down
-  _terminal->queueInput("\x1B[B");  // ESC [ B for down arrow
-  
-  auto result = _parser->service();
-  ASSERT_TRUE(result.has_value());
-  
-  auto* actionRequest = dynamic_cast<ActionRequest*>(result->get());
-  ASSERT_NE(actionRequest, nullptr);
-  EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::ArrowDown);
+  for (const auto& [input, expectedKey] : arrowTests) {
+    _terminal->queueInput(input);
+    
+    auto result = _parser->service();
+    ASSERT_TRUE(result.has_value());
+    
+    auto* actionRequest = dynamic_cast<ActionRequest*>(result->get());
+    ASSERT_NE(actionRequest, nullptr);
+    
+    std::vector<std::string> expectedPath = {expectedKey};
+    EXPECT_EQ(actionRequest->getPath(), expectedPath);
+    EXPECT_TRUE(actionRequest->getArgs().empty());
+  }
 }
 
 TEST_F(CommandParserTest, Backspace)
@@ -152,4 +136,19 @@ TEST_F(CommandParserTest, MultipleServiceCalls)
   
   std::vector<std::string> expectedPath = {"abc"};
   EXPECT_EQ(actionRequest->getPath(), expectedPath);
+}
+
+TEST_F(CommandParserTest, SpecialKeysOnlyInLoggedInState)
+{
+  _cliState = CLIState::LoggedOut;
+  
+  // Test tab key
+  _terminal->queueInput("\t");
+  auto result = _parser->service();
+  EXPECT_FALSE(result.has_value());
+  
+  // Test arrow keys
+  _terminal->queueInput("\x1B[A"); // Up arrow
+  result = _parser->service();
+  EXPECT_FALSE(result.has_value());
 }

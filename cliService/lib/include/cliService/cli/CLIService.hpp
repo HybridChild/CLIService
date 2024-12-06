@@ -25,7 +25,7 @@ namespace cliService
     // Request handlers
     void handleLoginRequest(const LoginRequest& request);
     void handleActionRequest(const ActionRequest& request);
-    void handleGlobalCommand(const std::string& command, const std::vector<std::string>& args);
+    void handleGlobalCommand(const std::string_view& command, const std::vector<std::string>& args);
     
     // State management 
     void resetToRoot();

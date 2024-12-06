@@ -5,9 +5,8 @@
 namespace cliService
 {
 
-  ActionRequest::ActionRequest(std::string inputStr, Trigger trigger)
+  ActionRequest::ActionRequest(std::string inputStr)
     : _absolutePath(false)
-    , _trigger(trigger)
   {
     // Empty string check
     if (inputStr.empty())
