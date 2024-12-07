@@ -117,6 +117,7 @@ namespace cliService
     if (!node)
     {
       _terminal.putString("Invalid path\n");
+      displayPrompt();
       return;
     }
 
