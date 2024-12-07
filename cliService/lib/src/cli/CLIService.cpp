@@ -235,7 +235,9 @@ namespace cliService
     {
       _terminal.putString(_currentUser->getUsername());
       _terminal.putString("@");
-      _terminal.putString("> ");
+      std::string pathStr = _pathResolver.getAbsolutePath(*_currentDirectory).toString();
+      _terminal.putString(pathStr);
+      _terminal.putString(" > ");
     }
   }
 
