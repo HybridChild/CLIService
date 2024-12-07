@@ -19,7 +19,7 @@ namespace cliService
 
     Path normalized() const;
     Path parent() const;
-    Path joined(const Path& other) const;
+    Path join(const Path& other) const;
     Path relativeTo(const Path& base) const;
     
     std::string toString() const;

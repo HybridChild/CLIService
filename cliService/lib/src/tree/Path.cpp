@@ -89,7 +89,7 @@ namespace cliService
     return Path(std::move(parentComponents), _isAbsolute);
   }
 
-  Path Path::joined(const Path& other) const
+  Path Path::join(const Path& other) const
   {
     // If other is absolute, return it
     if (other.isAbsolute()) { return other; }

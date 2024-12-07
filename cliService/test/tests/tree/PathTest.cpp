@@ -95,9 +95,11 @@ TEST_F(PathTest, JoinPaths)
 {
   Path path1("dir1/dir2");
   Path path2("dir3/dir4");
-  auto joined = path1.joined(path2);
+  auto joined = path1.join(path2);
   ASSERT_EQ(joined.components().size(), 4);
   EXPECT_EQ(joined.components()[0], "dir1");
+  EXPECT_EQ(joined.components()[1], "dir2");
+  EXPECT_EQ(joined.components()[2], "dir3");
   EXPECT_EQ(joined.components()[3], "dir4");
 }
 
@@ -105,7 +107,7 @@ TEST_F(PathTest, JoinWithAbsolutePath)
 {
   Path path1("dir1/dir2");
   Path path2("/dir3/dir4");
-  auto joined = path1.joined(path2);
+  auto joined = path1.join(path2);
   EXPECT_TRUE(joined.isAbsolute());
   ASSERT_EQ(joined.components().size(), 2);
   EXPECT_EQ(joined.components()[0], "dir3");
