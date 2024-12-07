@@ -167,27 +167,27 @@ namespace cliService
       _terminal.putString(LOGGED_OUT_MESSAGE);
       _terminal.putChar('\n');
     }
-    else if (command == "key:tab")
+    else if (command == InputParser::KEY_CODE_TAB)
     {
       _terminal.putString("Tab pressed\n");
       displayPrompt();
     }
-    else if (command == "key:up")
+    else if (command == InputParser::KEY_CODE_ARROW_UP)
     {
       _terminal.putString("Up arrow pressed\n");
       displayPrompt();
     }
-    else if (command == "key:down")
+    else if (command == InputParser::KEY_CODE_ARROW_DOWN)
     {
       _terminal.putString("Down arrow pressed\n");
       displayPrompt();
     }
-    else if (command == "key:left")
+    else if (command == InputParser::KEY_CODE_ARROW_LEFT)
     {
       _terminal.putString("Left arrow pressed\n");
       displayPrompt();
     }
-    else if (command == "key:right")
+    else if (command == InputParser::KEY_CODE_ARROW_RIGHT)
     {
       _terminal.putString("Right arrow pressed\n");
       displayPrompt();

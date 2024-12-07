@@ -86,7 +86,7 @@ namespace cliService
       case TAB:
         if (_currentState == CLIState::LoggedIn)
         {
-          _buffer = "key:tab";
+          _buffer = KEY_CODE_TAB;
           return true;
         }
         break;
@@ -106,7 +106,7 @@ namespace cliService
         case 'A': // Up arrow
           if (_currentState == CLIState::LoggedIn)
           {
-            _buffer = "key:up";
+            _buffer = KEY_CODE_ARROW_UP;
             return true;
           }
           break;
@@ -114,7 +114,7 @@ namespace cliService
         case 'B': // Down arrow
           if (_currentState == CLIState::LoggedIn)
           {
-            _buffer = "key:down";
+            _buffer = KEY_CODE_ARROW_DOWN;
             return true;
           }
           break;
@@ -122,7 +122,7 @@ namespace cliService
         case 'C': // Right arrow
           if (_currentState == CLIState::LoggedIn)
           {
-            _buffer = "key:right";
+            _buffer = KEY_CODE_ARROW_RIGHT;
             return true;
           }
           break;
@@ -130,7 +130,7 @@ namespace cliService
         case 'D': // Left arrow
           if (_currentState == CLIState::LoggedIn)
           {
-            _buffer = "key:left";
+            _buffer = KEY_CODE_ARROW_LEFT;
             return true;
           }
           break;
