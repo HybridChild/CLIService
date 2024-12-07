@@ -20,6 +20,8 @@ namespace cliService
     void activate();
     void service();
 
+    CLIState getState() const { return _currentState; }
+
   private:
     // Request handlers
     void handleLoginRequest(const LoginRequest& request);

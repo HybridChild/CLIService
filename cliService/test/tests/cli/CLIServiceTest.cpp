@@ -22,10 +22,7 @@ protected:
       {"user", "pass123", AccessLevel::User}
     };
     
-    _service = std::make_unique<CLIService>(
-      CLIServiceConfiguration{
-        _terminal, std::move(users), std::move(root)
-      });
+    _service = std::make_unique<CLIService>(CLIServiceConfiguration{_terminal, std::move(users), std::move(root)});
   }
 
   TerminalMock _terminal;
@@ -34,6 +31,12 @@ protected:
   std::unique_ptr<CLIService> _service;
 };
 
+TEST_F(CLIServiceTest, StartsInLoggedOutState) 
+{
+  _service->activate();
+  EXPECT_EQ(_service->getState(), CLIState::LoggedOut);
+}
+
 TEST_F(CLIServiceTest, LoginSuccess) 
 {
   _terminal.queueInput("admin:admin123\n");
@@ -41,7 +44,7 @@ TEST_F(CLIServiceTest, LoginSuccess)
   _service->activate();
   _service->service();
   
-  EXPECT_THAT(_terminal.getOutput(), testing::HasSubstr("admin@> "));
+  EXPECT_EQ(_service->getState(), CLIState::LoggedIn);
 }
 
 TEST_F(CLIServiceTest, ExecuteCommand) 
@@ -79,7 +82,7 @@ TEST_F(CLIServiceTest, GlobalCommandLogout)
  _service->service();
  _service->service();
  
- EXPECT_THAT(_terminal.getOutput(), testing::HasSubstr("Logged out"));
+ EXPECT_EQ(_service->getState(), CLIState::LoggedOut);
 }
 
 TEST_F(CLIServiceTest, InvalidPath) 
