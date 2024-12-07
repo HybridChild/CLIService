@@ -1,6 +1,7 @@
 #pragma once
 #include "cliService/tree/NodeIf.hpp"
 #include "cliService/tree/CommandIf.hpp"
+#include "cliService/tree/Path.hpp"
 #include <memory>
 #include <vector>
 #include <functional>
@@ -28,6 +29,9 @@ namespace cliService
 
     NodeIf* findNode(const std::vector<std::string>& path) const;
     void traverse(const std::function<void(const NodeIf&, int)>& visitor, int depth = 0) const;
+
+    NodeIf* resolvePath(std::string_view pathStr, const Directory& currentDir) const;
+    Path getRelativePath(const NodeIf& node) const;
 
   private:
     void addChild(std::unique_ptr<NodeIf> child);

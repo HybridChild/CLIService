@@ -1,4 +1,5 @@
 #include "cliService/tree/Directory.hpp"
+#include "cliService/tree/PathResolver.hpp"
 #include <algorithm>
 
 namespace cliService
@@ -23,44 +24,66 @@ namespace cliService
 
   NodeIf* Directory::findNode(const std::vector<std::string>& path) const
   {
-    if (path.empty())
-    {
-      return const_cast<Directory*>(this);
-    }
+    // Base case: empty path returns current directory
+    if (path.empty()) { return const_cast<Directory*>(this); }
 
+    // Search for child matching first path component
     auto it = std::find_if(_children.begin(), _children.end(),
       [&path](const auto& child) {
         return child->getName() == path[0];
       });
 
-    if (it == _children.end()) {
-      return nullptr;
-    }
+    // No matching child found
+    if (it == _children.end()) { return nullptr; }
 
-    if (path.size() == 1) {
-      return it->get();
-    }
+    // If path has only one component, return the found node
+    if (path.size() == 1) { return it->get(); }
 
-    if (!(*it)->isDirectory()) {
-      return nullptr;
-    }
+    // If more path components exist but found node isn't a directory, navigation fails
+    if (!(*it)->isDirectory()) { return nullptr; }
 
+    // Recursive case: continue search in found directory with remaining path
     std::vector<std::string> subPath(path.begin() + 1, path.end());
     return static_cast<Directory*>(it->get())->findNode(subPath);
   }
 
   void Directory::traverse(const std::function<void(const NodeIf&, int)>& visitor, int depth) const
   {
+    // Visit current directory
     visitor(*this, depth);
+
+    // Visit all children
     for (const auto& child : _children)
     {
-      if (child->isDirectory()) {
+      if (child->isDirectory())
+      {
+        // Recursively traverse directories
         static_cast<const Directory*>(child.get())->traverse(visitor, depth + 1);
       }
-      else {
+      else
+      {
+        // Visit commands directly
         visitor(*child, depth + 1);
       }
     }
+  }
+
+  NodeIf* Directory::resolvePath(std::string_view pathStr, const Directory& currentDir) const
+  {
+    // Create a resolver using this directory as root
+    PathResolver resolver(*const_cast<Directory*>(this));
+    return resolver.resolveFromString(pathStr, currentDir);
+  }
+
+  Path Directory::getRelativePath(const NodeIf& node) const
+  {
+    // Get absolute paths for both nodes
+    Path nodePath = PathResolver::getAbsolutePath(node);
+    Path myPath = PathResolver::getAbsolutePath(*this);
+    
+    // Convert absolute path difference to relative
+    // This would require adding a new method to Path class
+    return nodePath.relativeTo(myPath);
   }
 
   void Directory::addChild(std::unique_ptr<NodeIf> child)
