@@ -39,6 +39,8 @@ namespace cliService
     _currentState = CLIState::LoggedOut;
     _terminal.putString(WELCOME_MESSAGE);
     _terminal.putChar('\n');
+    _terminal.putString(LOGGED_OUT_MESSAGE);
+    _terminal.putChar('\n');
   }
 
 
@@ -162,7 +164,7 @@ namespace cliService
       _currentState = CLIState::LoggedOut;
       _currentUser = std::nullopt;
       resetToRoot();
-      _terminal.putString(LOGOUT_MESSAGE);
+      _terminal.putString(LOGGED_OUT_MESSAGE);
       _terminal.putChar('\n');
     }
     else if (command == "key:tab")
