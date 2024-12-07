@@ -1,6 +1,7 @@
 #pragma once
 #include "cliService/tree/CommandIf.hpp"
 #include "commands/AccessLevel.hpp"
+#include "util/util.hpp"
 #include <iomanip>
 #include <sstream>
 
@@ -20,6 +21,11 @@ namespace cliService
       if (args.size() < 1 || args.size() > 1)
       {
         return CommandResponse("Please provide potmeter ID: 1 .. 4", CommandStatus::InvalidArguments);
+      }
+
+      if (!util::isIntegerString(args[0]))
+      {
+        return CommandResponse("Invalid potmeter ID: " + args[0] + ". Must be integer.", CommandStatus::InvalidArguments);
       }
 
       uint32_t potId = std::stoi(args[0]);

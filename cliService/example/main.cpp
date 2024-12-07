@@ -24,7 +24,7 @@ std::unique_ptr<Directory> createMenuTree()
         dirHwPot.addCommand<PotmeterGetCommand>("get", AccessLevel::User);
 
       auto& dirHwRgbLed = dirHw.addDirectory("rgbLed", AccessLevel::Admin);
-        dirHwPot.addCommand<RgbLedSetCommand>("set", AccessLevel::User);
+        dirHwRgbLed.addCommand<RgbLedSetCommand>("set", AccessLevel::User);
 
       auto& dirHwToggleSwitch = dirHw.addDirectory("toggleSwitch", AccessLevel::User);
         dirHwToggleSwitch.addCommand<ToggleSwitchGetCommand>("get", AccessLevel::User);
