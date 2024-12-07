@@ -1,5 +1,4 @@
-// CommandParserTest.cpp
-#include "cliService/parser/CommandParser.hpp"
+#include "cliService/parser/InputParser.hpp"
 #include "cliService/requests/ActionRequest.hpp"
 #include "cliService/requests/LoginRequest.hpp"
 #include "mock/terminal/TerminalMock.hpp"
@@ -7,13 +6,13 @@
 
 using namespace cliService;
 
-class CommandParserTest : public ::testing::Test
+class InputParserTest : public ::testing::Test
 {
 protected:
   void SetUp() override
   {
     _currentState = CLIState::LoggedIn;
-    _parser = std::make_unique<CommandParser>(_terminal, _currentState);
+    _parser = std::make_unique<InputParser>(_terminal, _currentState);
   }
 
   // Helper to process all queued input
@@ -29,10 +28,10 @@ protected:
 
   TerminalMock _terminal;
   CLIState _currentState;
-  std::unique_ptr<CommandParser> _parser;
+  std::unique_ptr<InputParser> _parser;
 };
 
-TEST_F(CommandParserTest, EmptyInput)
+TEST_F(InputParserTest, EmptyInput)
 {
   _terminal.queueInput("\n");
   auto request = processAllInput();
@@ -40,7 +39,7 @@ TEST_F(CommandParserTest, EmptyInput)
   EXPECT_EQ(_terminal.getOutput(), "\n");
 }
 
-TEST_F(CommandParserTest, SimpleCommand)
+TEST_F(InputParserTest, SimpleCommand)
 {
   _terminal.queueInput("command\n");
   auto request = processAllInput();
@@ -52,7 +51,7 @@ TEST_F(CommandParserTest, SimpleCommand)
   EXPECT_EQ(_terminal.getOutput(), "command\n");
 }
 
-TEST_F(CommandParserTest, CommandWithArguments)
+TEST_F(InputParserTest, CommandWithArguments)
 {
   _terminal.queueInput("command arg1 arg2\n");
   auto request = processAllInput();
@@ -66,14 +65,14 @@ TEST_F(CommandParserTest, CommandWithArguments)
   EXPECT_EQ(actionRequest->getArgs()[1], "arg2");
 }
 
-TEST_F(CommandParserTest, BackspaceHandling)
+TEST_F(InputParserTest, BackspaceHandling)
 {
   _terminal.queueInput("commanf");
   processAllInput();
   EXPECT_EQ(_terminal.getOutput(), "commanf");
   
   _terminal.clearOutput();
-  _terminal.queueInput(std::string(1, CommandParser::BACKSPACE));
+  _terminal.queueInput(std::string(1, InputParser::BACKSPACE));
   processAllInput();
   EXPECT_EQ(_terminal.getOutput(), "\b \b");
   
@@ -88,10 +87,10 @@ TEST_F(CommandParserTest, BackspaceHandling)
   EXPECT_EQ(actionRequest->getPath().components()[0], "command");
 }
 
-TEST_F(CommandParserTest, LoginHandling)
+TEST_F(InputParserTest, LoginHandling)
 {
   _currentState = CLIState::LoggedOut;
-  _parser = std::make_unique<CommandParser>(_terminal, _currentState);
+  _parser = std::make_unique<InputParser>(_terminal, _currentState);
   
   _terminal.queueInput("user:pass\n");
   auto request = processAllInput();
@@ -107,7 +106,7 @@ TEST_F(CommandParserTest, LoginHandling)
   EXPECT_EQ(_terminal.getOutput(), expectedOutput);
 }
 
-TEST_F(CommandParserTest, ArrowKeys)
+TEST_F(InputParserTest, ArrowKeys)
 {
   // Test UP arrow
   _terminal.queueInput({0x1B, '[', 'A'});  // ESC [ A
@@ -129,9 +128,9 @@ TEST_F(CommandParserTest, ArrowKeys)
   EXPECT_EQ(actionRequest->getPath().components()[0], "key:down");
 }
 
-TEST_F(CommandParserTest, TabKey)
+TEST_F(InputParserTest, TabKey)
 {
-  _terminal.queueInput(std::string(1, CommandParser::TAB));
+  _terminal.queueInput(std::string(1, InputParser::TAB));
   auto request = processAllInput();
   
   ASSERT_TRUE(request.has_value());
@@ -140,19 +139,19 @@ TEST_F(CommandParserTest, TabKey)
   EXPECT_EQ(actionRequest->getPath().components()[0], "key:tab");
 }
 
-TEST_F(CommandParserTest, MultipleBackspace)
+TEST_F(InputParserTest, MultipleBackspace)
 {
   _terminal.queueInput("hello");
   processAllInput();
   EXPECT_EQ(_terminal.getOutput(), "hello");
   
   _terminal.clearOutput();
-  _terminal.queueInput(std::string(1, CommandParser::BACKSPACE));
+  _terminal.queueInput(std::string(1, InputParser::BACKSPACE));
   processAllInput();
   EXPECT_EQ(_terminal.getOutput(), "\b \b");
   
   _terminal.clearOutput();
-  _terminal.queueInput(std::string(1, CommandParser::BACKSPACE));
+  _terminal.queueInput(std::string(1, InputParser::BACKSPACE));
   processAllInput();
   EXPECT_EQ(_terminal.getOutput(), "\b \b");
   

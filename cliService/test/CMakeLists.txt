@@ -24,18 +24,18 @@ target_link_libraries(${PROJECT_NAME}_LoginRequest_test
 )
 
 
-# CommandParser tests
-add_executable(${PROJECT_NAME}_CommandParser_test
-  tests/parser/CommandParserTest.cpp
+# InputParser tests
+add_executable(${PROJECT_NAME}_InputParser_test
+  tests/parser/InputParserTest.cpp
   mock/terminal/TerminalMock.cpp
 )
 
-target_include_directories(${PROJECT_NAME}_CommandParser_test
+target_include_directories(${PROJECT_NAME}_InputParser_test
   PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-target_link_libraries(${PROJECT_NAME}_CommandParser_test
+target_link_libraries(${PROJECT_NAME}_InputParser_test
   PRIVATE
     ${PROJECT_NAME}_lib
     GTest::GTest
@@ -106,7 +106,7 @@ target_link_libraries(${PROJECT_NAME}_PathResolver_test
 # Discover tests
 gtest_discover_tests(${PROJECT_NAME}_ActionRequest_test)
 gtest_discover_tests(${PROJECT_NAME}_LoginRequest_test)
-gtest_discover_tests(${PROJECT_NAME}_CommandParser_test)
+gtest_discover_tests(${PROJECT_NAME}_InputParser_test)
 gtest_discover_tests(${PROJECT_NAME}_Tree_test)
 gtest_discover_tests(${PROJECT_NAME}_CLIService_test)
 gtest_discover_tests(${PROJECT_NAME}_Path_test)

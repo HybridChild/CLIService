@@ -2,7 +2,7 @@
 #pragma once
 #include "CLIServiceConfiguration.hpp"
 #include "cliService/cli/CLIState.hpp"
-#include "cliService/parser/CommandParser.hpp"
+#include "cliService/parser/InputParser.hpp"
 #include "cliService/tree/Directory.hpp"
 #include "cliService/path/Path.hpp"
 #include "cliService/path/PathResolver.hpp"
@@ -35,7 +35,7 @@ namespace cliService
     void displayPrompt() const;
     
     TerminalIf& _terminal;
-    CommandParser _parser;
+    InputParser _parser;
     std::vector<User> _users;
     std::unique_ptr<Directory> _root;
     Directory* _currentDirectory;
