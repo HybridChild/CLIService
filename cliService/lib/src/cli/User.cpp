@@ -1,4 +1,4 @@
-#include "cliService/user/User.hpp"
+#include "cliService/cli/User.hpp"
 
 namespace cliService
 {

@@ -1,4 +1,4 @@
-#include "cliService/parser/InputParser.hpp"
+#include "cliService/cli/InputParser.hpp"
 #include <cassert>
 
 namespace cliService

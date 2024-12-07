@@ -1,5 +1,5 @@
 // PathResolverTest.cpp
-#include "cliService/path/PathResolver.hpp"
+#include "cliService/tree/PathResolver.hpp"
 #include "cliService/tree/Directory.hpp"
 #include <gtest/gtest.h>
 

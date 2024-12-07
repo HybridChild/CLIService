@@ -1,6 +1,6 @@
 // PathResolver.hpp
 #pragma once
-#include "cliService/path/Path.hpp"
+#include "cliService/tree/Path.hpp"
 #include "cliService/tree/Directory.hpp"
 #include "cliService/tree/NodeIf.hpp"
 #include <cassert>

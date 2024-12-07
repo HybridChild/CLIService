@@ -1,6 +1,6 @@
 #pragma once
-#include "cliService/requests/RequestBase.hpp"
-#include "cliService/path/Path.hpp"
+#include "cliService/cli/RequestBase.hpp"
+#include "cliService/tree/Path.hpp"
 #include <string>
 #include <vector>
 

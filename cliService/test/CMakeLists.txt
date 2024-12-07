@@ -1,6 +1,6 @@
 # ActionRequest tests
 add_executable(${PROJECT_NAME}_ActionRequest_test
-  tests/requests/ActionRequestTest.cpp
+  tests/cli/ActionRequestTest.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}_ActionRequest_test
@@ -13,7 +13,7 @@ target_link_libraries(${PROJECT_NAME}_ActionRequest_test
 
 # LoginRequest tests
 add_executable(${PROJECT_NAME}_LoginRequest_test
-  tests/requests/LoginRequestTest.cpp
+  tests/cli/LoginRequestTest.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}_LoginRequest_test
@@ -26,7 +26,7 @@ target_link_libraries(${PROJECT_NAME}_LoginRequest_test
 
 # InputParser tests
 add_executable(${PROJECT_NAME}_InputParser_test
-  tests/parser/InputParserTest.cpp
+  tests/cli/InputParserTest.cpp
   mock/terminal/TerminalMock.cpp
 )
 
@@ -60,7 +60,7 @@ target_link_libraries(${PROJECT_NAME}_Tree_test
 add_executable(${PROJECT_NAME}_CLIService_test
   tests/cli/CLIServiceTest.cpp
   mock/terminal/TerminalMock.cpp
-  mock/tree/CommandMock.hpp
+  mock/command/CommandMock.hpp
 )
 
 target_include_directories(${PROJECT_NAME}_CLIService_test
@@ -79,7 +79,7 @@ target_link_libraries(${PROJECT_NAME}_CLIService_test
 
 # Path tests
 add_executable(${PROJECT_NAME}_Path_test
-  tests/path/PathTest.cpp
+  tests/tree/PathTest.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}_Path_test
@@ -92,7 +92,7 @@ target_link_libraries(${PROJECT_NAME}_Path_test
 
 # PathResolver tests
 add_executable(${PROJECT_NAME}_PathResolver_test
-  tests/path/PathResolverTest.cpp
+  tests/tree/PathResolverTest.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}_PathResolver_test

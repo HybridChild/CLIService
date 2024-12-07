@@ -1,6 +1,6 @@
-#include "cliService/parser/InputParser.hpp"
-#include "cliService/requests/ActionRequest.hpp"
-#include "cliService/requests/LoginRequest.hpp"
+#include "cliService/cli/InputParser.hpp"
+#include "cliService/cli/ActionRequest.hpp"
+#include "cliService/cli/LoginRequest.hpp"
 #include "mock/terminal/TerminalMock.hpp"
 #include <gtest/gtest.h>
 

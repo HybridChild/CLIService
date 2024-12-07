@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "cliService/cli/CLIService.hpp"
-#include "mock/tree/CommandMock.hpp"
+#include "mock/command/CommandMock.hpp"
 #include "mock/terminal/TerminalMock.hpp"
 
 using namespace cliService;

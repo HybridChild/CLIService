@@ -1,5 +1,5 @@
 #pragma once
-#include "cliService/terminal/TerminalIf.hpp"
+#include "cliService/cli/TerminalIf.hpp"
 #include <atomic>
 #include <string>
 

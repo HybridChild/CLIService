@@ -1,11 +1,11 @@
 // CLIService.hpp
 #pragma once
-#include "CLIServiceConfiguration.hpp"
+#include "cliService/cli/CLIServiceConfiguration.hpp"
 #include "cliService/cli/CLIState.hpp"
-#include "cliService/parser/InputParser.hpp"
+#include "cliService/cli/InputParser.hpp"
 #include "cliService/tree/Directory.hpp"
-#include "cliService/path/Path.hpp"
-#include "cliService/path/PathResolver.hpp"
+#include "cliService/tree/Path.hpp"
+#include "cliService/tree/PathResolver.hpp"
 #include <optional>
 #include <unordered_set>
 

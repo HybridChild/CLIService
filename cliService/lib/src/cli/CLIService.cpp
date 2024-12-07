@@ -1,10 +1,10 @@
 #include "cliService/cli/CLIService.hpp"
-#include "cliService/terminal/TerminalIf.hpp"
-#include "cliService/tree/Directory.hpp"
+#include "cliService/cli/ActionRequest.hpp"
+#include "cliService/cli/LoginRequest.hpp"
+#include "cliService/cli/TerminalIf.hpp"
+#include "cliService/cli/User.hpp"
 #include "cliService/tree/CommandIf.hpp"
-#include "cliService/requests/LoginRequest.hpp"
-#include "cliService/requests/ActionRequest.hpp"
-#include "cliService/user/User.hpp"
+#include "cliService/tree/Directory.hpp"
 #include <cassert>
 
 

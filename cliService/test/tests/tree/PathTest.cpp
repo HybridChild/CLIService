@@ -1,4 +1,4 @@
-#include "cliService/path/Path.hpp"
+#include "cliService/tree/Path.hpp"
 #include <gtest/gtest.h>
 
 using namespace cliService;

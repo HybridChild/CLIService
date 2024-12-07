@@ -1,5 +1,5 @@
 #pragma once
-#include "cliService/requests/RequestBase.hpp"
+#include "cliService/cli/RequestBase.hpp"
 #include <string>
 
 namespace cliService

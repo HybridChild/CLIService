@@ -1,7 +1,7 @@
 #pragma once
-#include "cliService/user/User.hpp"
+#include "cliService/cli/User.hpp"
+#include "cliService/cli/TerminalIf.hpp"
 #include "cliService/tree/Directory.hpp"
-#include "cliService/terminal/TerminalIf.hpp"
 #include <vector>
 #include <memory>
 

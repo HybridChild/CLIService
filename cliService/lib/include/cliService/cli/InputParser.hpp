@@ -1,7 +1,7 @@
 #pragma once
-#include "cliService/terminal/TerminalIf.hpp"
-#include "cliService/requests/ActionRequest.hpp"
-#include "cliService/requests/LoginRequest.hpp"
+#include "cliService/cli/TerminalIf.hpp"
+#include "cliService/cli/ActionRequest.hpp"
+#include "cliService/cli/LoginRequest.hpp"
 #include "cliService/cli/CLIState.hpp"
 #include <memory>
 #include <string>

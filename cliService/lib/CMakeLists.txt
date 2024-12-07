@@ -1,12 +1,12 @@
 set(SOURCES
+  src/cli/ActionRequest.cpp
   src/cli/CLIService.cpp
-  src/parser/InputParser.cpp
-  src/path/Path.cpp
-  src/path/PathResolver.cpp
-  src/requests/ActionRequest.cpp
-  src/requests/LoginRequest.cpp
+  src/cli/InputParser.cpp
+  src/cli/LoginRequest.cpp
+  src/cli/User.cpp
   src/tree/Directory.cpp
-  src/user/User.cpp
+  src/tree/Path.cpp
+  src/tree/PathResolver.cpp
 )
 
 add_library(${PROJECT_NAME}_lib
