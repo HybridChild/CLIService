@@ -184,3 +184,15 @@ TEST_F(InputParserTest, MultipleBackspace)
   ASSERT_NE(actionRequest, nullptr);
   EXPECT_EQ(actionRequest->getPath().elements()[0], "hel");
 }
+
+TEST_F(InputParserTest, RootNavigation)
+{
+  _terminal.queueInput("/\n");
+  auto request = processAllInput();
+  
+  ASSERT_TRUE(request.has_value());
+  auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
+  ASSERT_NE(actionRequest, nullptr);
+  EXPECT_TRUE(actionRequest->getPath().isAbsolute());
+  EXPECT_TRUE(actionRequest->getPath().elements().empty());
+}

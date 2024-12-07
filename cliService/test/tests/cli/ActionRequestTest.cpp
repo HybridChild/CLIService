@@ -17,7 +17,7 @@ TEST_F(ActionRequestTest, EmptyInput)
   EXPECT_TRUE(request.getArgs().empty());
 }
 
-TEST_F(ActionRequestTest, SimplePathNoArgs)
+TEST_F(ActionRequestTest, RelativePathNoArgs)
 {
   ActionRequest request("dir1/dir2");
   
@@ -41,24 +41,25 @@ TEST_F(ActionRequestTest, AbsolutePathNoArgs)
   EXPECT_TRUE(request.getArgs().empty());
 }
 
-TEST_F(ActionRequestTest, PathWithSingleArg)
+TEST_F(ActionRequestTest, RelativePathWithSingleArg)
 {
   ActionRequest request("dir1/dir2 arg1");
   
   EXPECT_FALSE(request.getPath().isEmpty());
+  EXPECT_FALSE(request.getPath().isAbsolute());
   ASSERT_EQ(request.getPath().elements().size(), 2);
   EXPECT_EQ(request.getPath().elements()[0], "dir1");
   EXPECT_EQ(request.getPath().elements()[1], "dir2");
-  
   ASSERT_EQ(request.getArgs().size(), 1);
   EXPECT_EQ(request.getArgs()[0], "arg1");
 }
 
-TEST_F(ActionRequestTest, PathWithMultipleArgs)
+TEST_F(ActionRequestTest, RelativePathWithMultipleArgs)
 {
   ActionRequest request("dir1/dir2 arg1 arg2 arg3");
   
   EXPECT_FALSE(request.getPath().isEmpty());
+  EXPECT_FALSE(request.getPath().isAbsolute());
   ASSERT_EQ(request.getPath().elements().size(), 2);
   EXPECT_EQ(request.getPath().elements()[0], "dir1");
   EXPECT_EQ(request.getPath().elements()[1], "dir2");
@@ -69,7 +70,21 @@ TEST_F(ActionRequestTest, PathWithMultipleArgs)
   EXPECT_EQ(request.getArgs()[2], "arg3");
 }
 
-TEST_F(ActionRequestTest, PathWithExtraSpaces)
+TEST_F(ActionRequestTest, AbsolutePathWithArgs)
+{
+  ActionRequest request("/dir1/command arg1 arg2");
+  
+  EXPECT_TRUE(request.getPath().isAbsolute());
+  ASSERT_EQ(request.getPath().elements().size(), 2);
+  EXPECT_EQ(request.getPath().elements()[0], "dir1");
+  EXPECT_EQ(request.getPath().elements()[1], "command");
+  
+  ASSERT_EQ(request.getArgs().size(), 2);
+  EXPECT_EQ(request.getArgs()[0], "arg1");
+  EXPECT_EQ(request.getArgs()[1], "arg2");
+}
+
+TEST_F(ActionRequestTest, PathWithExtraSpacesBetweenArgs)
 {
   ActionRequest request("dir1/dir2   arg1    arg2   arg3");
   
@@ -101,20 +116,6 @@ TEST_F(ActionRequestTest, CommandWithArgs)
   EXPECT_FALSE(request.getPath().isEmpty());
   ASSERT_EQ(request.getPath().elements().size(), 1);
   EXPECT_EQ(request.getPath().elements()[0], "command");
-  
-  ASSERT_EQ(request.getArgs().size(), 2);
-  EXPECT_EQ(request.getArgs()[0], "arg1");
-  EXPECT_EQ(request.getArgs()[1], "arg2");
-}
-
-TEST_F(ActionRequestTest, AbsolutePathWithArgs)
-{
-  ActionRequest request("/dir1/command arg1 arg2");
-  
-  EXPECT_TRUE(request.getPath().isAbsolute());
-  ASSERT_EQ(request.getPath().elements().size(), 2);
-  EXPECT_EQ(request.getPath().elements()[0], "dir1");
-  EXPECT_EQ(request.getPath().elements()[1], "command");
   
   ASSERT_EQ(request.getArgs().size(), 2);
   EXPECT_EQ(request.getArgs()[0], "arg1");
