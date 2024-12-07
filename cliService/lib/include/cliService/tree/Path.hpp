@@ -11,11 +11,11 @@ namespace cliService
   public:
     Path() : _isAbsolute(false) {}
     explicit Path(std::string_view pathStr);
-    Path(std::vector<std::string> components, bool isAbsolute);
+    Path(std::vector<std::string> elements, bool isAbsolute);
     
     bool isAbsolute() const { return _isAbsolute; }
-    bool isEmpty() const { return _components.empty(); }
-    const std::vector<std::string>& components() const { return _components; }
+    bool isEmpty() const { return _elements.empty(); }
+    const std::vector<std::string>& elements() const { return _elements; }
 
     Path normalized() const;
     Path parent() const;
@@ -28,11 +28,11 @@ namespace cliService
     bool operator!=(const Path& other) const { return !(*this == other); }
 
   private:
-    std::vector<std::string> _components;
+    std::vector<std::string> _elements;
     bool _isAbsolute;
 
-    static std::vector<std::string> parseComponents(std::string_view pathStr, bool& isAbsolute);
-    static std::vector<std::string> normalizeComponents(const std::vector<std::string>& components, bool isAbsolute);
+    static std::vector<std::string> parseElements(std::string_view pathStr, bool& isAbsolute);
+    static std::vector<std::string> normalizeElements(const std::vector<std::string>& elements, bool isAbsolute);
   };
 
 }

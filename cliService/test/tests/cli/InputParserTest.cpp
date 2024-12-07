@@ -47,7 +47,7 @@ TEST_F(InputParserTest, SimpleCommand)
   ASSERT_TRUE(request.has_value());
   auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
   ASSERT_NE(actionRequest, nullptr);
-  EXPECT_EQ(actionRequest->getPath().components()[0], "command");
+  EXPECT_EQ(actionRequest->getPath().elements()[0], "command");
   EXPECT_EQ(_terminal.getOutput(), "command\n");
 }
 
@@ -59,7 +59,7 @@ TEST_F(InputParserTest, CommandWithArguments)
   ASSERT_TRUE(request.has_value());
   auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
   ASSERT_NE(actionRequest, nullptr);
-  EXPECT_EQ(actionRequest->getPath().components()[0], "command");
+  EXPECT_EQ(actionRequest->getPath().elements()[0], "command");
   ASSERT_EQ(actionRequest->getArgs().size(), 2);
   EXPECT_EQ(actionRequest->getArgs()[0], "arg1");
   EXPECT_EQ(actionRequest->getArgs()[1], "arg2");
@@ -84,7 +84,7 @@ TEST_F(InputParserTest, BackspaceHandling)
   ASSERT_TRUE(request.has_value());
   auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
   ASSERT_NE(actionRequest, nullptr);
-  EXPECT_EQ(actionRequest->getPath().components()[0], "command");
+  EXPECT_EQ(actionRequest->getPath().elements()[0], "command");
 }
 
 TEST_F(InputParserTest, LoginHandling)
@@ -115,7 +115,7 @@ TEST_F(InputParserTest, ArrowKeys)
   ASSERT_TRUE(request.has_value());
   auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
   ASSERT_NE(actionRequest, nullptr);
-  EXPECT_EQ(actionRequest->getPath().components()[0], "key:up");
+  EXPECT_EQ(actionRequest->getPath().elements()[0], "key:up");
   
   // Test DOWN arrow
   _terminal.clearOutput();
@@ -125,7 +125,7 @@ TEST_F(InputParserTest, ArrowKeys)
   ASSERT_TRUE(request.has_value());
   actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
   ASSERT_NE(actionRequest, nullptr);
-  EXPECT_EQ(actionRequest->getPath().components()[0], "key:down");
+  EXPECT_EQ(actionRequest->getPath().elements()[0], "key:down");
 }
 
 TEST_F(InputParserTest, TabKey)
@@ -136,7 +136,7 @@ TEST_F(InputParserTest, TabKey)
   ASSERT_TRUE(request.has_value());
   auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
   ASSERT_NE(actionRequest, nullptr);
-  EXPECT_EQ(actionRequest->getPath().components()[0], "key:tab");
+  EXPECT_EQ(actionRequest->getPath().elements()[0], "key:tab");
 }
 
 TEST_F(InputParserTest, MultipleBackspace)
@@ -162,5 +162,5 @@ TEST_F(InputParserTest, MultipleBackspace)
   ASSERT_TRUE(request.has_value());
   auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
   ASSERT_NE(actionRequest, nullptr);
-  EXPECT_EQ(actionRequest->getPath().components()[0], "hel");
+  EXPECT_EQ(actionRequest->getPath().elements()[0], "hel");
 }

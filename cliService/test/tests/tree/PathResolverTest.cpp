@@ -109,9 +109,9 @@ TEST_F(PathResolverTest, GetAbsolutePath)
   // Get its absolute path
   Path absPath = PathResolver::getAbsolutePath(*node);
   EXPECT_TRUE(absPath.isAbsolute());
-  ASSERT_EQ(absPath.components().size(), 2);
-  EXPECT_EQ(absPath.components()[0], "dir2");
-  EXPECT_EQ(absPath.components()[1], "subdir3");
+  ASSERT_EQ(absPath.elements().size(), 2);
+  EXPECT_EQ(absPath.elements()[0], "dir2");
+  EXPECT_EQ(absPath.elements()[1], "subdir3");
 }
 
 TEST_F(PathResolverTest, ResolveEmptyPath)

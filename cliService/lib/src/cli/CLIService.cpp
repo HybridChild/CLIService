@@ -112,9 +112,9 @@ namespace cliService
     const auto& path = request.getPath();
     
     // Handle global commands
-    if (!path.isEmpty() && GLOBAL_COMMANDS.find(path.components().front()) != GLOBAL_COMMANDS.end())
+    if (!path.isEmpty() && GLOBAL_COMMANDS.find(path.elements().front()) != GLOBAL_COMMANDS.end())
     {
-      handleGlobalCommand(path.components().front(), request.getArgs());
+      handleGlobalCommand(path.elements().front(), request.getArgs());
       return;
     }
 

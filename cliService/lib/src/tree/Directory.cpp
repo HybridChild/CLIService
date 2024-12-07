@@ -27,7 +27,7 @@ namespace cliService
     // Base case: empty path returns current directory
     if (path.empty()) { return const_cast<Directory*>(this); }
 
-    // Search for child matching first path component
+    // Search for child matching first path element
     auto it = std::find_if(_children.begin(), _children.end(),
       [&path](const auto& child) {
         return child->getName() == path[0];
@@ -36,10 +36,10 @@ namespace cliService
     // No matching child found
     if (it == _children.end()) { return nullptr; }
 
-    // If path has only one component, return the found node
+    // If path has only one element, return the found node
     if (path.size() == 1) { return it->get(); }
 
-    // If more path components exist but found node isn't a directory, navigation fails
+    // If more path elements exist but found node isn't a directory, navigation fails
     if (!(*it)->isDirectory()) { return nullptr; }
 
     // Recursive case: continue search in found directory with remaining path

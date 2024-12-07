@@ -29,8 +29,8 @@ namespace cliService
     // Start from current directory for relative paths
     NodeIf* current = const_cast<Directory*>(&currentDir);
 
-    // Process each component
-    for (const auto& component : normalizedPath.components())
+    // Process each element of the normalized path
+    for (const auto& element : normalizedPath.elements())
     {
       // Must be in a directory to continue
       if (!current || !current->isDirectory())
@@ -38,7 +38,7 @@ namespace cliService
         return nullptr;
       }
 
-      if (component == "..")
+      if (element == "..")
       {
         current = current->getParent();
         // If we hit root's parent, stay at root
@@ -47,7 +47,7 @@ namespace cliService
       else
       {
         auto* dir = static_cast<Directory*>(current);
-        current = dir->findNode({component});
+        current = dir->findNode({element});
         if (!current) { return nullptr; }
       }
     }
@@ -65,13 +65,13 @@ namespace cliService
     // Start from root
     NodeIf* current = &_root;
 
-    // Process each component
-    for (const auto& component : path.components())
+    // Process each element of the normalized path
+    for (const auto& element : path.elements())
     {
       if (!current->isDirectory()) { return nullptr; }
 
       auto* dir = static_cast<Directory*>(current);
-      current = dir->findNode({component});
+      current = dir->findNode({element});
 
       if (!current) { return nullptr; }
     }
@@ -81,21 +81,21 @@ namespace cliService
 
   Path PathResolver::getAbsolutePath(const NodeIf& node) 
   {
-    std::vector<std::string> components;
+    std::vector<std::string> elements;
 
     // Walk up the tree collecting node names
     const NodeIf* current = &node;
     while (current->getParent())
     {
-      components.push_back(current->getName());
+      elements.push_back(current->getName());
       current = current->getParent();
     }
 
-    // Reverse the components since we collected them from leaf to root
-    std::reverse(components.begin(), components.end());
+    // Reverse the elements since we collected them from leaf to root
+    std::reverse(elements.begin(), elements.end());
 
     // Create absolute path
-    return Path(std::move(components), true);
+    return Path(std::move(elements), true);
   }
 
 }
