@@ -1,9 +1,10 @@
 #include "terminal/UnixWinTerminal.hpp"
 #include "commands/AccessLevel.hpp"
-#include "commands/RebootCommand.hpp"
-#include "commands/RgbLedSetCommand.hpp"
-#include "commands/PotmeterGetCommand.hpp"
-#include "commands/ToggleSwitchGetCommand.hpp"
+#include "commands/system/RebootCommand.hpp"
+#include "commands/system/HeapStatsGetCommand.hpp"
+#include "commands/hw/RgbLedSetCommand.hpp"
+#include "commands/hw/PotmeterGetCommand.hpp"
+#include "commands/hw/ToggleSwitchGetCommand.hpp"
 #include "cliService/cli/CLIService.hpp"
 #include <vector>
 #include <thread>
@@ -18,6 +19,7 @@ std::unique_ptr<Directory> createMenuTree()
     
     auto& dirSystem = dirRoot->addDirectory("system", AccessLevel::Admin);
       dirSystem.addCommand<RebootCommand>("reboot", AccessLevel::Admin);
+      dirSystem.addCommand<HeapStatsGetCommand>("heap", AccessLevel::Admin);
 
     auto& dirHw = dirRoot->addDirectory("hw", AccessLevel::User);
       auto& dirHwPot = dirHw.addDirectory("potmeter", AccessLevel::User);

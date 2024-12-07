@@ -1,6 +1,7 @@
 #pragma once
 #include "cliService/tree/CommandIf.hpp"
 #include "commands/AccessLevel.hpp"
+#include "util/util.hpp"
 #include <array>
 
 namespace cliService
@@ -18,6 +19,11 @@ namespace cliService
       if (args.size() < 1 || args.size() > 4)
       {
         return CommandResponse("Invalid number of arguments. Please provide: <ID> <R> <G> <B>", CommandStatus::InvalidArguments);
+      }
+
+      if (!util::isIntegerString(args[0]))
+      {
+        return CommandResponse("Invalid RGB LED ID: " + args[0] + ". Must be integer.", CommandStatus::InvalidArguments);
       }
 
       uint32_t rgbLedId = std::stoi(args[0]);
