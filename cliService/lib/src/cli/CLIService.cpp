@@ -12,7 +12,7 @@ namespace cliService
 {
 
   const std::unordered_set<std::string_view> CLIService::GLOBAL_COMMANDS = {
-    "logout",
+    "logout", "tree",
     "key:tab", "key:up", "key:down", "key:left", "key:right"
   };
 
@@ -46,16 +46,10 @@ namespace cliService
 
   void CLIService::service() 
   {
-    if (_currentState == CLIState::Inactive)
-    {
-      return;
-    }
+    if (_currentState == CLIState::Inactive) { return; }
 
     auto request = _parser.service();
-    if (!request)
-    {
-      return;
-    }
+    if (!request) { return; }
 
     // Process state-specific requests
     switch (_currentState)
@@ -166,6 +160,17 @@ namespace cliService
       resetToRoot();
       _terminal.putString(LOGGED_OUT_MESSAGE);
       _terminal.putChar('\n');
+    }
+    else if (command == "tree")
+    {
+      // print tree structure string
+      _currentDirectory->traverse([&](const NodeIf& node, int depth) {
+        std::string indent(depth * 2, ' ');
+        std::string treeStr = indent + node.getName() + (node.isDirectory() ? "/" : "") + "\n";
+        _terminal.putString(treeStr);
+      });
+
+      displayPrompt();
     }
     else if (command == InputParser::KEY_CODE_TAB)
     {
