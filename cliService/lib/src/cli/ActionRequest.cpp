@@ -40,7 +40,8 @@ namespace cliService
     }
   }
 
-  ActionRequest::ActionRequest(std::string_view inputStr) 
+  ActionRequest::ActionRequest(std::string_view inputStr, Trigger trigger)
+    : _trigger(trigger)
   {
     // Split input into path and args
     std::string_view pathStr, argsStr;

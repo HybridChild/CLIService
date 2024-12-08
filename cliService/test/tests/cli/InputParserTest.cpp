@@ -115,7 +115,7 @@ TEST_F(InputParserTest, ArrowKeys)
   ASSERT_TRUE(request.has_value());
   auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
   ASSERT_NE(actionRequest, nullptr);
-  EXPECT_EQ(actionRequest->getPath().elements()[0], InputParser::KEY_CODE_ARROW_UP);
+  EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::ArrowUp);
   
   // Test DOWN arrow
   _terminal.clearOutput();
@@ -125,7 +125,7 @@ TEST_F(InputParserTest, ArrowKeys)
   ASSERT_TRUE(request.has_value());
   actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
   ASSERT_NE(actionRequest, nullptr);
-  EXPECT_EQ(actionRequest->getPath().elements()[0], InputParser::KEY_CODE_ARROW_DOWN);
+  EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::ArrowDown);
 
   // Test LEFT arrow
   _terminal.clearOutput();
@@ -135,7 +135,7 @@ TEST_F(InputParserTest, ArrowKeys)
   ASSERT_TRUE(request.has_value());
   actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
   ASSERT_NE(actionRequest, nullptr);
-  EXPECT_EQ(actionRequest->getPath().elements()[0], InputParser::KEY_CODE_ARROW_LEFT);
+  EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::ArrowLeft);
 
   // Test RIGHT arrow
   _terminal.clearOutput();
@@ -145,7 +145,7 @@ TEST_F(InputParserTest, ArrowKeys)
   ASSERT_TRUE(request.has_value());
   actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
   ASSERT_NE(actionRequest, nullptr);
-  EXPECT_EQ(actionRequest->getPath().elements()[0], InputParser::KEY_CODE_ARROW_RIGHT);
+  EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::ArrowRight);
 }
 
 TEST_F(InputParserTest, TabKey)
@@ -156,7 +156,7 @@ TEST_F(InputParserTest, TabKey)
   ASSERT_TRUE(request.has_value());
   auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
   ASSERT_NE(actionRequest, nullptr);
-  EXPECT_EQ(actionRequest->getPath().elements()[0], InputParser::KEY_CODE_TAB);
+  EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::Tab);
 }
 
 TEST_F(InputParserTest, MultipleBackspace)

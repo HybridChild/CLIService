@@ -11,7 +11,7 @@ protected:
 
 TEST_F(ActionRequestTest, EmptyInput)
 {
-  ActionRequest request("");
+  ActionRequest request("", ActionRequest::Trigger::Enter);
   EXPECT_TRUE(request.getPath().isEmpty());
   EXPECT_FALSE(request.getPath().isAbsolute());
   EXPECT_TRUE(request.getArgs().empty());
@@ -19,7 +19,7 @@ TEST_F(ActionRequestTest, EmptyInput)
 
 TEST_F(ActionRequestTest, RelativePathNoArgs)
 {
-  ActionRequest request("dir1/dir2");
+  ActionRequest request("dir1/dir2", ActionRequest::Trigger::Enter);
   
   EXPECT_FALSE(request.getPath().isEmpty());
   EXPECT_FALSE(request.getPath().isAbsolute());
@@ -31,7 +31,7 @@ TEST_F(ActionRequestTest, RelativePathNoArgs)
 
 TEST_F(ActionRequestTest, AbsolutePathNoArgs)
 {
-  ActionRequest request("/dir1/dir2");
+  ActionRequest request("/dir1/dir2", ActionRequest::Trigger::Enter);
   
   EXPECT_FALSE(request.getPath().isEmpty());
   EXPECT_TRUE(request.getPath().isAbsolute());
@@ -43,7 +43,7 @@ TEST_F(ActionRequestTest, AbsolutePathNoArgs)
 
 TEST_F(ActionRequestTest, RelativePathWithSingleArg)
 {
-  ActionRequest request("dir1/dir2 arg1");
+  ActionRequest request("dir1/dir2 arg1", ActionRequest::Trigger::Enter);
   
   EXPECT_FALSE(request.getPath().isEmpty());
   EXPECT_FALSE(request.getPath().isAbsolute());
@@ -56,7 +56,7 @@ TEST_F(ActionRequestTest, RelativePathWithSingleArg)
 
 TEST_F(ActionRequestTest, RelativePathWithMultipleArgs)
 {
-  ActionRequest request("dir1/dir2 arg1 arg2 arg3");
+  ActionRequest request("dir1/dir2 arg1 arg2 arg3", ActionRequest::Trigger::Enter);
   
   EXPECT_FALSE(request.getPath().isEmpty());
   EXPECT_FALSE(request.getPath().isAbsolute());
@@ -72,7 +72,7 @@ TEST_F(ActionRequestTest, RelativePathWithMultipleArgs)
 
 TEST_F(ActionRequestTest, AbsolutePathWithArgs)
 {
-  ActionRequest request("/dir1/command arg1 arg2");
+  ActionRequest request("/dir1/command arg1 arg2", ActionRequest::Trigger::Enter);
   
   EXPECT_TRUE(request.getPath().isAbsolute());
   ASSERT_EQ(request.getPath().elements().size(), 2);
@@ -86,7 +86,7 @@ TEST_F(ActionRequestTest, AbsolutePathWithArgs)
 
 TEST_F(ActionRequestTest, PathWithExtraSpacesBetweenArgs)
 {
-  ActionRequest request("dir1/dir2   arg1    arg2   arg3");
+  ActionRequest request("dir1/dir2   arg1    arg2   arg3", ActionRequest::Trigger::Enter);
   
   EXPECT_FALSE(request.getPath().isEmpty());
   ASSERT_EQ(request.getPath().elements().size(), 2);
@@ -101,7 +101,7 @@ TEST_F(ActionRequestTest, PathWithExtraSpacesBetweenArgs)
 
 TEST_F(ActionRequestTest, SimpleCommand)
 {
-  ActionRequest request("command");
+  ActionRequest request("command", ActionRequest::Trigger::Enter);
   
   EXPECT_FALSE(request.getPath().isEmpty());
   ASSERT_EQ(request.getPath().elements().size(), 1);
@@ -111,7 +111,7 @@ TEST_F(ActionRequestTest, SimpleCommand)
 
 TEST_F(ActionRequestTest, CommandWithArgs)
 {
-  ActionRequest request("command arg1 arg2");
+  ActionRequest request("command arg1 arg2", ActionRequest::Trigger::Enter);
   
   EXPECT_FALSE(request.getPath().isEmpty());
   ASSERT_EQ(request.getPath().elements().size(), 1);
@@ -124,7 +124,7 @@ TEST_F(ActionRequestTest, CommandWithArgs)
 
 TEST_F(ActionRequestTest, RootPath)
 {
-  ActionRequest request("/");
+  ActionRequest request("/", ActionRequest::Trigger::Enter);
   
   EXPECT_TRUE(request.getPath().isAbsolute());
   EXPECT_TRUE(request.getPath().elements().empty());
@@ -133,7 +133,7 @@ TEST_F(ActionRequestTest, RootPath)
 
 TEST_F(ActionRequestTest, ParentPath)
 {
-  ActionRequest request("..");
+  ActionRequest request("..", ActionRequest::Trigger::Enter);
   
   EXPECT_FALSE(request.getPath().isEmpty());
   ASSERT_EQ(request.getPath().elements().size(), 1);
@@ -143,7 +143,7 @@ TEST_F(ActionRequestTest, ParentPath)
 
 TEST_F(ActionRequestTest, ComplexPathWithArgs)
 {
-  ActionRequest request("dir1/../../dir2/command arg1 arg2");
+  ActionRequest request("dir1/../../dir2/command arg1 arg2", ActionRequest::Trigger::Enter);
   
   EXPECT_FALSE(request.getPath().isEmpty());
   ASSERT_EQ(request.getPath().elements().size(), 5);  // Now expecting 5 elements

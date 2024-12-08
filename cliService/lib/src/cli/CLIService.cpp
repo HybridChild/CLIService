@@ -12,8 +12,7 @@ namespace cliService
 {
 
   const std::unordered_set<std::string_view> CLIService::GLOBAL_COMMANDS = {
-    "logout", "tree",
-    "key:tab", "key:up", "key:down", "key:left", "key:right"
+    "logout", "tree"
   };
 
 
@@ -173,37 +172,44 @@ namespace cliService
 
       displayPrompt();
     }
-    else if (command == InputParser::KEY_CODE_TAB)
+  }
+  
+
+  void CLIService::handleSpecialKey(const ActionRequest& request)
+  {
+    switch (request.getTrigger())
     {
+    case ActionRequest::Trigger::Tab:
       _terminal.putString("Tab pressed\n");
       displayPrompt();
-    }
-    else if (command == InputParser::KEY_CODE_ARROW_UP)
-    {
+      break;
+    case ActionRequest::Trigger::ArrowUp:
       _terminal.putString("Up arrow pressed\n");
       displayPrompt();
-    }
-    else if (command == InputParser::KEY_CODE_ARROW_DOWN)
-    {
+      break;
+    case ActionRequest::Trigger::ArrowDown:
       _terminal.putString("Down arrow pressed\n");
       displayPrompt();
-    }
-    else if (command == InputParser::KEY_CODE_ARROW_LEFT)
-    {
+      break;
+    case ActionRequest::Trigger::ArrowLeft:
       _terminal.putString("Left arrow pressed\n");
       displayPrompt();
-    }
-    else if (command == InputParser::KEY_CODE_ARROW_RIGHT)
-    {
+      break;
+    case ActionRequest::Trigger::ArrowRight:
       _terminal.putString("Right arrow pressed\n");
       displayPrompt();
-    }
+      break;
+    default:
+      break;
+    };
   }
+
 
   NodeIf* CLIService::resolvePath(const Path& path) const 
   {
     return _pathResolver.resolve(path, *_currentDirectory);
   }
+
 
   bool CLIService::validatePathAccess(const NodeIf* node) const 
   {
