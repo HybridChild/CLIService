@@ -5,6 +5,7 @@
 #include "cliService/cli/User.hpp"
 #include "cliService/tree/CommandIf.hpp"
 #include "cliService/tree/Directory.hpp"
+#include "cliService/tree/PathCompleter.hpp"
 #include <cassert>
 
 
@@ -102,6 +103,12 @@ namespace cliService
   {
     assert(_currentUser && "No user logged in");
 
+    if (request.getTrigger() != ActionRequest::Trigger::Enter)
+    {
+      handleSpecialKey(request);
+      return;
+    }
+
     const auto& path = request.getPath();
     
     // Handle global commands
@@ -180,8 +187,7 @@ namespace cliService
     switch (request.getTrigger())
     {
     case ActionRequest::Trigger::Tab:
-      _terminal.putString("Tab pressed\n");
-      displayPrompt();
+      handleTabCompletion(request);
       break;
     case ActionRequest::Trigger::ArrowUp:
       _terminal.putString("Up arrow pressed\n");
@@ -232,6 +238,44 @@ namespace cliService
     }
     
     return true;
+  }
+
+
+  void CLIService::handleTabCompletion(const ActionRequest& request)
+  {
+    auto currentInput = _parser.getBuffer();
+    auto node = resolvePath(request.getPath());
+
+    if (node && node->isDirectory() && currentInput.back() != '/')
+    {
+      currentInput += "/";
+    }
+
+    auto result = PathCompleter::complete(*_currentDirectory, currentInput, _currentUser->getAccessLevel());
+
+    if (!result.fillCharacters.empty())
+    {
+      _terminal.putString(result.fillCharacters);
+      _parser.appendToBuffer(result.fillCharacters);
+
+      if (result.isDirectory)
+      {
+        _terminal.putChar('/');
+        _parser.appendToBuffer("/");
+      }
+    }
+    else if (!result.allOptions.empty())
+    {
+      _terminal.putChar('\n');
+      for (const auto& opt : result.allOptions)
+      {
+        _terminal.putString(opt + "   ");
+      }
+
+      _terminal.putChar('\n');
+      displayPrompt();
+      _terminal.putString(_parser.getBuffer());
+    }
   }
 
 

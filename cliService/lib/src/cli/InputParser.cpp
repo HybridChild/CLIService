@@ -182,7 +182,10 @@ namespace cliService
       case CLIState::LoggedIn:
       {
         auto request = std::make_unique<ActionRequest>(_buffer, _lastTrigger);
-        _buffer.clear();
+        if (_lastTrigger != ActionRequest::Trigger::Tab)
+        {
+          _buffer.clear();
+        }
         return request;
       }
 

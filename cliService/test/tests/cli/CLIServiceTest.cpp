@@ -106,5 +106,5 @@ TEST_F(CLIServiceTest, NavigateToDirectory)
  _service->service();
  _service->service();
  
- EXPECT_THAT(_terminal.getOutput(), testing::EndsWith("admin@> "));
+ EXPECT_THAT(_terminal.getOutput(), testing::EndsWith("admin@/sub > "));
 }

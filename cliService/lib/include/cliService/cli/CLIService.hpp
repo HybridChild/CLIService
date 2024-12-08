@@ -27,10 +27,12 @@ namespace cliService
     void handleLoginRequest(const LoginRequest& request);
     void handleActionRequest(const ActionRequest& request);
     void handleGlobalCommand(const std::string_view& command, const std::vector<std::string>& args);
+    void handleSpecialKey(const ActionRequest& request);
     
     // Path operations
     NodeIf* resolvePath(const Path& path) const;
     bool validatePathAccess(const NodeIf* node) const;
+    void handleTabCompletion(const ActionRequest& request);
     
     // State management 
     void resetToRoot();
