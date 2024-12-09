@@ -44,9 +44,9 @@ namespace cliService
       return false;
     }
 
-    if (c == ENTER)
+    if (c == ENTER_MAC || c == ENTER_WIN)
     {
-      _terminal.putChar('\n');
+      _terminal.putChar('\n');  // Echo newline
 
       if (!_buffer.empty())
       {

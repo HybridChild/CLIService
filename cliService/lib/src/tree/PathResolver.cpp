@@ -1,4 +1,5 @@
 #include "cliService/tree/PathResolver.hpp"
+#include <algorithm>
 #include <cassert>
 
 namespace cliService

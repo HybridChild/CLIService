@@ -18,16 +18,16 @@ namespace cliService
     : _isOpen(false)
     , _lastError("")
   {
-    #ifdef _WIN32
+  #ifdef _WIN32
     _hStdin = GetStdHandle(STD_INPUT_HANDLE);
     _hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
     _oldInMode = new DWORD;
     _oldOutMode = new DWORD;
     assert(_hStdin != INVALID_HANDLE_VALUE && "Failed to get stdin handle");
     assert(_hStdout != INVALID_HANDLE_VALUE && "Failed to get stdout handle");
-    #else
+  #else
     _oldTermios = new termios;
-    #endif
+  #endif
     
     setupTerminal();
     _isOpen = true;
@@ -47,18 +47,34 @@ namespace cliService
 
   void UnixWinTerminal::setupTerminal()
   {
-    #ifdef _WIN32
+  #ifdef _WIN32
     // Get current console mode
     GetConsoleMode(_hStdin, static_cast<DWORD*>(_oldInMode));
     GetConsoleMode(_hStdout, static_cast<DWORD*>(_oldOutMode));
-    
-    // Set new console mode
-    DWORD newMode = ENABLE_VIRTUAL_TERMINAL_INPUT | ENABLE_PROCESSED_INPUT;
-    assert(SetConsoleMode(_hStdin, newMode) && "Failed to set console mode");
-    
-    newMode = ENABLE_VIRTUAL_TERMINAL_PROCESSING | ENABLE_PROCESSED_OUTPUT;
-    assert(SetConsoleMode(_hStdout, newMode) && "Failed to set console mode");
-    #else
+
+    // Set new console mode for stdin
+    DWORD newMode = ENABLE_VIRTUAL_TERMINAL_INPUT |
+                    ENABLE_PROCESSED_INPUT;
+
+    if (!SetConsoleMode(_hStdin, newMode))
+    {
+      _lastError = "Failed to set console input mode";
+      _isOpen = false;
+      return;
+    }
+
+    // ... and stdout
+    newMode = ENABLE_VIRTUAL_TERMINAL_PROCESSING | 
+              ENABLE_PROCESSED_OUTPUT |
+              ENABLE_WRAP_AT_EOL_OUTPUT;
+
+    if (!SetConsoleMode(_hStdout, newMode))
+    {
+        _lastError = "Failed to set console output mode";
+        _isOpen = false;
+        return;
+    }
+  #else
     // Get current terminal attributes
     struct termios newTermios;
     assert(tcgetattr(STDIN_FILENO, static_cast<termios*>(_oldTermios)) == 0 && "Failed to get terminal attributes");
@@ -70,62 +86,62 @@ namespace cliService
     newTermios.c_cc[VTIME] = 0;
     
     assert(tcsetattr(STDIN_FILENO, TCSANOW, &newTermios) == 0 && "Failed to set terminal attributes");
-    #endif
+  #endif
   }
 
   void UnixWinTerminal::restoreTerminal()
   {
-    #ifdef _WIN32
+  #ifdef _WIN32
     SetConsoleMode(_hStdin, *static_cast<DWORD*>(_oldInMode));
     SetConsoleMode(_hStdout, *static_cast<DWORD*>(_oldOutMode));
-    #else
+  #else
     tcsetattr(STDIN_FILENO, TCSANOW, static_cast<termios*>(_oldTermios));
-    #endif
+  #endif
   }
 
   bool UnixWinTerminal::putChar(char c)
   {
-    #ifdef _WIN32
+  #ifdef _WIN32
     DWORD written;
     if (!WriteConsole(_hStdout, &c, 1, &written, nullptr) || written != 1)
     {
       _lastError = "Failed to write to console";
       return false;
     }
-    #else
+  #else
     if (write(STDOUT_FILENO, &c, 1) != 1)
     {
       _lastError = "Failed to write to terminal";
       return false;
     }
-    #endif
+  #endif
     return true;
   }
 
   bool UnixWinTerminal::getChar(char& c)
   {
-    #ifdef _WIN32
+  #ifdef _WIN32
     DWORD read;
     char buf;
-    if (!ReadConsole(_hStdin, &buf, 1, &read, nullptr) || read != 1)
+    if (!ReadFile(_hStdin, &buf, 1, &read, nullptr) || read != 1)
     {
       _lastError = "Failed to read from console";
       return false;
     }
     c = buf;
-    #else
+  #else
     if (read(STDIN_FILENO, &c, 1) != 1)
     {
       _lastError = "Failed to read from terminal";
       return false;
     }
-    #endif
+  #endif
     return true;
   }
 
   bool UnixWinTerminal::getCharTimeout(char& c, uint32_t timeout_ms)
   {
-    #ifdef _WIN32
+  #ifdef _WIN32
     // Windows implementation using WaitForSingleObject
     DWORD result = WaitForSingleObject(_hStdin, timeout_ms);
     if (result == WAIT_OBJECT_0)
@@ -133,7 +149,7 @@ namespace cliService
       return getChar(c);
     }
     return false;
-    #else
+  #else
     // Unix implementation using select
     fd_set fds;
     FD_ZERO(&fds);
@@ -149,29 +165,29 @@ namespace cliService
       return getChar(c);
     }
     return false;
-    #endif
+  #endif
   }
 
   bool UnixWinTerminal::available() const
   {
-    #ifdef _WIN32
+  #ifdef _WIN32
     DWORD events;
     GetNumberOfConsoleInputEvents(_hStdin, &events);
     return events > 0;
-    #else
+  #else
     int bytes;
     ioctl(STDIN_FILENO, FIONREAD, &bytes);
     return bytes > 0;
-    #endif
+  #endif
   }
 
   void UnixWinTerminal::flush()
   {
-    #ifdef _WIN32
+  #ifdef _WIN32
     FlushConsoleInputBuffer(_hStdin);
-    #else
+  #else
     tcflush(STDIN_FILENO, TCIFLUSH);
-    #endif
+  #endif
   }
 
   bool UnixWinTerminal::isOpen() const
