@@ -6,8 +6,8 @@ add_executable(${PROJECT_NAME}_ActionRequest_test
 target_link_libraries(${PROJECT_NAME}_ActionRequest_test
   PRIVATE
     ${PROJECT_NAME}_lib
-    GTest::GTest
-    GTest::Main
+    GTest::gtest
+    GTest::gtest_main
 )
 
 
@@ -19,8 +19,8 @@ add_executable(${PROJECT_NAME}_LoginRequest_test
 target_link_libraries(${PROJECT_NAME}_LoginRequest_test
   PRIVATE
     ${PROJECT_NAME}_lib
-    GTest::GTest
-    GTest::Main
+    GTest::gtest
+    GTest::gtest_main
 )
 
 
@@ -38,8 +38,8 @@ target_include_directories(${PROJECT_NAME}_InputParser_test
 target_link_libraries(${PROJECT_NAME}_InputParser_test
   PRIVATE
     ${PROJECT_NAME}_lib
-    GTest::GTest
-    GTest::Main
+    GTest::gtest
+    GTest::gtest_main
 )
 
 
@@ -51,8 +51,8 @@ add_executable(${PROJECT_NAME}_Tree_test
 target_link_libraries(${PROJECT_NAME}_Tree_test
   PRIVATE
     ${PROJECT_NAME}_lib
-    GTest::GTest
-    GTest::Main
+    GTest::gtest
+    GTest::gtest_main
 )
 
 
@@ -71,8 +71,8 @@ target_include_directories(${PROJECT_NAME}_CLIService_test
 target_link_libraries(${PROJECT_NAME}_CLIService_test
   PRIVATE
     ${PROJECT_NAME}_lib
-    GTest::GTest
-    GTest::Main
+    GTest::gtest
+    GTest::gtest_main
     GTest::gmock
 )
 
@@ -85,8 +85,8 @@ add_executable(${PROJECT_NAME}_Path_test
 target_link_libraries(${PROJECT_NAME}_Path_test
   PRIVATE
     ${PROJECT_NAME}_lib
-    GTest::GTest
-    GTest::Main
+    GTest::gtest
+    GTest::gtest_main
 )
 
 
@@ -98,8 +98,8 @@ add_executable(${PROJECT_NAME}_PathResolver_test
 target_link_libraries(${PROJECT_NAME}_PathResolver_test
   PRIVATE
     ${PROJECT_NAME}_lib
-    GTest::GTest
-    GTest::Main
+    GTest::gtest
+    GTest::gtest_main
 )
 
 
@@ -111,8 +111,8 @@ add_executable(${PROJECT_NAME}_PathCompleter_test
 target_link_libraries(${PROJECT_NAME}_PathCompleter_test
   PRIVATE
     ${PROJECT_NAME}_lib
-    GTest::GTest
-    GTest::Main
+    GTest::gtest
+    GTest::gtest_main
 )
 
 
