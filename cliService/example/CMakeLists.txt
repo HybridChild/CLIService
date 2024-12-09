@@ -1,3 +1,14 @@
+set(EXAMPLE_HEADERS
+  commands/AccessLevel.hpp
+  commands/hw/PotmeterGetCommand.hpp
+  commands/hw/RgbLedSetCommand.hpp
+  commands/hw/ToggleSwitchGetCommand.hpp
+  commands/system/HeapStatsGetCommand.hpp
+  commands/system/RebootCommand.hpp
+  terminal/UnixWinTerminal.hpp
+  util/util.hpp
+)
+
 set(EXAMPLE_SOURCES
   main.cpp
   terminal/UnixWinTerminal.cpp

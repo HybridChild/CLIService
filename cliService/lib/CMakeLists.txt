@@ -1,4 +1,23 @@
-set(SOURCES
+set(LIB_HEADERS
+  include/cliService/cli/ActionRequest.hpp
+  include/cliService/cli/CLIService.hpp
+  include/cliService/cli/CLIServiceConfiguration.hpp
+  include/cliService/cli/CLIState.hpp
+  include/cliService/cli/InputParser.hpp
+  include/cliService/cli/LoginRequest.hpp
+  include/cliService/cli/RequestBase.hpp
+  include/cliService/cli/TerminalIf.hpp
+  include/cliService/cli/User.hpp
+  include/cliService/tree/CommandIf.hpp
+  include/cliService/tree/CommandResponse.hpp
+  include/cliService/tree/Directory.hpp
+  include/cliService/tree/NodeIf.hpp
+  include/cliService/tree/Path.hpp
+  include/cliService/tree/PathCompleter.hpp
+  include/cliService/tree/PathResolver.hpp
+)
+
+set(LIB_SOURCES
   src/cli/ActionRequest.cpp
   src/cli/CLIService.cpp
   src/cli/InputParser.cpp
@@ -10,7 +29,8 @@ set(SOURCES
 )
 
 add_library(${PROJECT_NAME}_lib
-  ${SOURCES}
+  ${LIB_HEADERS}
+  ${LIB_SOURCES}
 )
 
 target_include_directories(${PROJECT_NAME}_lib
