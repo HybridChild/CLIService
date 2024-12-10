@@ -24,8 +24,6 @@ namespace cliService
     static constexpr char TAB = 0x09;
     static constexpr char ESC = 0x1B;
 
-  protected:
-    friend class CLIService;
     std::string getBuffer() const { return _buffer; }
     void appendToBuffer(const std::string& str) { _buffer += str; }
     

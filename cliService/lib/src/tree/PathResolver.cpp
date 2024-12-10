@@ -12,48 +12,18 @@ namespace cliService
 
   NodeIf* PathResolver::resolve(const Path& path, const Directory& currentDir) const 
   {
-    // Normalize the path first
-    Path normalizedPath = path.normalized();
-
-    // Handle absolute vs relative paths
-    if (normalizedPath.isAbsolute())
-    {
-      return resolveAbsolute(normalizedPath);
+    // For relative paths, first convert to absolute by combining with current directory path
+    if (!path.isAbsolute()) {
+      // Get the absolute path of current directory
+      Path currentPath = getAbsolutePath(currentDir);
+      
+      // Join the paths and normalize
+      Path absolutePath = currentPath.join(path).normalized();
+      return resolveAbsolute(absolutePath);
     }
 
-    // Empty relative path returns current directory
-    if (normalizedPath.isEmpty())
-    {
-      return const_cast<Directory*>(&currentDir);
-    }
-
-    // Start from current directory for relative paths
-    NodeIf* current = const_cast<Directory*>(&currentDir);
-
-    // Process each element of the normalized path
-    for (const auto& element : normalizedPath.elements())
-    {
-      // Must be in a directory to continue
-      if (!current || !current->isDirectory())
-      {
-        return nullptr;
-      }
-
-      if (element == "..")
-      {
-        current = current->getParent();
-        // If we hit root's parent, stay at root
-        if (!current) { current = &_root; }
-      }
-      else
-      {
-        auto* dir = static_cast<Directory*>(current);
-        current = dir->findNode({element});
-        if (!current) { return nullptr; }
-      }
-    }
-
-    return current;
+    // Handle absolute paths directly
+    return resolveAbsolute(path.normalized());
   }
 
   NodeIf* PathResolver::resolveAbsolute(const Path& path) const 
