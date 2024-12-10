@@ -246,9 +246,11 @@ namespace cliService
     auto currentInput = _parser.getBuffer();
     auto node = resolvePath(request.getPath());
 
-    if (node && node->isDirectory() && currentInput.back() != '/')
+    if (node && node->isDirectory() && !currentInput.empty() && currentInput.back() != '/')
     {
-      currentInput += "/";
+      _terminal.putChar('/');
+      _parser.appendToBuffer("/");
+      return;
     }
 
     auto result = PathCompleter::complete(*_currentDirectory, currentInput, _currentUser->getAccessLevel());
