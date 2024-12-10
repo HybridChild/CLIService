@@ -20,13 +20,13 @@ namespace cliService
       }
 
       std::string response = "Heap stats: \n";
-      response += "Available Heap Space In Bytes: \n";
-      response += "Size Of Largest Free Block In Bytes: \n";
-      response += "Size Of Smallest Free Block In Bytes: \n";
-      response += "Number Of Free Blocks: \n";
-      response += "Minimum Ever Free Bytes Remaining: \n";
-      response += "Number Of Successful Allocations: \n";
-      response += "Number Of Successful Frees: ";
+      response += "  Available Heap Space In Bytes:        18500\n";
+      response += "  Size Of Largest Free Block In Bytes:  12800\n";
+      response += "  Size Of Smallest Free Block In Bytes:   500\n";
+      response += "  Number Of Free Blocks:                    4\n";
+      response += "  Minimum Ever Free Bytes Remaining:     7700\n";
+      response += "  Number Of Successful Allocations:    123456\n";
+      response += "  Number Of Successful Frees:           23456";
       return CommandResponse::success(response);
     }
   };
