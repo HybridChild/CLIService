@@ -19,7 +19,8 @@ std::unique_ptr<Directory> createMenuTree()
     
     auto& dirSystem = dirRoot->addDirectory("system", AccessLevel::Admin);
       dirSystem.addCommand<RebootCommand>("reboot", AccessLevel::Admin);
-      dirSystem.addCommand<HeapStatsGetCommand>("heap", AccessLevel::Admin);
+        auto& dirFreeRTOS = dirSystem.addDirectory("freeRTOS", AccessLevel::Admin);
+          dirFreeRTOS.addCommand<HeapStatsGetCommand>("heap", AccessLevel::Admin);
 
     auto& dirHw = dirRoot->addDirectory("hw", AccessLevel::User);
       auto& dirHwPot = dirHw.addDirectory("potmeter", AccessLevel::User);
