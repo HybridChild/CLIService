@@ -44,14 +44,19 @@ namespace cliService
 
     // Get next command (triggered by DOWN arrow)
     std::string getNextCommand() {
-      if (_currentIndex < _history.size() - 1) {
-        _currentIndex++;
-        return _history[_currentIndex];
+      // If history is empty or we're already at the end, return empty string
+      if (_history.empty() || _currentIndex >= _history.size()) {
+        return "";
       }
+
+      _currentIndex++;
       
-      // If we reach the end, clear the current command
-      _currentIndex = _history.size();
-      return "";
+      // If we've moved past the last command, return empty string
+      if (_currentIndex >= _history.size()) {
+        return "";
+      }
+
+      return _history[_currentIndex];
     }
 
     // Reset the history navigation (called when Enter is pressed)
@@ -70,6 +75,7 @@ namespace cliService
       return _history.size();
     }
 
+    // Get current navigation index (for testing)
     size_t getCurrentIndex() const {
       return _currentIndex;
     }
