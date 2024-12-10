@@ -3,6 +3,7 @@ set(LIB_HEADERS
   include/cliService/cli/CLIService.hpp
   include/cliService/cli/CLIServiceConfiguration.hpp
   include/cliService/cli/CLIState.hpp
+  include/cliService/cli/CommandHistory.hpp
   include/cliService/cli/InputParser.hpp
   include/cliService/cli/LoginRequest.hpp
   include/cliService/cli/RequestBase.hpp

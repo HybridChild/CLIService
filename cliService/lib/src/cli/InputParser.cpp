@@ -104,21 +104,53 @@ namespace cliService
     {
       switch (_escapeBuffer[1])
       {
-        case 'A': // Up arrow
-          if (_currentState == CLIState::LoggedIn)
-          {
-            _lastTrigger = ActionRequest::Trigger::ArrowUp;
-            return true;
+     case 'A': // Up arrow
+        if (_currentState == CLIState::LoggedIn)
+        {
+          // Save current buffer first time we press up
+          if (_history.getCurrentIndex() == _history.size()) {
+            _savedBuffer = _buffer;
           }
-          break;
-        
-        case 'B': // Down arrow
-          if (_currentState == CLIState::LoggedIn)
-          {
-            _lastTrigger = ActionRequest::Trigger::ArrowDown;
-            return true;
+          
+          // Clear current line
+          while (!_buffer.empty()) {
+            _terminal.putString("\b \b");
+            _buffer.pop_back();
           }
-          break;
+          
+          // Show previous command
+          std::string prevCmd = _history.getPreviousCommand();
+          _buffer = prevCmd;
+          _terminal.putString(prevCmd);
+          
+          _lastTrigger = ActionRequest::Trigger::ArrowUp;
+          return true;
+        }
+        break;
+      
+      case 'B': // Down arrow
+        if (_currentState == CLIState::LoggedIn)
+        {
+          // Clear current line
+          while (!_buffer.empty()) {
+            _terminal.putString("\b \b");
+            _buffer.pop_back();
+          }
+          
+          // Show next command or restore saved buffer
+          std::string nextCmd = _history.getNextCommand();
+          if (nextCmd.empty() && !_savedBuffer.empty()) {
+            nextCmd = _savedBuffer;
+            _savedBuffer.clear();
+          }
+          
+          _buffer = nextCmd;
+          _terminal.putString(nextCmd);
+          
+          _lastTrigger = ActionRequest::Trigger::ArrowDown;
+          return true;
+        }
+        break;
 
         case 'C': // Right arrow
           if (_currentState == CLIState::LoggedIn)
@@ -182,10 +214,15 @@ namespace cliService
       case CLIState::LoggedIn:
       {
         auto request = std::make_unique<ActionRequest>(_buffer, _lastTrigger);
-        if (_lastTrigger != ActionRequest::Trigger::Tab)
+        
+        if (_lastTrigger == ActionRequest::Trigger::Enter && !_buffer.empty())
         {
+          _history.addCommand(_buffer);
+          _history.resetNavigation();
+          _savedBuffer.clear();
           _buffer.clear();
         }
+        
         return request;
       }
 

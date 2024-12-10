@@ -3,6 +3,7 @@
 #include "cliService/cli/ActionRequest.hpp"
 #include "cliService/cli/LoginRequest.hpp"
 #include "cliService/cli/CLIState.hpp"
+#include "cliService/cli/CommandHistory.hpp"
 #include <memory>
 #include <string>
 #include <optional>
@@ -43,6 +44,8 @@ namespace cliService
     char _escapeBuffer[2];
     uint8_t _escapeIndex;
     ActionRequest::Trigger _lastTrigger;
+    CommandHistory _history;
+    std::string _savedBuffer;  // Saves current input when navigating history
   };
 
 }

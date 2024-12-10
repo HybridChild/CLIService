@@ -189,22 +189,8 @@ namespace cliService
     case ActionRequest::Trigger::Tab:
       handleTabCompletion(request);
       break;
-    case ActionRequest::Trigger::ArrowUp:
-      _terminal.putString("Up arrow pressed\n");
-      displayPrompt();
-      break;
-    case ActionRequest::Trigger::ArrowDown:
-      _terminal.putString("Down arrow pressed\n");
-      displayPrompt();
-      break;
     case ActionRequest::Trigger::ArrowLeft:
-      _terminal.putString("Left arrow pressed\n");
-      displayPrompt();
-      break;
     case ActionRequest::Trigger::ArrowRight:
-      _terminal.putString("Right arrow pressed\n");
-      displayPrompt();
-      break;
     default:
       break;
     };
