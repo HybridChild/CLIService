@@ -116,6 +116,66 @@ target_link_libraries(${PROJECT_NAME}_PathCompleter_test
 )
 
 
+# CommandHistory tests
+add_executable(${PROJECT_NAME}_CommandHistory_test
+  tests/cli/CommandHistoryTest.cpp
+)
+
+target_link_libraries(${PROJECT_NAME}_CommandHistory_test
+  PRIVATE
+    ${PROJECT_NAME}_lib
+    GTest::gtest
+    GTest::gtest_main
+)
+
+
+# PathCompleter Advanced tests
+add_executable(${PROJECT_NAME}_PathCompleterAdvanced_test
+  tests/tree/PathCompleterAdvancedTest.cpp
+)
+
+target_link_libraries(${PROJECT_NAME}_PathCompleterAdvanced_test
+  PRIVATE
+    ${PROJECT_NAME}_lib
+    GTest::gtest
+    GTest::gtest_main
+)
+
+
+# CLIService Advanced test
+add_executable(${PROJECT_NAME}_CLIServiceAdvanced_test
+  tests/cli/CLIServiceAdvancedTest.cpp
+  mock/terminal/TerminalMock.cpp
+)
+
+target_include_directories(${PROJECT_NAME}_CLIServiceAdvanced_test
+  PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_link_libraries(${PROJECT_NAME}_CLIServiceAdvanced_test
+  PRIVATE
+    ${PROJECT_NAME}_lib
+    GTest::gtest
+    GTest::gtest_main
+    GTest::gmock
+    GTest::gmock_main
+)
+
+
+# PathResolver Navigation tests
+add_executable(${PROJECT_NAME}_PathResolverNavigation_test
+  tests/tree/PathResolverNavigationTest.cpp
+)
+
+target_link_libraries(${PROJECT_NAME}_PathResolverNavigation_test
+  PRIVATE
+    ${PROJECT_NAME}_lib
+    GTest::gtest
+    GTest::gtest_main
+)
+
+
 # Discover tests
 gtest_discover_tests(${PROJECT_NAME}_ActionRequest_test)
 gtest_discover_tests(${PROJECT_NAME}_LoginRequest_test)
@@ -125,3 +185,7 @@ gtest_discover_tests(${PROJECT_NAME}_CLIService_test)
 gtest_discover_tests(${PROJECT_NAME}_Path_test)
 gtest_discover_tests(${PROJECT_NAME}_PathResolver_test)
 gtest_discover_tests(${PROJECT_NAME}_PathCompleter_test)
+gtest_discover_tests(${PROJECT_NAME}_CommandHistory_test)
+gtest_discover_tests(${PROJECT_NAME}_PathCompleterAdvanced_test)
+gtest_discover_tests(${PROJECT_NAME}_CLIServiceAdvanced_test)
+gtest_discover_tests(${PROJECT_NAME}_PathResolverNavigation_test)
