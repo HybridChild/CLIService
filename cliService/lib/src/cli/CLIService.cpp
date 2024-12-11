@@ -13,7 +13,7 @@ namespace cliService
 {
 
   const std::unordered_set<std::string_view> CLIService::GLOBAL_COMMANDS = {
-    "logout", "tree"
+    "logout", "tree", "help", "?"
   };
 
 
@@ -41,6 +41,7 @@ namespace cliService
     _terminal.putChar('\n');
     _terminal.putString(LOGGED_OUT_MESSAGE);
     _terminal.putChar('\n');
+    displayPrompt();
   }
 
 
@@ -162,20 +163,97 @@ namespace cliService
   {
     if (command == "logout")
     {
+      if (!args.empty())
+      {
+        _terminal.putString(NO_ARGUMENTS_MESSAGE);
+        _terminal.putChar('\n');
+        displayPrompt();
+        return;
+      }
+
       _currentState = CLIState::LoggedOut;
       _currentUser = std::nullopt;
       resetToRoot();
       _terminal.putString(LOGGED_OUT_MESSAGE);
       _terminal.putChar('\n');
+      displayPrompt();
     }
     else if (command == "tree")
     {
+      
+      if (!args.empty())
+      {
+        _terminal.putString(NO_ARGUMENTS_MESSAGE);
+        _terminal.putChar('\n');
+        displayPrompt();
+        return;
+      }
+
       // print tree structure string
+      _terminal.putChar('\n');
       _currentDirectory->traverse([&](const NodeIf& node, int depth) {
         std::string indent(depth * 2, ' ');
         std::string treeStr = indent + node.getName() + (node.isDirectory() ? "/" : "") + "\n";
         _terminal.putString(treeStr);
       });
+
+      _terminal.putChar('\n');
+      displayPrompt();
+    }
+    else if (command == "?")
+    {
+      if (!args.empty())
+      {
+        _terminal.putString(NO_ARGUMENTS_MESSAGE);
+        _terminal.putChar('\n');
+        displayPrompt();
+        return;
+      }
+
+      _terminal.putChar('\n');
+      _terminal.putString("Available commands in current directory:\n");
+      _currentDirectory->traverse([&](const NodeIf& node, int depth) {
+        // Only show items in current directory and with appropriate access level
+        if (depth == 1 && node.getAccessLevel() <= _currentUser->getAccessLevel())
+        {
+          std::string indent("  ");
+          std::string entry = indent + node.getName();
+          
+          if (node.isDirectory())
+          {
+            entry += "/";
+          }
+          else if (auto* cmd = dynamic_cast<const CommandIf*>(&node))
+          {
+            if (!cmd->getDescription().empty())
+            {
+              entry += " - " + cmd->getDescription();
+            }
+          }
+          entry += "\n";
+          _terminal.putString(entry);
+        }
+      });
+
+      _terminal.putChar('\n');
+      displayPrompt();
+    }
+    else if (command == "help")
+    {
+      if (!args.empty())
+      {
+        _terminal.putString(NO_ARGUMENTS_MESSAGE);
+        _terminal.putChar('\n');
+        displayPrompt();
+        return;
+      }
+
+      // Show global commands
+      _terminal.putString("\nGlobal commands:\n");
+      _terminal.putString("  help   - List global commands\n");
+      _terminal.putString("  tree   - Show directory structure\n");
+      _terminal.putString("  ?      - Show help for available commands in current directory\n");
+      _terminal.putString("  logout - Exit current session\n\n");
 
       displayPrompt();
     }
@@ -281,8 +359,9 @@ namespace cliService
       _terminal.putString("@");
       std::string pathStr = _pathResolver.getAbsolutePath(*_currentDirectory).toString();
       _terminal.putString(pathStr);
-      _terminal.putString(" > ");
     }
+
+    _terminal.putString(" > ");
   }
 
 }

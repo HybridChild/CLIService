@@ -8,15 +8,15 @@ namespace cliService
   class RebootCommand : public CommandIf
   {
   public:
-    RebootCommand(std::string name, AccessLevel level)
-      : CommandIf(std::move(name), level)
+    RebootCommand(std::string name, AccessLevel level, std::string description = "")
+      : CommandIf(std::move(name), level, "Reboot the device")
     {}
 
     CommandResponse execute(const std::vector<std::string>& args) override
     {
       if (args.size() > 0)
       {
-        return CommandResponse("Reboot command does not take any arguments.", CommandStatus::InvalidArguments);
+        return CommandResponse("Command take no arguments.", CommandStatus::InvalidArguments);
       }
 
       // signal system reboot

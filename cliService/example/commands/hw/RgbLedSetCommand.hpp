@@ -10,15 +10,15 @@ namespace cliService
   class RgbLedSetCommand : public CommandIf
   {
   public:
-    RgbLedSetCommand(std::string name, AccessLevel level)
-      : CommandIf(std::move(name), level)
+    RgbLedSetCommand(std::string name, AccessLevel level, std::string description = "")
+      : CommandIf(std::move(name), level, "Set RGB LED color - Args: <rgbLED ID> <R> <G> <B>")
     {}
 
     CommandResponse execute(const std::vector<std::string>& args) override
     {
       if (args.size() < 1 || args.size() > 4)
       {
-        return CommandResponse("Invalid number of arguments. Please provide: <ID> <R> <G> <B>", CommandStatus::InvalidArguments);
+        return CommandResponse("Invalid number of arguments.", CommandStatus::InvalidArguments);
       }
 
       if (!util::isIntegerString(args[0]))

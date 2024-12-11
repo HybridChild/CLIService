@@ -8,15 +8,15 @@ namespace cliService
   class HeapStatsGetCommand : public CommandIf
   {
   public:
-    HeapStatsGetCommand(std::string name, AccessLevel level)
-      : CommandIf(std::move(name), level)
+    HeapStatsGetCommand(std::string name, AccessLevel level, std::string description = "")
+      : CommandIf(std::move(name), level, "Get heap statistics")
     {}
 
     CommandResponse execute(const std::vector<std::string>& args) override
     {
       if (args.size() > 0)
       {
-        return CommandResponse("Command does not take any arguments.", CommandStatus::InvalidArguments);
+        return CommandResponse("Command takes no arguments.", CommandStatus::InvalidArguments);
       }
 
       std::string response = "Heap stats: \n";

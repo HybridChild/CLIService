@@ -12,15 +12,15 @@ namespace cliService
   class PotmeterGetCommand : public CommandIf
   {
   public:
-    PotmeterGetCommand(std::string name, AccessLevel level)
-      : CommandIf(std::move(name), level)
+    PotmeterGetCommand(std::string name, AccessLevel level, std::string description = "")
+      : CommandIf(std::move(name), level, "Get potmeter value - Args: <pot ID>")
     {}
 
     CommandResponse execute(const std::vector<std::string>& args) override
     {
       if (args.size() < 1 || args.size() > 1)
       {
-        return CommandResponse("Please provide potmeter ID: 1 .. 4", CommandStatus::InvalidArguments);
+        return CommandResponse("Invalid number of arguments.", CommandStatus::InvalidArguments);
       }
 
       if (!util::isIntegerString(args[0]))

@@ -16,15 +16,15 @@ namespace cliService
   class ToggleSwitchGetCommand : public CommandIf
   {
   public:
-    ToggleSwitchGetCommand(std::string name, AccessLevel level)
-      : CommandIf(std::move(name), level)
+    ToggleSwitchGetCommand(std::string name, AccessLevel level, std::string description = "")
+      : CommandIf(std::move(name), level, "Get toggle switch position - Args: <toggleSwitch ID>")
     {}
 
     CommandResponse execute(const std::vector<std::string>& args) override
     {
       if (args.size() < 1 || args.size() > 1)
       {
-        return CommandResponse("Please provide toggle switch ID: 1 .. 2", CommandStatus::InvalidArguments);
+        return CommandResponse("Invalid number of arguments.", CommandStatus::InvalidArguments);
       }
 
       if (!util::isIntegerString(args[0]))

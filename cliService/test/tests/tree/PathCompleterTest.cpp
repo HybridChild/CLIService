@@ -12,8 +12,8 @@ using namespace cliService;
 class TestCommand : public CommandIf
 {
 public:
-  TestCommand(std::string name, AccessLevel level) 
-    : CommandIf(std::move(name), level)
+  TestCommand(std::string name, AccessLevel level, std::string description = "") 
+    : CommandIf(std::move(name), level, std::move(description))
   {}
   
   CommandResponse execute(const std::vector<std::string>&) override
