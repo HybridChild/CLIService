@@ -16,12 +16,12 @@ namespace cliService
       std::unique_ptr<Directory> root)
       : _terminal(terminal)
       , _users(std::move(users))
-      , _root(std::move(root))
+      , _rootDirectory(std::move(root))
     {}
 
     TerminalIf& _terminal;
     std::vector<User> _users;
-    std::unique_ptr<Directory> _root;
+    std::unique_ptr<Directory> _rootDirectory;
   };
 
 }

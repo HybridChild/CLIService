@@ -21,14 +21,14 @@ namespace cliService
     : _terminal(config._terminal)
     , _parser(_terminal, _currentState)
     , _users(std::move(config._users))
-    , _root(std::move(config._root))
-    , _currentDirectory(_root.get())
+    , _rootDirectory(std::move(config._rootDirectory))
+    , _currentDirectory(_rootDirectory.get())
     , _currentUser(std::nullopt)
     , _currentState(CLIState::Inactive)
-    , _pathResolver(*_root)
+    , _pathResolver(*_rootDirectory)
   {
     assert(!_users.empty() && "User list cannot be empty");
-    assert(_root != nullptr && "Root directory cannot be null");
+    assert(_rootDirectory != nullptr && "Root directory cannot be null");
     assert(_currentDirectory != nullptr && "Current directory must be set");
   }
 
@@ -347,7 +347,7 @@ namespace cliService
 
   void CLIService::resetToRoot() 
   {
-    _currentDirectory = _root.get();
+    _currentDirectory = _rootDirectory.get();
   }
 
 
