@@ -9,10 +9,9 @@ namespace cliService
     , _currentState(currentState)
     , _inEscapeSequence(false)
     , _escapeIndex(0)
-  {
-  }
+  {}
 
-  std::optional<std::unique_ptr<RequestBase>> InputParser::service()
+  std::optional<std::unique_ptr<RequestBase>> InputParser::parseNextRequest()
   {
     while (_terminal.available())
     {

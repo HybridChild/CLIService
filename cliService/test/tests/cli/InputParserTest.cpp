@@ -25,7 +25,7 @@ protected:
     std::optional<std::unique_ptr<RequestBase>> request;
     while (_terminal.available())
     {
-      request = _parser->service();
+      request = _parser->parseNextRequest();
     }
     return request;
   }

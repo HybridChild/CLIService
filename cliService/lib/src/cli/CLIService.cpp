@@ -49,7 +49,7 @@ namespace cliService
   {
     if (_currentState == CLIState::Inactive) { return; }
 
-    auto request = _parser.service();
+    auto request = _parser.parseNextRequest();
     if (!request) { return; }
 
     // Process state-specific requests
