@@ -21,6 +21,7 @@ set(LIB_HEADERS
 set(LIB_SOURCES
   src/cli/ActionRequest.cpp
   src/cli/CLIService.cpp
+  src/cli/CommandHistory.cpp
   src/cli/InputParser.cpp
   src/cli/LoginRequest.cpp
   src/cli/User.cpp
