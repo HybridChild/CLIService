@@ -9,10 +9,12 @@ namespace cliService
     : NodeIf(std::move(name), level)
   {}
 
+
   bool Directory::isDirectory() const
   {
     return true;
   }
+
 
   Directory& Directory::addDirectory(const std::string& name, AccessLevel level)
   {
@@ -21,6 +23,7 @@ namespace cliService
     addChild(std::move(dir));
     return *dirPtr;
   }
+
 
   NodeIf* Directory::findNode(const std::vector<std::string>& path) const
   {
@@ -47,6 +50,7 @@ namespace cliService
     return static_cast<Directory*>(it->get())->findNode(subPath);
   }
 
+
   void Directory::traverse(const std::function<void(const NodeIf&, int)>& visitor, int depth) const
   {
     // Visit current directory
@@ -68,12 +72,14 @@ namespace cliService
     }
   }
 
+
   NodeIf* Directory::resolvePath(std::string_view pathStr, const Directory& currentDir) const
   {
     // Create a resolver using this directory as root
     PathResolver resolver(*const_cast<Directory*>(this));
     return resolver.resolveFromString(pathStr, currentDir);
   }
+
 
   Path Directory::getRelativePath(const NodeIf& node) const
   {
@@ -85,6 +91,7 @@ namespace cliService
     // This would require adding a new method to Path class
     return nodePath.relativeTo(myPath);
   }
+
 
   void Directory::addChild(std::unique_ptr<NodeIf> child)
   {

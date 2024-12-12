@@ -14,8 +14,9 @@ namespace cliService
       , _description(std::move(description))
     {}
     
-    bool isDirectory() const override { return false; }
     virtual CommandResponse execute(const std::vector<std::string>& args) = 0;
+    
+    bool isDirectory() const override { return false; }
     const std::string& getDescription() const { return _description; }
 
   private:

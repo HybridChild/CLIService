@@ -10,9 +10,7 @@ namespace cliService
   class PathResolver 
   {
   public:
-    explicit PathResolver(Directory& root) 
-      : _root(root)
-    {}
+    explicit PathResolver(Directory& root);
 
     // Core resolution method - returns nullptr if path cannot be resolved
     NodeIf* resolve(const Path& path, const Directory& currentDir) const;

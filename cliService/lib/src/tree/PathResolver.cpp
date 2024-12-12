@@ -5,10 +5,15 @@
 namespace cliService
 {
 
-  NodeIf* PathResolver::resolveFromString(std::string_view pathStr, const Directory& currentDir) const 
-  {
+  PathResolver::PathResolver(Directory& root) 
+    : _root(root)
+  {}
+
+
+  NodeIf* PathResolver::resolveFromString(std::string_view pathStr, const Directory& currentDir) const {
     return resolve(Path(pathStr), currentDir);
   }
+
 
   NodeIf* PathResolver::resolve(const Path& path, const Directory& currentDir) const 
   {
@@ -25,6 +30,7 @@ namespace cliService
     // Handle absolute paths directly
     return resolveAbsolute(path.normalized());
   }
+
 
   NodeIf* PathResolver::resolveAbsolute(const Path& path) const 
   {
@@ -50,12 +56,14 @@ namespace cliService
     return current;
   }
 
+
   Path PathResolver::getAbsolutePath(const NodeIf& node) 
   {
     std::vector<std::string> elements;
 
     // Walk up the tree collecting node names
     const NodeIf* current = &node;
+    
     while (current->getParent())
     {
       elements.push_back(current->getName());

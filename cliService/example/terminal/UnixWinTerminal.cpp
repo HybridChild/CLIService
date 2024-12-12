@@ -15,8 +15,7 @@ namespace cliService
 {
 
   UnixWinTerminal::UnixWinTerminal()
-    : _isOpen(false)
-    , _lastError("")
+    : _isOpen(false), _lastError("")
   {
   #ifdef _WIN32
     _hStdin = GetStdHandle(STD_INPUT_HANDLE);
@@ -37,12 +36,12 @@ namespace cliService
   {
     restoreTerminal();
     
-    #ifdef _WIN32
+  #ifdef _WIN32
     delete static_cast<DWORD*>(_oldInMode);
     delete static_cast<DWORD*>(_oldOutMode);
-    #else
+  #else
     delete static_cast<termios*>(_oldTermios);
-    #endif
+  #endif
   }
 
   void UnixWinTerminal::setupTerminal()
@@ -144,10 +143,10 @@ namespace cliService
   #ifdef _WIN32
     // Windows implementation using WaitForSingleObject
     DWORD result = WaitForSingleObject(_hStdin, timeout_ms);
-    if (result == WAIT_OBJECT_0)
-    {
+    if (result == WAIT_OBJECT_0) {
       return getChar(c);
     }
+
     return false;
   #else
     // Unix implementation using select
@@ -160,10 +159,11 @@ namespace cliService
     tv.tv_usec = (timeout_ms % 1000) * 1000;
     
     int result = select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv);
-    if (result > 0)
-    {
+
+    if (result > 0) {
       return getChar(c);
     }
+
     return false;
   #endif
   }
@@ -190,23 +190,19 @@ namespace cliService
   #endif
   }
 
-  bool UnixWinTerminal::isOpen() const
-  {
+  bool UnixWinTerminal::isOpen() const {
     return _isOpen;
   }
 
-  bool UnixWinTerminal::hasError() const
-  {
+  bool UnixWinTerminal::hasError() const {
     return !_lastError.empty();
   }
 
-  const char* UnixWinTerminal::getLastError() const
-  {
+  const char* UnixWinTerminal::getLastError() const {
     return _lastError.c_str();
   }
 
-  void UnixWinTerminal::clearError()
-  {
+  void UnixWinTerminal::clearError() {
     _lastError.clear();
   }
 

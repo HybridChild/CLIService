@@ -38,11 +38,13 @@ std::unique_ptr<Directory> createMenuTree()
 int main()
 {
   UnixWinTerminal terminal{};
-  auto tree = createMenuTree();
+
   std::vector<cliService::User> users = {
     {"admin", "admin123", AccessLevel::Admin},
     {"user", "user123", AccessLevel::User}
   };
+
+  auto tree = createMenuTree();
 
   CLIServiceConfiguration cliConfig{static_cast<TerminalIf&>(terminal), std::move(users), std::move(tree)};
   CLIService cli(std::move(cliConfig));

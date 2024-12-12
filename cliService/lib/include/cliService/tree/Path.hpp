@@ -9,8 +9,8 @@ namespace cliService
   class Path 
   {
   public:
-    Path() : _isAbsolute(false) {}
     explicit Path(std::string_view pathStr);
+    Path();
     Path(std::vector<std::string> elements, bool isAbsolute);
     
     bool isAbsolute() const { return _isAbsolute; }

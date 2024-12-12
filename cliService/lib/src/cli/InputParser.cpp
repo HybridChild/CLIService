@@ -11,12 +11,12 @@ namespace cliService
     , _escapeIndex(0)
   {}
 
+
   std::optional<std::unique_ptr<RequestBase>> InputParser::parseNextRequest()
   {
     while (_terminal.available())
     {
-      if (processNextChar())
-      {
+      if (processNextChar()) {
         return createRequest();
       }
     }
@@ -24,22 +24,23 @@ namespace cliService
     return std::nullopt;
   }
 
+
   bool InputParser::processNextChar()
   {
     char c;
 
-    if (!_terminal.getChar(c))
-    {
+    if (!_terminal.getChar(c)) {
       return false;
     }
 
     if (_inEscapeSequence)
     {
       _escapeBuffer[_escapeIndex++] = c;
-      if (_escapeIndex == 2)
-      {
+
+      if (_escapeIndex == 2) {
         return handleEscapeSequence();
       }
+
       return false;
     }
 
@@ -52,6 +53,7 @@ namespace cliService
         _lastTrigger = ActionRequest::Trigger::Enter;
         return true;
       }
+
       return false;
     }
 
@@ -62,14 +64,14 @@ namespace cliService
       return false;
     }
 
-    if (std::iscntrl(c))
-    {
+    if (std::iscntrl(c)) {
       return handleControlCharacter(c);
     }
 
     handleRegularCharacter(c);
     return false;
   }
+
 
   bool InputParser::handleControlCharacter(char c)
   {
@@ -95,6 +97,7 @@ namespace cliService
     return false;
   }
 
+
   bool InputParser::handleEscapeSequence()
   {
     _inEscapeSequence = false;
@@ -103,53 +106,56 @@ namespace cliService
     {
       switch (_escapeBuffer[1])
       {
-     case 'A': // Up arrow
-        if (_currentState == CLIState::LoggedIn)
-        {
-          // Save current buffer first time we press up
-          if (_history.getCurrentIndex() == _history.size()) {
-            _savedBuffer = _buffer;
+        case 'A': // Up arrow
+          if (_currentState == CLIState::LoggedIn)
+          {
+            // Save current buffer first time we press up
+            if (_history.getCurrentIndex() == _history.size()) {
+              _savedBuffer = _buffer;
+            }
+            
+            // Clear current line
+            while (!_buffer.empty()) {
+              _terminal.putString("\b \b");
+              _buffer.pop_back();
+            }
+            
+            // Show previous command
+            std::string prevCmd = _history.getPreviousCommand();
+            _buffer = prevCmd;
+            _terminal.putString(prevCmd);
+            
+            _lastTrigger = ActionRequest::Trigger::ArrowUp;
+            return true;
           }
-          
-          // Clear current line
-          while (!_buffer.empty()) {
-            _terminal.putString("\b \b");
-            _buffer.pop_back();
+          break;
+        
+        case 'B': // Down arrow
+          if (_currentState == CLIState::LoggedIn)
+          {
+            // Clear current line
+            while (!_buffer.empty())
+            {
+              _terminal.putString("\b \b");
+              _buffer.pop_back();
+            }
+            
+            // Show next command or restore saved buffer
+            std::string nextCmd = _history.getNextCommand();
+
+            if (nextCmd.empty() && !_savedBuffer.empty())
+            {
+              nextCmd = _savedBuffer;
+              _savedBuffer.clear();
+            }
+            
+            _buffer = nextCmd;
+            _terminal.putString(nextCmd);
+            
+            _lastTrigger = ActionRequest::Trigger::ArrowDown;
+            return true;
           }
-          
-          // Show previous command
-          std::string prevCmd = _history.getPreviousCommand();
-          _buffer = prevCmd;
-          _terminal.putString(prevCmd);
-          
-          _lastTrigger = ActionRequest::Trigger::ArrowUp;
-          return true;
-        }
-        break;
-      
-      case 'B': // Down arrow
-        if (_currentState == CLIState::LoggedIn)
-        {
-          // Clear current line
-          while (!_buffer.empty()) {
-            _terminal.putString("\b \b");
-            _buffer.pop_back();
-          }
-          
-          // Show next command or restore saved buffer
-          std::string nextCmd = _history.getNextCommand();
-          if (nextCmd.empty() && !_savedBuffer.empty()) {
-            nextCmd = _savedBuffer;
-            _savedBuffer.clear();
-          }
-          
-          _buffer = nextCmd;
-          _terminal.putString(nextCmd);
-          
-          _lastTrigger = ActionRequest::Trigger::ArrowDown;
-          return true;
-        }
-        break;
+          break;
 
         case 'C': // Right arrow
           if (_currentState == CLIState::LoggedIn)
@@ -171,24 +177,25 @@ namespace cliService
     return false;
   }
 
+
   void InputParser::handleRegularCharacter(char c)
   {
     _buffer += c;
     echoCharacter(c);
   }
 
+
   void InputParser::echoCharacter(char c)
   {
     if (_currentState == CLIState::LoggedOut)
     {
       size_t colonPos = _buffer.find(':');
+      
       // If we've found a colon and this character is after it, mask it
-      if (colonPos != std::string::npos && _buffer.length() > colonPos + 1)
-      {
+      if (colonPos != std::string::npos && _buffer.length() > colonPos + 1) {
         _terminal.putChar('*');
       }
-      else
-      {
+      else {
         _terminal.putChar(c);
       }
     }

@@ -9,7 +9,7 @@ namespace cliService
   class CommandHistory
   {
   public:
-    explicit CommandHistory(size_t maxSize = 50);
+    CommandHistory(size_t maxSize = 50);
 
     void addCommand(const std::string& command);
 

@@ -8,10 +8,8 @@ namespace util
   {
     if (str.empty() || str.length() > 3) return false;
 
-    // Check if all characters are digits
-    for (char c : str)
-    {
-      if (!std::isdigit(c)) return false;
+    for (char c : str) {
+      if (!std::isdigit(c)) { return false; }
     }
 
     return true;

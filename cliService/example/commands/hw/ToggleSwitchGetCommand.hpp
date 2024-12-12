@@ -22,20 +22,17 @@ namespace cliService
 
     CommandResponse execute(const std::vector<std::string>& args) override
     {
-      if (args.size() < 1 || args.size() > 1)
-      {
+      if (args.size() < 1 || args.size() > 1) {
         return CommandResponse("Invalid number of arguments.", CommandStatus::InvalidArguments);
       }
 
-      if (!util::isIntegerString(args[0]))
-      {
+      if (!util::isIntegerString(args[0])) {
         return CommandResponse("Invalid toggle switch ID: " + args[0] + ". Must be integer.", CommandStatus::InvalidArguments);
       }
 
       uint32_t potId = std::stoi(args[0]);
 
-      if (potId < 1 || potId > 2)
-      {
+      if (potId < 1 || potId > 2) {
         return CommandResponse("Invalid toggle switch ID: " + args[0] + ". Must be 1 .. 2", CommandStatus::InvalidArguments);
       }
 

@@ -33,7 +33,7 @@ namespace cliService
   }
 
 
-  void CLIService::activate() 
+  void CLIService::activate()
   {
     assert(_currentState == CLIState::Inactive && "Service must be inactive to activate");
     _currentState = CLIState::LoggedOut;
@@ -45,7 +45,7 @@ namespace cliService
   }
 
 
-  void CLIService::service() 
+  void CLIService::service()
   {
     if (_currentState == CLIState::Inactive) { return; }
 
@@ -76,14 +76,13 @@ namespace cliService
   }
 
 
-  void CLIService::handleLoginRequest(const LoginRequest& request) 
+  void CLIService::handleLoginRequest(const LoginRequest& request)
   {
     const auto& username = request.getUsername();
     const auto& password = request.getPassword();
 
     auto userIt = std::find_if(_users.begin(), _users.end(),
-      [&](const User& user)
-      {
+      [&](const User& user) {
         return user.getUsername() == username && user.getPassword() == password;
       });
 
@@ -104,6 +103,7 @@ namespace cliService
   {
     assert(_currentUser && "No user logged in");
 
+    // Handle special keys
     if (request.getTrigger() != ActionRequest::Trigger::Enter)
     {
       handleSpecialKey(request);
@@ -159,7 +159,7 @@ namespace cliService
   }
 
 
-  void CLIService::handleGlobalCommand(const std::string_view& command, const std::vector<std::string>& args) 
+  void CLIService::handleGlobalCommand(const std::string_view& command, const std::vector<std::string>& args)
   {
     if (command == "logout")
     {
@@ -191,6 +191,7 @@ namespace cliService
 
       // print tree structure string
       _terminal.putChar('\n');
+
       _currentDirectory->traverse([&](const NodeIf& node, int depth) {
         std::string indent(depth * 2, ' ');
         std::string treeStr = indent + node.getName() + (node.isDirectory() ? "/" : "") + "\n";
@@ -212,6 +213,7 @@ namespace cliService
 
       _terminal.putChar('\n');
       _terminal.putString("Available commands in current directory:\n");
+
       _currentDirectory->traverse([&](const NodeIf& node, int depth) {
         // Only show items in current directory and with appropriate access level
         if (depth == 1 && node.getAccessLevel() <= _currentUser->getAccessLevel())
@@ -225,11 +227,11 @@ namespace cliService
           }
           else if (auto* cmd = dynamic_cast<const CommandIf*>(&node))
           {
-            if (!cmd->getDescription().empty())
-            {
+            if (!cmd->getDescription().empty()) {
               entry += " - " + cmd->getDescription();
             }
           }
+
           entry += "\n";
           _terminal.putString(entry);
         }
@@ -275,29 +277,29 @@ namespace cliService
   }
 
 
-  NodeIf* CLIService::resolvePath(const Path& path) const 
+  NodeIf* CLIService::resolvePath(const Path& path) const
   {
     return _pathResolver.resolve(path, *_currentDirectory);
   }
 
 
-  bool CLIService::validatePathAccess(const NodeIf* node) const 
+  bool CLIService::validatePathAccess(const NodeIf* node) const
   {
     assert(_currentUser && "No user logged in");
     
-    if (!node)
-    {
+    if (!node) {
       return false;
     }
 
     // Check access levels up the tree
     const NodeIf* current = node;
+
     while (current)
     {
-      if (current->getAccessLevel() > _currentUser->getAccessLevel())
-      {
+      if (current->getAccessLevel() > _currentUser->getAccessLevel()) {
         return false;
       }
+
       current = current->getParent();
     }
     
@@ -345,13 +347,12 @@ namespace cliService
   }
 
 
-  void CLIService::resetToRoot() 
-  {
+  void CLIService::resetToRoot() {
     _currentDirectory = _rootDirectory.get();
   }
 
 
-  void CLIService::displayPrompt() const 
+  void CLIService::displayPrompt() const
   {
     if (_currentState == CLIState::LoggedIn && _currentUser)
     {

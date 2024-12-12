@@ -29,14 +29,14 @@ namespace cliService
     std::atomic<bool> _isOpen;
     std::string _lastError;
     
-    #ifdef _WIN32
+  #ifdef _WIN32
     void* _hStdin;  // HANDLE type
     void* _hStdout; // HANDLE type
     void* _oldInMode;  // DWORD type
     void* _oldOutMode; // DWORD type
-    #else
+  #else
     void* _oldTermios;  // struct termios*
-    #endif
+  #endif
   };
 
 }

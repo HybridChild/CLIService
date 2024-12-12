@@ -6,10 +6,8 @@ add_executable(${PROJECT_NAME}_ActionRequest_test
 target_link_libraries(${PROJECT_NAME}_ActionRequest_test
   PRIVATE
     ${PROJECT_NAME}_lib
-    GTest::gtest
     GTest::gtest_main
 )
-
 
 # LoginRequest tests
 add_executable(${PROJECT_NAME}_LoginRequest_test
@@ -19,10 +17,8 @@ add_executable(${PROJECT_NAME}_LoginRequest_test
 target_link_libraries(${PROJECT_NAME}_LoginRequest_test
   PRIVATE
     ${PROJECT_NAME}_lib
-    GTest::gtest
     GTest::gtest_main
 )
-
 
 # InputParser tests
 add_executable(${PROJECT_NAME}_InputParser_test
@@ -38,10 +34,8 @@ target_include_directories(${PROJECT_NAME}_InputParser_test
 target_link_libraries(${PROJECT_NAME}_InputParser_test
   PRIVATE
     ${PROJECT_NAME}_lib
-    GTest::gtest
     GTest::gtest_main
 )
-
 
 # Tree tests
 add_executable(${PROJECT_NAME}_Tree_test
@@ -51,10 +45,8 @@ add_executable(${PROJECT_NAME}_Tree_test
 target_link_libraries(${PROJECT_NAME}_Tree_test
   PRIVATE
     ${PROJECT_NAME}_lib
-    GTest::gtest
     GTest::gtest_main
 )
-
 
 # CLIService tests
 add_executable(${PROJECT_NAME}_CLIService_test
@@ -71,11 +63,9 @@ target_include_directories(${PROJECT_NAME}_CLIService_test
 target_link_libraries(${PROJECT_NAME}_CLIService_test
   PRIVATE
     ${PROJECT_NAME}_lib
-    GTest::gtest
     GTest::gtest_main
     GTest::gmock
 )
-
 
 # Path tests
 add_executable(${PROJECT_NAME}_Path_test
@@ -85,10 +75,8 @@ add_executable(${PROJECT_NAME}_Path_test
 target_link_libraries(${PROJECT_NAME}_Path_test
   PRIVATE
     ${PROJECT_NAME}_lib
-    GTest::gtest
     GTest::gtest_main
 )
-
 
 # PathResolver tests
 add_executable(${PROJECT_NAME}_PathResolver_test
@@ -98,12 +86,10 @@ add_executable(${PROJECT_NAME}_PathResolver_test
 target_link_libraries(${PROJECT_NAME}_PathResolver_test
   PRIVATE
     ${PROJECT_NAME}_lib
-    GTest::gtest
     GTest::gtest_main
 )
 
-
-# PathResolver tests
+# PathCompleter tests
 add_executable(${PROJECT_NAME}_PathCompleter_test
   tests/tree/PathCompleterTest.cpp
 )
@@ -111,10 +97,8 @@ add_executable(${PROJECT_NAME}_PathCompleter_test
 target_link_libraries(${PROJECT_NAME}_PathCompleter_test
   PRIVATE
     ${PROJECT_NAME}_lib
-    GTest::gtest
     GTest::gtest_main
 )
-
 
 # CommandHistory tests
 add_executable(${PROJECT_NAME}_CommandHistory_test
@@ -124,10 +108,8 @@ add_executable(${PROJECT_NAME}_CommandHistory_test
 target_link_libraries(${PROJECT_NAME}_CommandHistory_test
   PRIVATE
     ${PROJECT_NAME}_lib
-    GTest::gtest
     GTest::gtest_main
 )
-
 
 # PathCompleter Advanced tests
 add_executable(${PROJECT_NAME}_PathCompleterAdvanced_test
@@ -137,10 +119,8 @@ add_executable(${PROJECT_NAME}_PathCompleterAdvanced_test
 target_link_libraries(${PROJECT_NAME}_PathCompleterAdvanced_test
   PRIVATE
     ${PROJECT_NAME}_lib
-    GTest::gtest
     GTest::gtest_main
 )
-
 
 # CLIService Advanced test
 add_executable(${PROJECT_NAME}_CLIServiceAdvanced_test
@@ -156,12 +136,9 @@ target_include_directories(${PROJECT_NAME}_CLIServiceAdvanced_test
 target_link_libraries(${PROJECT_NAME}_CLIServiceAdvanced_test
   PRIVATE
     ${PROJECT_NAME}_lib
-    GTest::gtest
     GTest::gtest_main
     GTest::gmock
-    GTest::gmock_main
 )
-
 
 # PathResolver Navigation tests
 add_executable(${PROJECT_NAME}_PathResolverNavigation_test
@@ -171,10 +148,8 @@ add_executable(${PROJECT_NAME}_PathResolverNavigation_test
 target_link_libraries(${PROJECT_NAME}_PathResolverNavigation_test
   PRIVATE
     ${PROJECT_NAME}_lib
-    GTest::gtest
     GTest::gtest_main
 )
-
 
 # Discover tests
 gtest_discover_tests(${PROJECT_NAME}_ActionRequest_test)

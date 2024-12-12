@@ -16,20 +16,17 @@ namespace cliService
 
     CommandResponse execute(const std::vector<std::string>& args) override
     {
-      if (args.size() < 1 || args.size() > 4)
-      {
+      if (args.size() < 1 || args.size() > 4) {
         return CommandResponse("Invalid number of arguments.", CommandStatus::InvalidArguments);
       }
 
-      if (!util::isIntegerString(args[0]))
-      {
+      if (!util::isIntegerString(args[0])) {
         return CommandResponse("Invalid RGB LED ID: " + args[0] + ". Must be integer.", CommandStatus::InvalidArguments);
       }
 
       uint32_t rgbLedId = std::stoi(args[0]);
 
-      if (rgbLedId < 1 || rgbLedId > 2)
-      {
+      if (rgbLedId < 1 || rgbLedId > 2) {
         return CommandResponse("Invalid ID: " + args[0] + " ... valid IDs: 1 .. 2", CommandStatus::InvalidArguments);
       }
 
@@ -37,8 +34,7 @@ namespace cliService
 
       for (size_t i = 0; i < 3; i++)
       {
-        if (!isValidValueString(args[i + 1]))
-        {
+        if (!isValidValueString(args[i + 1])) {
           return CommandResponse("Invalid value: " + args[i + 1] + " ... valid values: 0 .. 255", CommandStatus::InvalidArguments);
         }
 

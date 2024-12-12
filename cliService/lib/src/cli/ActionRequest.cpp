@@ -56,8 +56,8 @@ namespace cliService
       // Fix for most vexing parse - use brace initialization
       std::istringstream argStream{std::string(argsStr)};
       std::string arg;
-      while (argStream >> arg)
-      {
+
+      while (argStream >> arg) {
         _args.push_back(std::move(arg));
       }
     }

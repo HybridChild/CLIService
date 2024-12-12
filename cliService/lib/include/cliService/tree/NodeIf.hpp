@@ -18,12 +18,12 @@ namespace cliService
     virtual ~NodeIf() = default;
     
     virtual bool isDirectory() const = 0;
-    bool isCommand() const { return !isDirectory(); }
 
     const std::string& getName() const { return _name; };
+    AccessLevel getAccessLevel() const { return _accessLevel; }
+    
     NodeIf* getParent() const { return _parent; }
     void setParent(NodeIf* parent) { _parent = parent; }
-    AccessLevel getAccessLevel() const { return _accessLevel; }
 
   protected:
     std::string _name;

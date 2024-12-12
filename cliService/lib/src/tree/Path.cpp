@@ -5,6 +5,11 @@
 namespace cliService
 {
 
+  Path::Path()
+    : _isAbsolute(false)
+  {}
+
+
   Path::Path(std::string_view pathStr)
   {
     bool isAbsolute;
@@ -12,10 +17,12 @@ namespace cliService
     _isAbsolute = isAbsolute;
   }
 
+
   Path::Path(std::vector<std::string> elements, bool isAbsolute)
     : _elements(std::move(elements))
     , _isAbsolute(isAbsolute)
   {}
+
 
   std::vector<std::string> Path::parseElements(std::string_view pathStr, bool& isAbsolute)
   {
@@ -36,18 +43,19 @@ namespace cliService
     {
       if (pos == pathStr.length() || pathStr[pos] == '/')
       {
-        if (pos > start)
-        {
+        if (pos > start) {
           elements.push_back(std::string(pathStr.substr(start, pos - start)));
         }
 
         start = pos + 1;
       }
+
       pos++;
     }
 
     return elements;
   }
+
 
   std::vector<std::string> Path::normalizeElements(const std::vector<std::string>& elements, bool isAbsolute)
   {
@@ -57,14 +65,20 @@ namespace cliService
     for (const auto& element : elements)
     {
       // Skip empty elements and "."
-      if (element.empty() || element == ".") { continue; }
+      if (element.empty() || element == ".") {
+        continue;
+      }
 
       // Handle ".." by removing last elements if possible
       if (element == "..")
       {
-        if (!normalized.empty()) { normalized.pop_back(); }
+        if (!normalized.empty()) {
+          normalized.pop_back();
+        }
         // Keep ".." if we're at the start of a relative path
-        else if (!isAbsolute) { normalized.push_back(".."); }
+        else if (!isAbsolute) {
+          normalized.push_back("..");
+        }
       }
       else
       {
@@ -75,24 +89,32 @@ namespace cliService
     return normalized;
   }
 
+
   Path Path::normalized() const
   {
     return Path(normalizeElements(_elements, _isAbsolute), _isAbsolute);
   }
 
+
   Path Path::parent() const
   {
-    if (isEmpty()) { return Path({".."}, _isAbsolute); }
+    if (isEmpty()) {
+      return Path({".."}, _isAbsolute);
+    }
 
     auto parentElements = _elements;
     parentElements.pop_back();
+
     return Path(std::move(parentElements), _isAbsolute);
   }
+
 
   Path Path::join(const Path& other) const
   {
     // If other is absolute, return it
-    if (other.isAbsolute()) { return other; }
+    if (other.isAbsolute()) {
+      return other;
+    }
 
     // Combine elements
     auto newElements = _elements;
@@ -109,7 +131,7 @@ namespace cliService
     
     // Find common prefix
     size_t commonPrefix = 0;
-    while (commonPrefix < _elements.size() && 
+    while ( commonPrefix < _elements.size() && 
             commonPrefix < base._elements.size() &&
             _elements[commonPrefix] == base._elements[commonPrefix])
     {
@@ -120,8 +142,7 @@ namespace cliService
     std::vector<std::string> relativeElements;
     
     // Add ".." for each element in base after common prefix
-    for (size_t i = commonPrefix; i < base._elements.size(); i++)
-    {
+    for (size_t i = commonPrefix; i < base._elements.size(); i++) {
       relativeElements.push_back("..");
     }
     
@@ -131,12 +152,17 @@ namespace cliService
     return Path(std::move(relativeElements), false);
   }
 
+
   std::string Path::toString() const
   {
-    if (isEmpty()) { return _isAbsolute ? "/" : "."; }
+    if (isEmpty()) {
+      return _isAbsolute ? "/" : ".";
+    }
 
     std::ostringstream oss;
-    if (_isAbsolute) { oss << '/'; }
+    if (_isAbsolute) {
+      oss << '/';
+    }
 
     for (size_t i = 0; i < _elements.size(); ++i)
     {
@@ -146,6 +172,7 @@ namespace cliService
 
     return oss.str();
   }
+
 
   bool Path::operator==(const Path& other) const
   {

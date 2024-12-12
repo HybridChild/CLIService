@@ -23,8 +23,6 @@ set(LIB_SOURCES
   src/cli/CLIService.cpp
   src/cli/CommandHistory.cpp
   src/cli/InputParser.cpp
-  src/cli/LoginRequest.cpp
-  src/cli/User.cpp
   src/tree/Directory.cpp
   src/tree/Path.cpp
   src/tree/PathResolver.cpp

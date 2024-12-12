@@ -7,9 +7,10 @@
 namespace cliService
 {
 
-  class ActionRequest : public RequestBase 
+  class ActionRequest : public RequestBase
   {
   public:
+
     enum class Trigger
     {
       Enter,
@@ -30,7 +31,7 @@ namespace cliService
     Path _path;
     std::vector<std::string> _args;
     Trigger _trigger;
-    
+
     static void parseInput(std::string_view input, std::string_view& pathStr, std::string_view& argsStr);
   };
 

@@ -14,8 +14,7 @@ namespace cliService
 
     CommandResponse execute(const std::vector<std::string>& args) override
     {
-      if (args.size() > 0)
-      {
+      if (args.size() > 0) {
         return CommandResponse("Command takes no arguments.", CommandStatus::InvalidArguments);
       }
 
