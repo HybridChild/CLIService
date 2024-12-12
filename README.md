@@ -1,18 +1,19 @@
 # CLI Service
 
-A lightweight C++ library for adding a flexible command-line interface to embedded devices. Provides a Unix-like shell experience with directories, commands, tab completion and command history.
+A lightweight C++ library for adding a flexible command-line interface to embedded devices.
 
 ## Features
-- Hierarchical command structure with nested directories and commands
+- Unix-like shell experience
+- Composite tree structure of directories and commands
 - User authentication with password protection (Password masking during login)
-- Assign user access levels to directories and commands
+- Assign access levels to directories and commands
 - Tab completion for paths and commands
 - Command history with arrow key navigation
 - Minimal dependencies
 
 ## Quick Start
 ```cpp
-// Provide a concrete implementation of the abstract TerminalIf class for your platform
+// Provide platform specific implementation of the Terminal interface
 class MyTerminal : public TerminalIf
 {
 public:
@@ -31,8 +32,13 @@ public:
 class RebootCommand : public CommandIf
 {
 public:
-  RebootCommand(std::string name, AccessLevel level, std::string description = "Reboot the device")
-    : CommandIf(std::move(name), level, std::move(description))
+  RebootCommand(
+    std::string name,
+    AccessLevel level,
+    std::string description = "Reboot the device")
+    : CommandIf(std::move(name)
+    , level
+    , std::move(description))
   {}
 
   CommandResponse execute(const std::vector<std::string>& args) override
@@ -54,6 +60,7 @@ enum class AccessLevel
   Admin
 };
 
+// Application entry point
 int main()
 {
   // Define users for your application and assign passwords and access levels
@@ -73,11 +80,11 @@ int main()
   CLIServiceConfiguration config{terminal, std::move(users), std::move(dirRoot)};
   CLIService cli(std::move(config));
 
-  // Run service
+  // Activate and run service
   cli.activate();
+
   while (true) {
     cli.service();
-    // Handle other tasks...
   }
 
   return 0;
@@ -98,6 +105,11 @@ sh runExample.sh
 .\runTests.bat
 .\runExample.bat
 ```
+
+## Requirements
+- C++17 compiler
+- CMake 3.20+
+- Google Test (for building tests)
 
 ## Example Session
 ```
@@ -133,8 +145,3 @@ admin@/ > logout
 Logged out. Please enter <username>:<password>
  > 
 ```
-
-## Requirements
-- C++17 compiler
-- CMake 3.20+
-- Google Test (for building tests)
