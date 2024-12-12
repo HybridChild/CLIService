@@ -1,20 +1,18 @@
 # CLI Service
 
-A lightweight C++ library for adding a flexible command-line interface to embedded devices. Provides a Unix-like shell experience with directories, commands, and tab completion.
+A lightweight C++ library for adding a flexible command-line interface to embedded devices. Provides a Unix-like shell experience with directories, commands, tab completion and command history.
 
 ## Features
-- Hierarchical command structure with directories and nested commands
+- Hierarchical command structure with nested directories and commands
+- User authentication with password protection (Password masking during login)
+- Assign user access levels to directories and commands
 - Tab completion for paths and commands
 - Command history with arrow key navigation
-- Customizable user authentication and access levels
-- Password masking during login
-- Easy to extend with custom commands
-- Terminal I/O abstraction for device integration
 - Minimal dependencies
 
 ## Quick Start
-### Concrete terminal implementation for your platform
 ```cpp
+// Provide a concrete implementation of the abstract TerminalIf class for your platform
 class MyTerminal : public TerminalIf
 {
 public:
@@ -28,15 +26,13 @@ public:
   const char* getLastError() const override { return ""; }
   void clearError() override {}
 };
-```
 
-### Implement custom commands
-```cpp
+// Implement custom commands
 class RebootCommand : public CommandIf
 {
 public:
-  RebootCommand(std::string name, AccessLevel level, std::string description = "")
-    : CommandIf(std::move(name), level, "Reboot the device")
+  RebootCommand(std::string name, AccessLevel level, std::string description = "Reboot the device")
+    : CommandIf(std::move(name), level, std::move(description))
   {}
 
   CommandResponse execute(const std::vector<std::string>& args) override
@@ -45,61 +41,62 @@ public:
       return CommandResponse("Command take no arguments.", CommandStatus::InvalidArguments);
     }
 
-    // signal system reboot
+    // signal system to reboot
+
     return CommandResponse::success("System reboot initiated...");
   }
 };
-```
 
-### Define your access levels
-```cpp
+// Define your access levels
 enum class AccessLevel
 {
   User,
   Admin
 };
-```
 
-### Create CLI service
-```cpp
-// Define users for your application
-std::vector<User> users = {
-  {"user", "user123", AccessLevel::User},
-  {"admin", "admin123", AccessLevel::Admin}
-};
+int main()
+{
+  // Define users for your application and assign passwords and access levels
+  std::vector<User> users = {
+    {"user", "user123", AccessLevel::User},
+    {"admin", "admin123", AccessLevel::Admin}
+  };
 
-// Create menu structure
-auto dirRoot = std::make_unique<Directory>("root", AccessLevel::User);
-  auto& dirSystem = dirRoot->addDirectory("system", AccessLevel::User);
-    dirSystem.addCommand<RebootCommand>("reboot", AccessLevel::Admin);
-    dirSystem.addCommand<HeapStatsGetCommand>("heap", AccessLevel::User);
+  // Create menu structure
+  auto dirRoot = std::make_unique<Directory>("root", AccessLevel::User);
+    auto& dirSystem = dirRoot->addDirectory("system", AccessLevel::User);
+      dirSystem.addCommand<RebootCommand>("reboot", AccessLevel::Admin);
+      dirSystem.addCommand<HeapStatsGetCommand>("heap", AccessLevel::User);
 
-// Create CLI service
-MyTerminal terminal{};
-CLIServiceConfiguration config{terminal, std::move(users), std::move(dirRoot)};
-CLIService cli(std::move(config));
+  // Create CLI service
+  MyTerminal terminal{};
+  CLIServiceConfiguration config{terminal, std::move(users), std::move(dirRoot)};
+  CLIService cli(std::move(config));
 
-// Run service
-cli.activate();
-while (true) {
-  cli.service();
-  // Handle other tasks...
+  // Run service
+  cli.activate();
+  while (true) {
+    cli.service();
+    // Handle other tasks...
+  }
+
+  return 0;
 }
 ```
 
 ## Building
 ```bash
-# Configure with CMake
-./configure.sh  # or configure.bat on Windows
+# Linux/Mac
+sh configureCMake.sh
+sh build.sh
+sh runTests.sh
+sh runExample.sh
 
-# Build
-./build.sh     # or build.bat on Windows
-
-# Run tests
-./runTests.sh  # or runTests.bat on Windows
-
-# Run example
-./runExample.sh  # or runExample.bat on Windows
+# Windows
+.\configureCMake.bat
+.\build.bat
+.\runTests.bat
+.\runExample.bat
 ```
 
 ## Example Session
@@ -131,7 +128,10 @@ Available commands in current directory:
 
 admin@/system > reboot
 System reboot initiated...
-admin@/system >
+admin@/system > ..
+admin@/ > logout
+Logged out. Please enter <username>:<password>
+ > 
 ```
 
 ## Requirements
