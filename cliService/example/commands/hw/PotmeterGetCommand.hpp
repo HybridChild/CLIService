@@ -12,8 +12,8 @@ namespace cliService
   class PotmeterGetCommand : public CommandIf
   {
   public:
-    PotmeterGetCommand(std::string name, AccessLevel level, std::string description = "")
-      : CommandIf(std::move(name), level, "Get potmeter value - Args: <pot ID>")
+    PotmeterGetCommand(std::string name, AccessLevel level, std::string description = "Get potmeter value - Args: <pot ID>")
+      : CommandIf(std::move(name), level, std::move(description))
     {}
 
     CommandResponse execute(const std::vector<std::string>& args) override

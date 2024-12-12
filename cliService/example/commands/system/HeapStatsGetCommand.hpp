@@ -8,8 +8,8 @@ namespace cliService
   class HeapStatsGetCommand : public CommandIf
   {
   public:
-    HeapStatsGetCommand(std::string name, AccessLevel level, std::string description = "")
-      : CommandIf(std::move(name), level, "Get heap statistics")
+    HeapStatsGetCommand(std::string name, AccessLevel level, std::string description = "Get heap statistics")
+      : CommandIf(std::move(name), level, std::move(description))
     {}
 
     CommandResponse execute(const std::vector<std::string>& args) override

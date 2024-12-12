@@ -10,8 +10,8 @@ namespace cliService
   class RgbLedSetCommand : public CommandIf
   {
   public:
-    RgbLedSetCommand(std::string name, AccessLevel level, std::string description = "")
-      : CommandIf(std::move(name), level, "Set RGB LED color - Args: <rgbLED ID> <R> <G> <B>")
+    RgbLedSetCommand(std::string name, AccessLevel level, std::string description = "Set RGB LED color - Args: <rgbLED ID> <R> <G> <B>")
+      : CommandIf(std::move(name), level, std::move(description))
     {}
 
     CommandResponse execute(const std::vector<std::string>& args) override

@@ -8,8 +8,8 @@ namespace cliService
   class RebootCommand : public CommandIf
   {
   public:
-    RebootCommand(std::string name, AccessLevel level, std::string description = "")
-      : CommandIf(std::move(name), level, "Reboot the device")
+    RebootCommand(std::string name, AccessLevel level, std::string description = "Reboot the device")
+      : CommandIf(std::move(name), level, std::move(description))
     {}
 
     CommandResponse execute(const std::vector<std::string>& args) override
