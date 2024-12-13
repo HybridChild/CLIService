@@ -180,7 +180,6 @@ namespace cliService
     }
     else if (command == "tree")
     {
-      
       if (!args.empty())
       {
         _terminal.putString(NO_ARGUMENTS_MESSAGE);
@@ -189,13 +188,14 @@ namespace cliService
         return;
       }
 
-      // print tree structure string
       _terminal.putChar('\n');
 
       _currentDirectory->traverse([&](const NodeIf& node, int depth) {
-        std::string indent(depth * 2, ' ');
-        std::string treeStr = indent + node.getName() + (node.isDirectory() ? "/" : "") + "\n";
-        _terminal.putString(treeStr);
+        if (node.getAccessLevel() <= _currentUser->getAccessLevel()) {
+          std::string indent(depth * 2, ' ');
+          std::string treeStr = indent + node.getName() + (node.isDirectory() ? "/" : "") + "\n";
+          _terminal.putString(treeStr);
+        }
       });
 
       _terminal.putChar('\n');
