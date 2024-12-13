@@ -3,7 +3,7 @@
 
 namespace cliService
 {
-  
+
   class CommandHistoryTest : public ::testing::Test
   {
   protected:

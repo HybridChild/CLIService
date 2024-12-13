@@ -205,6 +205,7 @@ namespace cliService
     }
   }
 
+
   std::unique_ptr<RequestBase> InputParser::createRequest()
   {
     switch (_currentState)

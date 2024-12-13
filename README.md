@@ -4,11 +4,10 @@ A lightweight C++ library for adding a flexible command-line interface to embedd
 
 ## Features
 - Unix-like shell experience
+- Tab completion and command history with arrow key navigation
 - Composite tree structure of directories and commands
 - User authentication with password protection (Password masking during login)
 - Assign access levels to directories and commands
-- Tab completion for paths and commands
-- Command history with arrow key navigation
 - Minimal dependencies
 
 ## Quick Start
@@ -29,10 +28,10 @@ public:
 };
 
 // Implement custom commands
-class RebootCommand : public CommandIf
+class MyCommand : public CommandIf
 {
 public:
-  RebootCommand(
+  MyCommand(
     std::string name,
     AccessLevel level,
     std::string description = "Reboot the device")
@@ -44,18 +43,17 @@ public:
   CommandResponse execute(const std::vector<std::string>& args) override
   {
     if (args.size() > 0) {
-      return CommandResponse("Command take no arguments.", CommandStatus::InvalidArguments);
+      return CommandResponse("Command takes no arguments.", CommandStatus::InvalidArguments);
     }
 
-    // signal system to reboot
+    // Perform command logic here
 
-    return CommandResponse::success("System reboot initiated...");
+    return CommandResponse::success("Command executed successfully.");
   }
 };
 
 // Define your access levels
-enum class AccessLevel
-{
+enum class AccessLevel {
   User,
   Admin
 };
@@ -75,14 +73,13 @@ int main()
       dirSystem.addCommand<RebootCommand>("reboot", AccessLevel::Admin);
       dirSystem.addCommand<HeapStatsGetCommand>("heap", AccessLevel::User);
 
-  // Create CLI service
+  // Create and activate CLI service
   MyTerminal terminal{};
   CLIServiceConfiguration config{terminal, std::move(users), std::move(dirRoot)};
   CLIService cli(std::move(config));
-
-  // Activate and run service
   cli.activate();
 
+  // Periocically service the CLI
   while (true) {
     cli.service();
   }

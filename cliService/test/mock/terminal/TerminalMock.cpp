@@ -9,10 +9,10 @@ namespace cliService
     return true;
   }
 
+
   bool TerminalMock::getChar(char& c)
   {
-    if (_inputQueue.empty())
-    {
+    if (_inputQueue.empty()) {
       return false;
     }
 
@@ -21,15 +21,17 @@ namespace cliService
     return true;
   }
 
+
   bool TerminalMock::getCharTimeout(char& c, uint32_t timeout_ms)
   {
     return getChar(c);  // For mock, ignore timeout
   }
 
-  bool TerminalMock::available() const
-  {
+
+  bool TerminalMock::available() const {
     return !_inputQueue.empty();
   }
+
 
   void TerminalMock::flush()
   {
@@ -38,25 +40,26 @@ namespace cliService
     std::swap(_inputQueue, empty);
   }
 
-  bool TerminalMock::isOpen() const
-  {
+
+  bool TerminalMock::isOpen() const {
     return _isOpen;
   }
 
-  bool TerminalMock::hasError() const
-  {
+
+  bool TerminalMock::hasError() const {
     return !_lastError.empty();
   }
 
-  const char* TerminalMock::getLastError() const
-  {
+
+  const char* TerminalMock::getLastError() const {
     return _lastError.c_str();
   }
 
-  void TerminalMock::clearError()
-  {
+
+  void TerminalMock::clearError() {
     _lastError.clear();
   }
+
 
   void TerminalMock::queueInput(const std::string& input)
   {
@@ -66,13 +69,13 @@ namespace cliService
     }
   }
 
-  std::string TerminalMock::getOutput() const
-  {
+
+  std::string TerminalMock::getOutput() const {
     return _output;
   }
 
-  void TerminalMock::clearOutput()
-  {
+
+  void TerminalMock::clearOutput() {
     _output.clear();
   }
 

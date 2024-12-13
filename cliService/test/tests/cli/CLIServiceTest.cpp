@@ -22,7 +22,7 @@ namespace cliService
         {"admin", "admin123", AccessLevel::Admin},
         {"user", "pass123", AccessLevel::User}
       };
-      
+
       _service = std::make_unique<CLIService>(CLIServiceConfiguration{_terminal, std::move(users), std::move(root)});
     }
 

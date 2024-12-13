@@ -40,6 +40,7 @@ namespace cliService
     }
   }
 
+
   ActionRequest::ActionRequest(std::string_view inputStr, Trigger trigger)
     : _trigger(trigger)
   {
