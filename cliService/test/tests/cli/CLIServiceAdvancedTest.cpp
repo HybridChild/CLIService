@@ -159,4 +159,41 @@ namespace cliService
     _service->service();
   }
 
+  TEST_F(CLIServiceAdvancedTest, TreeCommandAccessFiltering)
+  {
+    // First test as regular user
+    _terminal.queueInput("user:user123\n");
+    _service->activate();
+    _service->service();
+
+    _terminal.clearOutput();
+    _terminal.queueInput("tree\n");
+    _service->service();
+
+    // Check user view - should see public stuff but not admin
+    std::string userOutput = _terminal.getOutput();
+    EXPECT_THAT(userOutput, testing::HasSubstr("public/"));
+    EXPECT_THAT(userOutput, testing::HasSubstr("nested/"));
+    EXPECT_THAT(userOutput, testing::Not(testing::HasSubstr("admin/")));
+
+    // Logout
+    _terminal.queueInput("logout\n");
+    _service->service();
+
+    // Now test as admin
+    _terminal.queueInput("admin:admin123\n");
+    _service->service();
+
+    _terminal.clearOutput();
+    _terminal.queueInput("tree\n");
+    _service->service();
+
+    // Check admin view - should see everything
+    std::string adminOutput = _terminal.getOutput();
+    EXPECT_THAT(adminOutput, testing::HasSubstr("public/"));
+    EXPECT_THAT(adminOutput, testing::HasSubstr("nested/"));
+    EXPECT_THAT(adminOutput, testing::HasSubstr("admin/"));
+    EXPECT_THAT(adminOutput, testing::HasSubstr("config"));
+  }
+
 }
