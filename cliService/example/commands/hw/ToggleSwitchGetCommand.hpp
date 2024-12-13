@@ -16,8 +16,8 @@ namespace cliService
   class ToggleSwitchGetCommand : public CommandIf
   {
   public:
-    ToggleSwitchGetCommand(std::string name, AccessLevel level, std::string description = "Get toggle switch position - Args: <toggleSwitch ID>")
-      : CommandIf(std::move(name), level, std::move(description))
+    ToggleSwitchGetCommand(std::string name, AccessLevel level, std::string description)
+      : CommandIf(std::move(name), level, "Get toggle switch position - Args: <toggleSwitch ID>")
     {}
 
     CommandResponse execute(const std::vector<std::string>& args) override
