@@ -190,7 +190,7 @@ namespace cliService
 
       _terminal.putChar('\n');
 
-      _currentDirectory->traverse([&](const NodeIf& node, int depth) {
+      _currentDirectory->traverse([&](const NodeIf& node, size_t depth) {
         if (node.getAccessLevel() <= _currentUser->getAccessLevel()) {
           std::string indent(depth * 2, ' ');
           std::string treeStr = indent + node.getName() + (node.isDirectory() ? "/" : "") + "\n";
@@ -214,7 +214,7 @@ namespace cliService
       _terminal.putChar('\n');
       _terminal.putString("Available commands in current directory:\n");
 
-      _currentDirectory->traverse([&](const NodeIf& node, int depth) {
+      _currentDirectory->traverse([&](const NodeIf& node, size_t depth) {
         // Only show items in current directory and with appropriate access level
         if (depth == 1 && node.getAccessLevel() <= _currentUser->getAccessLevel())
         {

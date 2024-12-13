@@ -20,7 +20,7 @@ namespace cliService
     NodeIf* findNode(const std::vector<std::string>& path) const;
     NodeIf* resolvePath(std::string_view pathStr, const Directory& currentDir) const;
     Path getRelativePath(const NodeIf& node) const;
-    void traverse(const std::function<void(const NodeIf&, int)>& visitor, int depth = 0) const;
+    void traverse(const std::function<void(const NodeIf&, size_t)>& visitor, size_t depth = 0) const;
 
     Directory& addDirectory(const std::string& name, AccessLevel level);
 

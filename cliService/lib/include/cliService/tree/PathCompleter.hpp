@@ -73,7 +73,7 @@ namespace cliService
       CompletionResult result;
 
       dir.traverse(
-        [&result, accessLevel](const NodeIf& node, int depth)
+        [&result, accessLevel](const NodeIf& node, size_t depth)
         {
           if (depth == 1 && node.getAccessLevel() <= accessLevel) {
             result.allOptions.push_back(node.getName() + (node.isDirectory() ? "/" : ""));
@@ -97,7 +97,7 @@ namespace cliService
 
       // First pass: collect all matching entries
       dir.traverse(
-        [&](const NodeIf& node, int depth) {
+        [&](const NodeIf& node, size_t depth) {
           if (depth == 1 && node.getAccessLevel() <= accessLevel)
           {
             const std::string& name = node.getName();

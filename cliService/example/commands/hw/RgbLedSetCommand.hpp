@@ -57,7 +57,7 @@ namespace cliService
       }
 
       // Convert to integer and check bounds
-      int value = 0;
+      uint32_t value = 0;
       for (char c : str)
       {
         value = value * 10 + (c - '0');

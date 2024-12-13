@@ -128,7 +128,7 @@ namespace cliService
   TEST_F(TreeTest, TraverseEmptyTree)
   {
     std::vector<std::string> visited;
-    _root->traverse([&visited](const NodeIf& node, int depth) {
+    _root->traverse([&visited](const NodeIf& node, size_t depth) {
       visited.push_back(node.getName());
     });
 
@@ -144,7 +144,7 @@ namespace cliService
     dir2.addCommand<TestCommand>("test", AccessLevel::Admin);
 
     std::vector<std::pair<std::string, int>> visited;
-    _root->traverse([&visited](const NodeIf& node, int depth) {
+    _root->traverse([&visited](const NodeIf& node, size_t depth) {
       visited.push_back({node.getName(), depth});
     });
 

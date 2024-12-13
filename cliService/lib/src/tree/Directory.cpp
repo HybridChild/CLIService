@@ -51,7 +51,7 @@ namespace cliService
   }
 
 
-  void Directory::traverse(const std::function<void(const NodeIf&, int)>& visitor, int depth) const
+  void Directory::traverse(const std::function<void(const NodeIf&, size_t)>& visitor, size_t depth) const
   {
     // Visit current directory
     visitor(*this, depth);

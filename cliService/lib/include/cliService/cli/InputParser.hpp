@@ -45,7 +45,7 @@ namespace cliService
 
     bool _inEscapeSequence;
     char _escapeBuffer[2];
-    uint8_t _escapeIndex;
+    size_t _escapeIndex;
   };
 
 }
