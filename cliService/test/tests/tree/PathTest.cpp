@@ -118,13 +118,13 @@ namespace cliService
   {
     Path path1("/dir1/dir2");
     EXPECT_EQ(path1.toString(), "/dir1/dir2");
-    
+
     Path path2("dir1/dir2");
     EXPECT_EQ(path2.toString(), "dir1/dir2");
-    
+
     Path path3("/");
     EXPECT_EQ(path3.toString(), "/");
-    
+
     Path path4("");
     EXPECT_EQ(path4.toString(), ".");
   }

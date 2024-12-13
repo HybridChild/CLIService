@@ -25,7 +25,7 @@ namespace cliService
   TEST_F(CommandHistoryTest, AddSingleCommand)
   {
     _history->addCommand("command1");
-    
+
     EXPECT_EQ(_history->size(), 1);
     EXPECT_EQ(_history->getPreviousCommand(), "command1");
   }
@@ -49,7 +49,7 @@ namespace cliService
     _history->addCommand("command2");
     _history->addCommand("command3");
     _history->addCommand("command4");
-    
+
     EXPECT_EQ(_history->size(), 3);
     EXPECT_EQ(_history->getPreviousCommand(), "command4");
     EXPECT_EQ(_history->getPreviousCommand(), "command3");
@@ -60,12 +60,12 @@ namespace cliService
   {
     _history->addCommand("command1");
     _history->addCommand("command2");
-    
+
     // Navigate backwards
     EXPECT_EQ(_history->getPreviousCommand(), "command2");
     EXPECT_EQ(_history->getPreviousCommand(), "command1");
     EXPECT_EQ(_history->getPreviousCommand(), "command1"); // Stays at start
-    
+
     // Navigate forwards
     EXPECT_EQ(_history->getNextCommand(), "command2");
     EXPECT_TRUE(_history->getNextCommand().empty()); // Past end returns empty
@@ -75,7 +75,7 @@ namespace cliService
   {
     _history->addCommand("command1");
     _history->addCommand("command2");
-    
+
     EXPECT_EQ(_history->getPreviousCommand(), "command2");
     _history->resetNavigation();
     EXPECT_TRUE(_history->getNextCommand().empty());
@@ -85,7 +85,7 @@ namespace cliService
   {
     _history->addCommand("command1");
     _history->addCommand("command2");
-    
+
     _history->clear();
     EXPECT_EQ(_history->size(), 0);
     EXPECT_TRUE(_history->getPreviousCommand().empty());
@@ -96,7 +96,7 @@ namespace cliService
   {
     _history->addCommand("command1");
     _history->addCommand("command2");
-    
+
     EXPECT_EQ(_history->getCurrentIndex(), 2);
     _history->getPreviousCommand();
     EXPECT_EQ(_history->getCurrentIndex(), 1);

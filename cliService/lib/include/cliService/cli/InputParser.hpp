@@ -11,7 +11,7 @@
 namespace cliService
 {
 
-  class InputParser 
+  class InputParser
   {
   public:
     static constexpr char BACKSPACE = 0x7F;
@@ -26,7 +26,7 @@ namespace cliService
 
     std::string getBuffer() const { return _buffer; }
     void appendToBuffer(const std::string& str) { _buffer += str; }
-    
+
   private:
     bool processNextChar();
     bool handleControlCharacter(char c);
@@ -46,7 +46,6 @@ namespace cliService
     bool _inEscapeSequence;
     char _escapeBuffer[2];
     uint8_t _escapeIndex;
-    
   };
 
 }

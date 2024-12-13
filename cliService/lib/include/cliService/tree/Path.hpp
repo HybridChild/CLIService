@@ -6,13 +6,13 @@
 namespace cliService
 {
 
-  class Path 
+  class Path
   {
   public:
     explicit Path(std::string_view pathStr);
     Path();
     Path(std::vector<std::string> elements, bool isAbsolute);
-    
+
     bool isAbsolute() const { return _isAbsolute; }
     bool isEmpty() const { return _elements.empty(); }
     const std::vector<std::string>& elements() const { return _elements; }
@@ -21,7 +21,7 @@ namespace cliService
     Path parent() const;
     Path join(const Path& other) const;
     Path relativeTo(const Path& base) const;
-    
+
     std::string toString() const;
 
     bool operator==(const Path& other) const;

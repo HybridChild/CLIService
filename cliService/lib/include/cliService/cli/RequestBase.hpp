@@ -7,7 +7,7 @@ namespace cliService
   {
   public:
     virtual ~RequestBase() = default;
-    
+
   protected:
     RequestBase() = default;
   };

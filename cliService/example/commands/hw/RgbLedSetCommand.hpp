@@ -55,7 +55,7 @@ namespace cliService
       for (char c : str) {
         if (!std::isdigit(c)) return false;
       }
-      
+
       // Convert to integer and check bounds
       int value = 0;
       for (char c : str)
@@ -63,7 +63,7 @@ namespace cliService
         value = value * 10 + (c - '0');
         if (value > 255) return false;
       }
-      
+
       return true;
     }
 
@@ -71,7 +71,7 @@ namespace cliService
     {
       (void)id;
       (void)rgbValues;
-      
+
       // Create RGB LED message and send to output service
     }
   };

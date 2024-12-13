@@ -10,7 +10,7 @@
 namespace cliService
 {
 
-  class Directory : public NodeIf 
+  class Directory : public NodeIf
   {
   public:
     explicit Directory(std::string name, AccessLevel level);
@@ -21,9 +21,9 @@ namespace cliService
     NodeIf* resolvePath(std::string_view pathStr, const Directory& currentDir) const;
     Path getRelativePath(const NodeIf& node) const;
     void traverse(const std::function<void(const NodeIf&, int)>& visitor, int depth = 0) const;
-    
+
     Directory& addDirectory(const std::string& name, AccessLevel level);
-    
+
     template<typename T>
     T& addCommand(std::string name, AccessLevel level, std::string description = "")
     {

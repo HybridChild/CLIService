@@ -25,10 +25,10 @@ namespace cliService
   private:
     void setupTerminal();
     void restoreTerminal();
-    
+
     std::atomic<bool> _isOpen;
     std::string _lastError;
-    
+
   #ifdef _WIN32
     void* _hStdin;  // HANDLE type
     void* _hStdout; // HANDLE type

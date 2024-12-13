@@ -23,15 +23,15 @@ namespace cliService
       // │   └── subdir2
       // └── dir2
       //     └── subdir3
-      
+
       root = std::make_unique<Directory>("", AccessLevel::Public);
       auto& dir1 = root->addDirectory("dir1", AccessLevel::Public);
       dir1.addDirectory("subdir1", AccessLevel::Public);
       dir1.addDirectory("subdir2", AccessLevel::Public);
-      
+
       auto& dir2 = root->addDirectory("dir2", AccessLevel::Public);
       dir2.addDirectory("subdir3", AccessLevel::Public);
-      
+
       resolver = std::make_unique<PathResolver>(*root);
     }
 
@@ -60,7 +60,7 @@ namespace cliService
     Path dir1Path("/dir1");
     auto* dir1 = resolver->resolve(dir1Path, *root);
     ASSERT_NE(dir1, nullptr);
-    
+
     // Then resolve relative path from dir1
     Path path("subdir2");
     auto* node = resolver->resolve(path, *static_cast<Directory*>(dir1));
@@ -74,7 +74,7 @@ namespace cliService
     Path subdir1Path("/dir1/subdir1");
     auto* subdir1 = resolver->resolve(subdir1Path, *root);
     ASSERT_NE(subdir1, nullptr);
-    
+
     // Then go up one level
     Path path("..");
     auto* node = resolver->resolve(path, *static_cast<Directory*>(subdir1));
@@ -103,7 +103,7 @@ namespace cliService
     Path path("/dir2/subdir3");
     auto* node = resolver->resolve(path, *root);
     ASSERT_NE(node, nullptr);
-    
+
     // Get its absolute path
     Path absPath = PathResolver::getAbsolutePath(*node);
     EXPECT_TRUE(absPath.isAbsolute());
@@ -125,7 +125,7 @@ namespace cliService
     Path dir1Path("/dir1");
     auto* dir1 = resolver->resolve(dir1Path, *root);
     ASSERT_NE(dir1, nullptr);
-    
+
     // Resolve "." from dir1
     Path path(".");
     auto* node = resolver->resolve(path, *static_cast<Directory*>(dir1));

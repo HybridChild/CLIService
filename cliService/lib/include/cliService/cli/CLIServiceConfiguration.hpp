@@ -9,10 +9,10 @@ namespace cliService
 {
 
   struct CLIServiceConfiguration
-  {    
+  {
     CLIServiceConfiguration(
       TerminalIf& terminal,
-      std::vector<User> users, 
+      std::vector<User> users,
       std::unique_ptr<Directory> root)
       : _terminal(terminal)
       , _users(std::move(users))

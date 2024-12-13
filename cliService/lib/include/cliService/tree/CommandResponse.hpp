@@ -11,7 +11,7 @@ namespace cliService
     InvalidArguments
   };
 
-  class CommandResponse 
+  class CommandResponse
   {
   public:
     explicit CommandResponse(std::string msg = "", CommandStatus status = CommandStatus::Success)

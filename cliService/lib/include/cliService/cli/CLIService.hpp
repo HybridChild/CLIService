@@ -1,4 +1,3 @@
-// CLIService.hpp
 #pragma once
 #include "cliService/cli/CLIServiceConfiguration.hpp"
 #include "cliService/cli/CLIState.hpp"
@@ -12,11 +11,11 @@
 namespace cliService
 {
 
-  class CLIService 
+  class CLIService
   {
   public:
     explicit CLIService(CLIServiceConfiguration config);
-    
+
     void activate();
     void service();
 
@@ -29,18 +28,18 @@ namespace cliService
     void handleGlobalCommand(const std::string_view& command, const std::vector<std::string>& args);
     void handleSpecialKey(const ActionRequest& request);
     void handleTabCompletion(const ActionRequest& request);
-    
+
     // Path operations
     NodeIf* resolvePath(const Path& path) const;
     bool validatePathAccess(const NodeIf* node) const;
-    
+
     // State management 
     void resetToRoot();
     void displayPrompt() const;
-    
+
     TerminalIf& _terminal;
     InputParser _parser;
-    
+
     std::vector<User> _users;
     std::optional<User> _currentUser;
 
@@ -51,7 +50,7 @@ namespace cliService
     CLIState _currentState;
 
     static const std::unordered_set<std::string_view> GLOBAL_COMMANDS;
-    
+
     static constexpr std::string_view WELCOME_MESSAGE = "Welcome to CLI Service.";
     static constexpr std::string_view LOGGED_OUT_MESSAGE = "Logged out. Please enter <username>:<password>";
     static constexpr std::string_view NO_ARGUMENTS_MESSAGE = "Command takes no arguments.";

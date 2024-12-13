@@ -13,9 +13,9 @@ namespace cliService
       : NodeIf(std::move(name), level)
       , _description(std::move(description))
     {}
-    
+
     virtual CommandResponse execute(const std::vector<std::string>& args) = 0;
-    
+
     bool isDirectory() const override { return false; }
     const std::string& getDescription() const { return _description; }
 

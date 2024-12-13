@@ -27,7 +27,7 @@ namespace cliService
   #else
     _oldTermios = new termios;
   #endif
-    
+
     setupTerminal();
     _isOpen = true;
   }
@@ -35,7 +35,7 @@ namespace cliService
   UnixWinTerminal::~UnixWinTerminal()
   {
     restoreTerminal();
-    
+
   #ifdef _WIN32
     delete static_cast<DWORD*>(_oldInMode);
     delete static_cast<DWORD*>(_oldOutMode);
@@ -78,12 +78,12 @@ namespace cliService
     struct termios newTermios;
     assert(tcgetattr(STDIN_FILENO, static_cast<termios*>(_oldTermios)) == 0 && "Failed to get terminal attributes");
     newTermios = *static_cast<termios*>(_oldTermios);
-    
+
     // Disable canonical mode and echo
     newTermios.c_lflag &= ~(ICANON | ECHO);
     newTermios.c_cc[VMIN] = 1;
     newTermios.c_cc[VTIME] = 0;
-    
+
     assert(tcsetattr(STDIN_FILENO, TCSANOW, &newTermios) == 0 && "Failed to set terminal attributes");
   #endif
   }
@@ -153,11 +153,11 @@ namespace cliService
     fd_set fds;
     FD_ZERO(&fds);
     FD_SET(STDIN_FILENO, &fds);
-    
+
     struct timeval tv;
     tv.tv_sec = timeout_ms / 1000;
     tv.tv_usec = (timeout_ms % 1000) * 1000;
-    
+
     int result = select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv);
 
     if (result > 0) {

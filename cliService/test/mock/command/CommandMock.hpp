@@ -7,7 +7,7 @@
 namespace cliService 
 {
 
-  enum class AccessLevel 
+  enum class AccessLevel
   {
     User,
     Admin
@@ -19,7 +19,7 @@ namespace cliService
     explicit CommandMock(std::string name, AccessLevel level, std::string description = "")
       : CommandIf(std::move(name), level, std::move(description))
     {}
-    
+
     MOCK_METHOD(CommandResponse, execute, (const std::vector<std::string>&), (override));
   };
 

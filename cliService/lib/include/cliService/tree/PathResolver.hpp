@@ -7,7 +7,7 @@
 namespace cliService
 {
 
-  class PathResolver 
+  class PathResolver
   {
   public:
     explicit PathResolver(Directory& root);

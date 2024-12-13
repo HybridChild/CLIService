@@ -3,7 +3,7 @@
 
 namespace cliService
 {
-  
+
   enum class AccessLevel;
 
   class NodeIf

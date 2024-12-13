@@ -7,10 +7,10 @@
 namespace cliService
 {
 
-  class CLIServiceTest : public ::testing::Test 
+  class CLIServiceTest : public ::testing::Test
   {
   protected:
-    void SetUp() override 
+    void SetUp() override
     {
       auto root = std::make_unique<Directory>("root", AccessLevel::User);
       _rootDir = root.get();
@@ -41,73 +41,73 @@ namespace cliService
   TEST_F(CLIServiceTest, LoginSuccess) 
   {
     _terminal.queueInput("admin:admin123\n");
-    
+
     _service->activate();
     _service->service();
-    
+
     EXPECT_EQ(_service->getState(), CLIState::LoggedIn);
   }
 
   TEST_F(CLIServiceTest, ExecuteCommand) 
   {
-  _terminal.queueInput("admin:admin123\n");  // Login first
-  _terminal.queueInput("sub/test arg1 arg2\n");
-  
-  EXPECT_CALL(*_mockCmd, execute(testing::ElementsAre("arg1", "arg2")));
-  
-  _service->activate();
-  _service->service();  // Handle login
-  _service->service();  // Handle command
+    _terminal.queueInput("admin:admin123\n");  // Login first
+    _terminal.queueInput("sub/test arg1 arg2\n");
+
+    EXPECT_CALL(*_mockCmd, execute(testing::ElementsAre("arg1", "arg2")));
+
+    _service->activate();
+    _service->service();  // Handle login
+    _service->service();  // Handle command
   }
 
   TEST_F(CLIServiceTest, AccessDenied) 
   {
-  _terminal.queueInput("user:pass123\n");  // Login as regular user
-  _terminal.queueInput("sub/test arg1\n"); // Try to access admin command
-  
-  EXPECT_CALL(*_mockCmd, execute).Times(0);
-  
-  _service->activate();
-  _service->service();
-  _service->service();
-  
-  EXPECT_THAT(_terminal.getOutput(), testing::HasSubstr("Access denied"));
+    _terminal.queueInput("user:pass123\n");  // Login as regular user
+    _terminal.queueInput("sub/test arg1\n"); // Try to access admin command
+
+    EXPECT_CALL(*_mockCmd, execute).Times(0);
+
+    _service->activate();
+    _service->service();
+    _service->service();
+
+    EXPECT_THAT(_terminal.getOutput(), testing::HasSubstr("Access denied"));
   }
 
   TEST_F(CLIServiceTest, GlobalCommandLogout) 
   {
-  _terminal.queueInput("admin:admin123\n");
-  _terminal.queueInput("logout\n");
-  
-  _service->activate();
-  _service->service();
-  _service->service();
-  
-  EXPECT_EQ(_service->getState(), CLIState::LoggedOut);
+    _terminal.queueInput("admin:admin123\n");
+    _terminal.queueInput("logout\n");
+
+    _service->activate();
+    _service->service();
+    _service->service();
+
+    EXPECT_EQ(_service->getState(), CLIState::LoggedOut);
   }
 
   TEST_F(CLIServiceTest, InvalidPath) 
   {
-  _terminal.queueInput("admin:admin123\n");
-  _terminal.queueInput("invalid/path\n");
-  
-  _service->activate();
-  _service->service();
-  _service->service();
-  
-  EXPECT_THAT(_terminal.getOutput(), testing::HasSubstr("Invalid path"));
+    _terminal.queueInput("admin:admin123\n");
+    _terminal.queueInput("invalid/path\n");
+
+    _service->activate();
+    _service->service();
+    _service->service();
+
+    EXPECT_THAT(_terminal.getOutput(), testing::HasSubstr("Invalid path"));
   }
 
   TEST_F(CLIServiceTest, NavigateToDirectory) 
   {
-  _terminal.queueInput("admin:admin123\n");
-  _terminal.queueInput("sub\n");
-  
-  _service->activate();
-  _service->service();
-  _service->service();
-  
-  EXPECT_THAT(_terminal.getOutput(), testing::EndsWith("admin@/sub > "));
+    _terminal.queueInput("admin:admin123\n");
+    _terminal.queueInput("sub\n");
+
+    _service->activate();
+    _service->service();
+    _service->service();
+
+    EXPECT_THAT(_terminal.getOutput(), testing::EndsWith("admin@/sub > "));
   }
 
 }

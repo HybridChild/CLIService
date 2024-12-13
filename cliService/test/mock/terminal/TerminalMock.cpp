@@ -15,7 +15,7 @@ namespace cliService
     {
       return false;
     }
-    
+
     c = _inputQueue.front();
     _inputQueue.pop();
     return true;

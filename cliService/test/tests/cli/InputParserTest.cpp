@@ -24,7 +24,7 @@ namespace cliService
     std::optional<std::unique_ptr<RequestBase>> processAllInput()
     {
       std::optional<std::unique_ptr<RequestBase>> request;
-      
+
       while (_terminal.available()) {
         request = _parser->parseNextRequest();
       }
@@ -54,7 +54,7 @@ namespace cliService
   {
     _terminal.queueInput("command\n");
     auto request = processAllInput();
-    
+
     ASSERT_TRUE(request.has_value());
     auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
     ASSERT_NE(actionRequest, nullptr);
@@ -66,7 +66,7 @@ namespace cliService
   {
     _terminal.queueInput("command arg1 arg2\n");
     auto request = processAllInput();
-    
+
     ASSERT_TRUE(request.has_value());
     auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
     ASSERT_NE(actionRequest, nullptr);
@@ -81,17 +81,17 @@ namespace cliService
     _terminal.queueInput("commanf");
     processAllInput();
     EXPECT_EQ(_terminal.getOutput(), "commanf");
-    
+
     _terminal.clearOutput();
     _terminal.queueInput(std::string(1, InputParser::BACKSPACE));
     processAllInput();
     EXPECT_EQ(_terminal.getOutput(), "\b \b");
-    
+
     _terminal.clearOutput();
     _terminal.queueInput("d\n");
     auto request = processAllInput();
     EXPECT_EQ(_terminal.getOutput(), "d\n");
-    
+
     ASSERT_TRUE(request.has_value());
     auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
     ASSERT_NE(actionRequest, nullptr);
@@ -102,16 +102,16 @@ namespace cliService
   {
     _currentState = CLIState::LoggedOut;
     _parser = std::make_unique<InputParser>(_terminal, _currentState);
-    
+
     _terminal.queueInput("user:pass\n");
     auto request = processAllInput();
-    
+
     ASSERT_TRUE(request.has_value());
     auto* loginRequest = dynamic_cast<LoginRequest*>(request.value().get());
     ASSERT_NE(loginRequest, nullptr);
     EXPECT_EQ(loginRequest->getUsername(), "user");
     EXPECT_EQ(loginRequest->getPassword(), "pass");
-    
+
     // Verify password masking
     std::string expectedOutput = "user:****\n";
     EXPECT_EQ(_terminal.getOutput(), expectedOutput);
@@ -122,17 +122,17 @@ namespace cliService
     // Test UP arrow
     _terminal.queueInput({0x1B, '[', 'A'});  // ESC [ A
     auto request = processAllInput();
-    
+
     ASSERT_TRUE(request.has_value());
     auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
     ASSERT_NE(actionRequest, nullptr);
     EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::ArrowUp);
-    
+
     // Test DOWN arrow
     _terminal.clearOutput();
     _terminal.queueInput({0x1B, '[', 'B'});  // ESC [ B
     request = processAllInput();
-    
+
     ASSERT_TRUE(request.has_value());
     actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
     ASSERT_NE(actionRequest, nullptr);
@@ -163,7 +163,7 @@ namespace cliService
   {
     _terminal.queueInput(std::string(1, InputParser::TAB));
     auto request = processAllInput();
-    
+
     ASSERT_TRUE(request.has_value());
     auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
     ASSERT_NE(actionRequest, nullptr);
@@ -175,21 +175,21 @@ namespace cliService
     _terminal.queueInput("hello");
     processAllInput();
     EXPECT_EQ(_terminal.getOutput(), "hello");
-    
+
     _terminal.clearOutput();
     _terminal.queueInput(std::string(1, InputParser::BACKSPACE));
     processAllInput();
     EXPECT_EQ(_terminal.getOutput(), "\b \b");
-    
+
     _terminal.clearOutput();
     _terminal.queueInput(std::string(1, InputParser::BACKSPACE));
     processAllInput();
     EXPECT_EQ(_terminal.getOutput(), "\b \b");
-    
+
     _terminal.clearOutput();
     _terminal.queueInput("\n");
     auto request = processAllInput();
-    
+
     ASSERT_TRUE(request.has_value());
     auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
     ASSERT_NE(actionRequest, nullptr);
@@ -200,15 +200,13 @@ namespace cliService
   {
     _terminal.queueInput("/\n");
     auto request = processAllInput();
-    
+
     ASSERT_TRUE(request.has_value());
     auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
     ASSERT_NE(actionRequest, nullptr);
     EXPECT_TRUE(actionRequest->getPath().isAbsolute());
     EXPECT_TRUE(actionRequest->getPath().elements().empty());
   }
-
-  // Add to InputParserTest class in InputParserTest.cpp
 
   TEST_F(InputParserTest, HistoryNavigationWithoutPartialInput)
   {
@@ -217,18 +215,18 @@ namespace cliService
     processAllInput();
     _terminal.queueInput("command2\n");
     processAllInput();
-    
+
     _terminal.clearOutput();
-    
+
     // Press Up Arrow with no partial input
     _terminal.queueInput({0x1B, '[', 'A'});  // ESC [ A
     auto request = processAllInput();
-    
+
     ASSERT_TRUE(request.has_value());
     auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
     ASSERT_NE(actionRequest, nullptr);
     EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::ArrowUp);
-    
+
     // In this case, we just directly show the command
     EXPECT_EQ(_terminal.getOutput(), "command2");
   }
@@ -240,26 +238,26 @@ namespace cliService
     processAllInput();
     _terminal.queueInput("command2\n");
     processAllInput();
-    
+
     // Start typing a new command
     _terminal.queueInput("new");
     processAllInput();
-    
+
     _terminal.clearOutput();
-    
+
     // Navigate up
     _terminal.queueInput({0x1B, '[', 'A'});  // Up arrow
     processAllInput();
-    
+
     // Navigate down to restore buffer
     _terminal.queueInput({0x1B, '[', 'B'});  // Down arrow
     auto request = processAllInput();
-    
+
     ASSERT_TRUE(request.has_value());
     auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
     ASSERT_NE(actionRequest, nullptr);
     EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::ArrowDown);
-    
+
     std::string expectedOutput = generateClearSequence(3) +  // Clear "new"
                                 "command2" +                 // Show command from history
                                 generateClearSequence(8) +   // Clear command2
@@ -273,31 +271,31 @@ namespace cliService
     // Add one command
     _terminal.queueInput("command1\n");
     processAllInput();
-    
+
     _terminal.clearOutput();
-    
+
     // Try to go up twice (should show same command both times)
     _terminal.queueInput({0x1B, '[', 'A'});  // Up
     auto request = processAllInput();
     EXPECT_EQ(_terminal.getOutput(), "command1");
-    
+
     _terminal.clearOutput();
     _terminal.queueInput({0x1B, '[', 'A'});  // Up again
     request = processAllInput();
     std::string expectedOutput = generateClearSequence(8) + "command1";  // Clear "command1"
     EXPECT_EQ(_terminal.getOutput(), expectedOutput);  // Still shows same command
-    
+
     // Try to go down twice
     _terminal.clearOutput();
     _terminal.queueInput({0x1B, '[', 'B'});  // Down
     request = processAllInput();
     EXPECT_EQ(_terminal.getOutput(), generateClearSequence(8));  // Clear "command1"
-    
+
     _terminal.clearOutput();
     _terminal.queueInput({0x1B, '[', 'B'});  // Down again
     request = processAllInput();
     EXPECT_TRUE(_terminal.getOutput().empty());  // Already at bottom, no output
-    
+
     ASSERT_TRUE(request.has_value());
     auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
     ASSERT_NE(actionRequest, nullptr);
@@ -311,28 +309,28 @@ namespace cliService
     processAllInput();
     _terminal.queueInput("command1\n");
     processAllInput();
-    
+
     _terminal.clearOutput();
-    
+
     // Navigate up twice
     _terminal.queueInput({0x1B, '[', 'A'});  // Up
     auto request = processAllInput();
 
     std::string expectedOutput = "command1";
     EXPECT_EQ(_terminal.getOutput(), expectedOutput);
-    
+
     _terminal.clearOutput();
     _terminal.queueInput({0x1B, '[', 'A'});  // Up again
     request = processAllInput();
 
     expectedOutput = generateClearSequence(8) + "command1";  // Clear "command1" and rewrite "command1"
     EXPECT_EQ(_terminal.getOutput(), expectedOutput);
-    
+
     ASSERT_TRUE(request.has_value());
     auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
     ASSERT_NE(actionRequest, nullptr);
     EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::ArrowUp);
-    
+
     // Go back down
     _terminal.clearOutput();
     _terminal.queueInput({0x1B, '[', 'B'});  // Down

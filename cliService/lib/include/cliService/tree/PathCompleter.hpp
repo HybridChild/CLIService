@@ -33,16 +33,16 @@ namespace cliService
       // Split into directory part and completion part
       auto elements = partialPath.elements();
       std::string toComplete;
-      
+
       // Handle completion within a directory if path ends with /
       bool endsWithSlash = !partialInput.empty() && partialInput.back() == '/';
-      
+
       if (!elements.empty() && !endsWithSlash)
       {
         toComplete = elements.back();
         elements.pop_back();
       }
-      
+
       // Find the directory to complete in
       const Directory* targetDir = &currentDir;
 
@@ -51,7 +51,7 @@ namespace cliService
         Path dirPath(elements, partialPath.isAbsolute());
         PathResolver resolver(const_cast<Directory&>(currentDir));
         auto* node = resolver.resolve(dirPath, currentDir);
-        
+
         if (!node || !node->isDirectory()) {
           return CompletionResult{};
         }
@@ -71,7 +71,7 @@ namespace cliService
     static CompletionResult listCurrentDirectory(const Directory& dir, AccessLevel accessLevel)
     {
       CompletionResult result;
-      
+
       dir.traverse(
         [&result, accessLevel](const NodeIf& node, int depth)
         {
@@ -81,7 +81,7 @@ namespace cliService
         },
         0
       );
-      
+
       std::sort(result.allOptions.begin(), result.allOptions.end());
       return result;
     }
@@ -94,7 +94,7 @@ namespace cliService
       bool isAbsolute)
     {
       CompletionResult result;
-      
+
       // First pass: collect all matching entries
       dir.traverse(
         [&](const NodeIf& node, int depth) {
@@ -135,7 +135,7 @@ namespace cliService
         if (result.matchedNode.length() > partial.length()) {
           result.fillCharacters = result.matchedNode.substr(partial.length());
         }
-        
+
         // Set directory flag based on first match
         result.isDirectory = result.allOptions[0].back() == '/';
         
@@ -165,7 +165,7 @@ namespace cliService
     static std::string findCommonPrefix(const std::vector<std::string>& strings)
     {
       if (strings.empty()) { return ""; }
-      
+
       const std::string& first = strings[0];
       size_t prefixLen = first.length();
 
