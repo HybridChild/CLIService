@@ -7,6 +7,8 @@
 namespace cliService
 {
 
+  constexpr size_t HISTORY_SIZE = 10;
+
   class CLIServiceAdvancedTest : public ::testing::Test 
   {
   protected:
@@ -30,7 +32,7 @@ namespace cliService
         {"user", "user123", AccessLevel::User}
       };
 
-      _service = std::make_unique<CLIService>(CLIServiceConfiguration{_terminal, std::move(users), std::move(root)});
+      _service = std::make_unique<CLIService>(CLIServiceConfiguration{_terminal, std::move(users), std::move(root), HISTORY_SIZE});
     }
 
     TerminalMock _terminal;

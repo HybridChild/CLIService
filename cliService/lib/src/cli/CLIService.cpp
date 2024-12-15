@@ -19,7 +19,7 @@ namespace cliService
 
   CLIService::CLIService(CLIServiceConfiguration config)
     : _terminal(config._terminal)
-    , _parser(_terminal, _currentState)
+    , _parser(_terminal, _currentState, config._historySize)
     , _users(std::move(config._users))
     , _currentUser(std::nullopt)
     , _rootDirectory(std::move(config._rootDirectory))

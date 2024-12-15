@@ -7,13 +7,16 @@
 namespace cliService
 {
 
+  constexpr size_t HISTORY_SIZE = 10;
+
   class InputParserTest : public ::testing::Test
   {
+
   protected:
     void SetUp() override
     {
       _currentState = CLIState::LoggedIn;
-      _parser = std::make_unique<InputParser>(_terminal, _currentState);
+      _parser = std::make_unique<InputParser>(_terminal, _currentState, HISTORY_SIZE);
     }
 
     TerminalMock _terminal;
@@ -101,7 +104,7 @@ namespace cliService
   TEST_F(InputParserTest, LoginHandling)
   {
     _currentState = CLIState::LoggedOut;
-    _parser = std::make_unique<InputParser>(_terminal, _currentState);
+    _parser = std::make_unique<InputParser>(_terminal, _currentState, HISTORY_SIZE);
 
     _terminal.queueInput("user:pass\n");
     auto request = processAllInput();
@@ -120,7 +123,7 @@ namespace cliService
   TEST_F(InputParserTest, InvalidLoginFormat)
   {
     _currentState = CLIState::LoggedOut;
-    _parser = std::make_unique<InputParser>(_terminal, _currentState);
+    _parser = std::make_unique<InputParser>(_terminal, _currentState, HISTORY_SIZE);
     
     _terminal.queueInput("invalidformat\n");
     auto request = processAllInput();
@@ -132,7 +135,7 @@ namespace cliService
   TEST_F(InputParserTest, EmptyLogin)
   {
     _currentState = CLIState::LoggedOut;
-    _parser = std::make_unique<InputParser>(_terminal, _currentState);
+    _parser = std::make_unique<InputParser>(_terminal, _currentState, HISTORY_SIZE);
     
     _terminal.queueInput("\n");
     auto request = processAllInput();
@@ -143,7 +146,7 @@ namespace cliService
   TEST_F(InputParserTest, LoginWithEmptyFields)
   {
     _currentState = CLIState::LoggedOut;
-    _parser = std::make_unique<InputParser>(_terminal, _currentState);
+    _parser = std::make_unique<InputParser>(_terminal, _currentState, HISTORY_SIZE);
     
     // Test empty username
     _terminal.queueInput(":password\n");

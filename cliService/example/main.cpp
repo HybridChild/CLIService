@@ -10,6 +10,8 @@
 #include <thread>
 #include <chrono>
 
+#define COMMAND_HISTORY_SIZE 10
+
 using namespace cliService;
 
 
@@ -46,7 +48,7 @@ int main()
 
   auto tree = createMenuTree();
 
-  CLIServiceConfiguration cliConfig{static_cast<TerminalIf&>(terminal), std::move(users), std::move(tree)};
+  CLIServiceConfiguration cliConfig{static_cast<TerminalIf&>(terminal), std::move(users), std::move(tree), COMMAND_HISTORY_SIZE};
   CLIService cli(std::move(cliConfig));
   
   cli.activate();

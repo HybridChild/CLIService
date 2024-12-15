@@ -4,8 +4,9 @@
 namespace cliService
 {
 
-  InputParser::InputParser(TerminalIf& terminal, const CLIState& currentState)
+  InputParser::InputParser(TerminalIf& terminal, const CLIState& currentState, size_t historySize)
     : _terminal(terminal)
+    , _history(historySize)
     , _currentState(currentState)
     , _inEscapeSequence(false)
     , _escapeIndex(0)
@@ -46,7 +47,6 @@ namespace cliService
 
     if (c == ENTER_MAC || c == ENTER_WIN)
     {
-
       if (!_buffer.empty())
       {
         _terminal.putChar('\n');  // Echo newline

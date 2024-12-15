@@ -20,7 +20,7 @@ namespace cliService
     static constexpr char TAB = 0x09;
     static constexpr char ESC = 0x1B;
 
-    InputParser(TerminalIf& terminal, const CLIState& currentState);
+    InputParser(TerminalIf& terminal, const CLIState& currentState, size_t historySize);
 
     std::optional<std::unique_ptr<RequestBase>> parseNextRequest();
 

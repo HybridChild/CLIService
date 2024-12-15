@@ -13,15 +13,18 @@ namespace cliService
     CLIServiceConfiguration(
       TerminalIf& terminal,
       std::vector<User> users,
-      std::unique_ptr<Directory> root)
+      std::unique_ptr<Directory> root,
+      size_t historySize)
       : _terminal(terminal)
       , _users(std::move(users))
       , _rootDirectory(std::move(root))
+      , _historySize(historySize)
     {}
 
     TerminalIf& _terminal;
     std::vector<User> _users;
     std::unique_ptr<Directory> _rootDirectory;
+    size_t _historySize;
   };
 
 }
