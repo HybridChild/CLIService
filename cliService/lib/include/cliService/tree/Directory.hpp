@@ -14,7 +14,6 @@ namespace cliService
   {
   public:
     explicit Directory(std::string name, AccessLevel level);
-
     bool isDirectory() const override;
 
     NodeIf* findNode(const std::vector<std::string>& path) const;
