@@ -1,2 +1,2 @@
 @echo off
-.\out\build\bin\Debug\cliService_example.exe
+.\out\build\bin\cliService_example.exe
