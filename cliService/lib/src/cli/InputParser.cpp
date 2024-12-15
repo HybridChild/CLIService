@@ -38,7 +38,8 @@ namespace cliService
     if (_inEscapeSequence)
     {
       // Protect against buffer overflow
-      if (_escapeIndex >= MAX_ESCAPE_LENGTH - 1) {
+      if (_escapeIndex >= MAX_ESCAPE_LENGTH - 1)
+      {
         _inEscapeSequence = false;
         _escapeIndex = 0;
         return false;

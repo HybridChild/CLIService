@@ -7,10 +7,10 @@
 namespace cliService
 {
 
-  constexpr size_t HISTORY_SIZE = 10;
-
   class CLIServiceTest : public ::testing::Test
   {
+    static constexpr size_t HISTORY_SIZE = 10;
+
   protected:
     void SetUp() override
     {
