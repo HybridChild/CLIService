@@ -99,12 +99,12 @@ namespace cliService
     {
       _currentUser = *userIt;
       _currentState = CLIState::LoggedIn;
-      displayPrompt();
     }
-    else
-    {
+    else {
       _terminal.putString("Invalid username or password\n");
     }
+
+    displayPrompt();
   }
 
 
