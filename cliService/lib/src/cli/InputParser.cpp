@@ -46,10 +46,10 @@ namespace cliService
 
     if (c == ENTER_MAC || c == ENTER_WIN)
     {
-      _terminal.putChar('\n');  // Echo newline
 
       if (!_buffer.empty())
       {
+        _terminal.putChar('\n');  // Echo newline
         _lastTrigger = ActionRequest::Trigger::Enter;
         return true;
       }

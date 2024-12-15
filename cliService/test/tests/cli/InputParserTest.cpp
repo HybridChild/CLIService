@@ -47,7 +47,7 @@ namespace cliService
     _terminal.queueInput("\n");
     auto request = processAllInput();
     EXPECT_FALSE(request.has_value());
-    EXPECT_EQ(_terminal.getOutput(), "\n");
+    EXPECT_TRUE(_terminal.getOutput().empty());
   }
 
   TEST_F(InputParserTest, SimpleCommand)
