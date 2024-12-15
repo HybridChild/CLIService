@@ -14,6 +14,8 @@ namespace cliService
   class InputParser
   {
   public:
+    static constexpr size_t MAX_ESCAPE_LENGTH = 16;
+
     static constexpr char BACKSPACE = 0x7F;
     static constexpr char ENTER_MAC = 0x0A;
     static constexpr char ENTER_WIN = 0x0D;
@@ -44,7 +46,7 @@ namespace cliService
     const CLIState& _currentState;
 
     bool _inEscapeSequence;
-    char _escapeBuffer[2];
+    std::vector<char> _escapeBuffer;
     size_t _escapeIndex;
   };
 
