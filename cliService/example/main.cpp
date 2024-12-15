@@ -53,7 +53,7 @@ int main()
   
   cli.activate();
 
-  while (true)
+  while (cli.getState() != CLIState::Inactive)
   {
     cli.service();
     std::this_thread::sleep_for(std::chrono::milliseconds(10));

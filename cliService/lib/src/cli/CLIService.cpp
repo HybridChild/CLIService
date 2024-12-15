@@ -13,7 +13,7 @@ namespace cliService
 {
 
   const std::unordered_set<std::string_view> CLIService::GLOBAL_COMMANDS = {
-    "logout", "tree", "help", "?"
+    "logout", "exit", "tree", "help", "?"
   };
 
 
@@ -187,6 +187,22 @@ namespace cliService
       _terminal.putChar('\n');
       displayPrompt();
     }
+    else if (command == "exit")
+    {
+      if (!args.empty())
+      {
+        _terminal.putString(NO_ARGUMENTS_MESSAGE);
+        _terminal.putChar('\n');
+        displayPrompt();
+        return;
+      }
+
+      _currentState = CLIState::Inactive;
+      _currentUser = std::nullopt;
+      resetToRoot();
+      _terminal.putString(EXIT_MESSAGE);
+      _terminal.putChar('\n');
+    }
     else if (command == "tree")
     {
       if (!args.empty())
@@ -263,8 +279,9 @@ namespace cliService
       _terminal.putString("\nGlobal commands:\n");
       _terminal.putString("  help   - List global commands\n");
       _terminal.putString("  tree   - Show directory structure\n");
-      _terminal.putString("  ?      - Show help for available commands in current directory\n");
-      _terminal.putString("  logout - Exit current session\n\n");
+      _terminal.putString("  ?      - Show description of available commands in current directory\n");
+      _terminal.putString("  logout - Exit current session\n");
+      _terminal.putString("  exit   - Exit the CLI\n\n");
 
       displayPrompt();
     }
