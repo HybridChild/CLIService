@@ -151,6 +151,25 @@ target_link_libraries(${PROJECT_NAME}_PathResolverNavigation_test
     GTest::gtest_main
 )
 
+# TabCompletion tests
+add_executable(${PROJECT_NAME}_TabCompletion_test
+  tests/cli/TabCompletionTest.cpp
+  mock/terminal/TerminalMock.cpp
+  mock/command/CommandMock.hpp
+)
+
+target_include_directories(${PROJECT_NAME}_TabCompletion_test
+  PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_link_libraries(${PROJECT_NAME}_TabCompletion_test
+  PRIVATE
+    ${PROJECT_NAME}_lib
+    GTest::gtest_main
+    GTest::gmock
+)
+
 # Discover tests
 gtest_discover_tests(${PROJECT_NAME}_ActionRequest_test)
 gtest_discover_tests(${PROJECT_NAME}_LoginRequest_test)
@@ -164,3 +183,4 @@ gtest_discover_tests(${PROJECT_NAME}_CommandHistory_test)
 gtest_discover_tests(${PROJECT_NAME}_PathCompleterAdvanced_test)
 gtest_discover_tests(${PROJECT_NAME}_CLIServiceAdvanced_test)
 gtest_discover_tests(${PROJECT_NAME}_PathResolverNavigation_test)
+gtest_discover_tests(${PROJECT_NAME}_TabCompletion_test)

@@ -46,11 +46,12 @@ namespace cliService
       // Find the directory to complete in
       const Directory* targetDir = &currentDir;
 
-      if (!elements.empty())
+      if (!elements.empty() || partialPath.isAbsolute())
       {
-        Path dirPath(elements, partialPath.isAbsolute());
-        PathResolver resolver(const_cast<Directory&>(currentDir));
-        auto* node = resolver.resolve(dirPath, currentDir);
+        // Create normalized path for resolution
+        Path dirPath = Path(elements, partialPath.isAbsolute()).normalized();
+        
+        auto* node = targetDir->resolvePath(dirPath.toString(), currentDir);
 
         if (!node || !node->isDirectory()) {
           return CompletionResult{};
