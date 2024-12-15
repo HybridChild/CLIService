@@ -55,24 +55,33 @@ namespace cliService
     // Process state-specific requests
     switch (_currentState)
     {
-      case CLIState::LoggedOut:
-        if (auto* loginRequest = dynamic_cast<LoginRequest*>(request->get()))
-        {
-          handleLoginRequest(*loginRequest);
-        }
-        break;
+    case CLIState::LoggedOut:
+      if (auto* loginRequest = dynamic_cast<LoginRequest*>(request->get())) {
+        handleLoginRequest(*loginRequest);
+      }
+      else if (dynamic_cast<InvalidLoginRequest*>(request->get())) {
+        handleInvalidLoginRequest();
+      }
+      break;
 
-      case CLIState::LoggedIn:
-        if (auto* actionRequest = dynamic_cast<ActionRequest*>(request->get()))
-        {
-          handleActionRequest(*actionRequest);
-        }
-        break;
+    case CLIState::LoggedIn:
+      if (auto* actionRequest = dynamic_cast<ActionRequest*>(request->get())) {
+        handleActionRequest(*actionRequest);
+      }
+      break;
 
-      default:
-        assert(false && "Invalid state in service");
-        break;
+    default:
+      assert(false && "Invalid state in service");
+      break;
     }
+  }
+
+
+  void CLIService::handleInvalidLoginRequest()
+  {
+    _terminal.putString(LOGGED_OUT_MESSAGE);
+    _terminal.putChar('\n');
+    displayPrompt();
   }
 
 

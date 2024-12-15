@@ -21,8 +21,14 @@ namespace cliService
 
     CLIState getState() const { return _currentState; }
 
+    // Used by tests
+    static std::string_view getWelcomeMessage() { return WELCOME_MESSAGE; }
+    static std::string_view getLoggedOutMessage() { return LOGGED_OUT_MESSAGE; }
+    static std::string_view getNoArgumentsMessage() { return NO_ARGUMENTS_MESSAGE; }
+
   private:
     // Request handlers
+    void handleInvalidLoginRequest();
     void handleLoginRequest(const LoginRequest& request);
     void handleActionRequest(const ActionRequest& request);
     void handleGlobalCommand(const std::string_view& command, const std::vector<std::string>& args);

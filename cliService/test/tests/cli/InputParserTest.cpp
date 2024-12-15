@@ -117,6 +117,48 @@ namespace cliService
     EXPECT_EQ(_terminal.getOutput(), expectedOutput);
   }
 
+  TEST_F(InputParserTest, InvalidLoginFormat)
+  {
+    _currentState = CLIState::LoggedOut;
+    _parser = std::make_unique<InputParser>(_terminal, _currentState);
+    
+    _terminal.queueInput("invalidformat\n");
+    auto request = processAllInput();
+    
+    ASSERT_TRUE(request.has_value());
+    EXPECT_NE(dynamic_cast<InvalidLoginRequest*>(request->get()), nullptr);
+  }
+
+  TEST_F(InputParserTest, EmptyLogin)
+  {
+    _currentState = CLIState::LoggedOut;
+    _parser = std::make_unique<InputParser>(_terminal, _currentState);
+    
+    _terminal.queueInput("\n");
+    auto request = processAllInput();
+    
+    EXPECT_FALSE(request.has_value());
+  }
+
+  TEST_F(InputParserTest, LoginWithEmptyFields)
+  {
+    _currentState = CLIState::LoggedOut;
+    _parser = std::make_unique<InputParser>(_terminal, _currentState);
+    
+    // Test empty username
+    _terminal.queueInput(":password\n");
+    auto request = processAllInput();
+    ASSERT_TRUE(request.has_value());
+    EXPECT_NE(dynamic_cast<InvalidLoginRequest*>(request->get()), nullptr);
+    
+    // Test empty password
+    _terminal.clearOutput();
+    _terminal.queueInput("username:\n");
+    request = processAllInput();
+    ASSERT_TRUE(request.has_value());
+    EXPECT_NE(dynamic_cast<InvalidLoginRequest*>(request->get()), nullptr);
+  }
+
   TEST_F(InputParserTest, ArrowKeys)
   {
     // Test UP arrow

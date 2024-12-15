@@ -13,55 +13,52 @@ namespace cliService
 
   TEST_F(LoginRequestTest, ValidLoginRequest)
   {
-    LoginRequest request("user123:pass456");
-    
-    EXPECT_EQ(request.getUsername(), "user123");
-    EXPECT_EQ(request.getPassword(), "pass456");
+    auto request = LoginRequest::create("user123:pass456");
+    ASSERT_TRUE(request.has_value());
+    EXPECT_EQ(request->getUsername(), "user123");
+    EXPECT_EQ(request->getPassword(), "pass456");
   }
 
   TEST_F(LoginRequestTest, EmptyUsername)
   {
-    EXPECT_DEATH({
-      LoginRequest request(":password");
-    }, "Username cannot be empty");
+    auto request = LoginRequest::create(":password");
+    EXPECT_FALSE(request.has_value());
   }
 
   TEST_F(LoginRequestTest, EmptyPassword)
   {
-    EXPECT_DEATH({
-      LoginRequest request("username:");
-    }, "Password cannot be empty");
+    auto request = LoginRequest::create("username:");
+    EXPECT_FALSE(request.has_value());
   }
 
   TEST_F(LoginRequestTest, NoDelimiter)
   {
-    EXPECT_DEATH({
-      LoginRequest request("invalidformat");
-    }, "Invalid login format");
+    auto request = LoginRequest::create("invalidformat");
+    EXPECT_FALSE(request.has_value());
   }
 
   TEST_F(LoginRequestTest, MultipleDelimiters)
   {
-    LoginRequest request("user:pass:extra");
-
-    EXPECT_EQ(request.getUsername(), "user");
-    EXPECT_EQ(request.getPassword(), "pass:extra");
+    auto request = LoginRequest::create("user:pass:extra");
+    ASSERT_TRUE(request.has_value());
+    EXPECT_EQ(request->getUsername(), "user");
+    EXPECT_EQ(request->getPassword(), "pass:extra");
   }
 
   TEST_F(LoginRequestTest, WhitespaceHandling)
   {
-    LoginRequest request(" user : pass ");
-
-    EXPECT_EQ(request.getUsername(), " user ");
-    EXPECT_EQ(request.getPassword(), " pass ");
+    auto request = LoginRequest::create(" user : pass ");
+    ASSERT_TRUE(request.has_value());
+    EXPECT_EQ(request->getUsername(), " user ");
+    EXPECT_EQ(request->getPassword(), " pass ");
   }
 
   TEST_F(LoginRequestTest, SpecialCharacters)
   {
-    LoginRequest request("user@domain.com:p@ssw0rd!");
-
-    EXPECT_EQ(request.getUsername(), "user@domain.com");
-    EXPECT_EQ(request.getPassword(), "p@ssw0rd!");
+    auto request = LoginRequest::create("user@domain.com:p@ssw0rd!");
+    ASSERT_TRUE(request.has_value());
+    EXPECT_EQ(request->getUsername(), "user@domain.com");
+    EXPECT_EQ(request->getPassword(), "p@ssw0rd!");
   }
 
 }

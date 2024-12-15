@@ -212,10 +212,18 @@ namespace cliService
     {
       case CLIState::LoggedOut:
       {
-        assert(!_buffer.empty() && "Empty input received in LoggedOut state");
-        auto request = std::make_unique<LoginRequest>(_buffer);
+        if (_buffer.empty()) {
+          return nullptr;
+        }
+
+        auto loginRequest = LoginRequest::create(_buffer);
         _buffer.clear();
-        return request;
+
+        if (!loginRequest) {
+          return std::make_unique<InvalidLoginRequest>();
+        }
+
+        return std::make_unique<LoginRequest>(std::move(*loginRequest));
       }
 
       case CLIState::LoggedIn:

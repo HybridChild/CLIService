@@ -110,4 +110,37 @@ namespace cliService
     EXPECT_THAT(_terminal.getOutput(), testing::EndsWith("admin@/sub > "));
   }
 
+  TEST_F(CLIServiceTest, InvalidLoginFormat)
+  {
+    _terminal.queueInput("invalidloginformat\n");
+    _service->activate();
+    _service->service();
+    
+    EXPECT_THAT(_terminal.getOutput(), 
+      testing::HasSubstr(CLIService::getLoggedOutMessage()));
+    EXPECT_EQ(_service->getState(), CLIState::LoggedOut);
+  }
+
+  TEST_F(CLIServiceTest, EmptyUsername)
+  {
+    _terminal.queueInput(":password123\n");
+    _service->activate();
+    _service->service();
+    
+    EXPECT_THAT(_terminal.getOutput(), 
+      testing::HasSubstr(CLIService::getLoggedOutMessage()));
+    EXPECT_EQ(_service->getState(), CLIState::LoggedOut);
+  }
+
+  TEST_F(CLIServiceTest, EmptyPassword)
+  {
+    _terminal.queueInput("username:\n");
+    _service->activate();
+    _service->service();
+    
+    EXPECT_THAT(_terminal.getOutput(), 
+      testing::HasSubstr(CLIService::getLoggedOutMessage()));
+    EXPECT_EQ(_service->getState(), CLIState::LoggedOut);
+  }
+
 }

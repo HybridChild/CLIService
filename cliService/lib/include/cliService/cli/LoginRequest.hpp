@@ -1,30 +1,50 @@
 #pragma once
 #include "cliService/cli/RequestBase.hpp"
 #include <string>
-#include <cassert>
+#include <optional>
 
 namespace cliService
 {
 
+  // Simple request type to indicate invalid login attempt
+  class InvalidLoginRequest : public RequestBase
+  {
+  public:
+    InvalidLoginRequest() = default;
+  };
+
   class LoginRequest : public RequestBase
   {
   public:
-    explicit LoginRequest(const std::string& input)
+    // Factory method to create LoginRequest
+    static std::optional<LoginRequest> create(const std::string& input)
     {
       size_t delimPos = input.find(':');
-      assert(delimPos != std::string::npos && "Invalid login format");
+      
+      if (delimPos == std::string::npos) {
+        return std::nullopt;
+      }
 
-      _username = input.substr(0, delimPos);
-      _password = input.substr(delimPos + 1);
+      std::string username = input.substr(0, delimPos);
+      std::string password = input.substr(delimPos + 1);
+      
+      if (username.empty() || password.empty()) {
+        return std::nullopt;
+      }
 
-      assert(!_username.empty() && "Username cannot be empty");
-      assert(!_password.empty() && "Password cannot be empty");
+      return LoginRequest(std::move(username), std::move(password));
     }
 
     const std::string& getUsername() const { return _username; }
     const std::string& getPassword() const { return _password; }
 
   private:
+    // Private constructor - use factory method instead
+    LoginRequest(std::string username, std::string password)
+      : _username(std::move(username))
+      , _password(std::move(password))
+    {}
+
     std::string _username;
     std::string _password;
   };

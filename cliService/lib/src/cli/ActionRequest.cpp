@@ -7,6 +7,30 @@
 namespace cliService
 {
 
+  ActionRequest::ActionRequest(std::string_view inputStr, Trigger trigger)
+    : _trigger(trigger)
+  {
+    // Split input into path and args
+    std::string_view pathStr, argsStr;
+    parseInput(inputStr, pathStr, argsStr);
+    
+    // Create path object
+    _path = Path(pathStr);
+    
+    // Parse args if present
+    if (!argsStr.empty())
+    {
+      // Fix for most vexing parse - use brace initialization
+      std::istringstream argStream{std::string(argsStr)};
+      std::string arg;
+
+      while (argStream >> arg) {
+        _args.push_back(std::move(arg));
+      }
+    }
+  }
+
+
   void ActionRequest::parseInput(std::string_view input, std::string_view& pathStr, std::string_view& argsStr)
   {
     // Find first space that separates path from args
@@ -37,30 +61,6 @@ namespace cliService
     if (!argsStr.empty())
     {
       assert(pathStr.empty() || pathStr.back() != '/' && "Paths with arguments must not end with a slash");
-    }
-  }
-
-
-  ActionRequest::ActionRequest(std::string_view inputStr, Trigger trigger)
-    : _trigger(trigger)
-  {
-    // Split input into path and args
-    std::string_view pathStr, argsStr;
-    parseInput(inputStr, pathStr, argsStr);
-    
-    // Create path object
-    _path = Path(pathStr);
-    
-    // Parse args if present
-    if (!argsStr.empty())
-    {
-      // Fix for most vexing parse - use brace initialization
-      std::istringstream argStream{std::string(argsStr)};
-      std::string arg;
-
-      while (argStream >> arg) {
-        _args.push_back(std::move(arg));
-      }
     }
   }
 
