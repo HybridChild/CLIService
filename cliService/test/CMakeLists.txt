@@ -23,7 +23,7 @@ target_link_libraries(${PROJECT_NAME}_LoginRequest_test
 # InputParser tests
 add_executable(${PROJECT_NAME}_InputParser_test
   tests/cli/InputParserTest.cpp
-  mock/terminal/TerminalMock.cpp
+  mock/io/CharIOStreamMock.cpp
 )
 
 target_include_directories(${PROJECT_NAME}_InputParser_test
@@ -51,7 +51,7 @@ target_link_libraries(${PROJECT_NAME}_Tree_test
 # CLIService tests
 add_executable(${PROJECT_NAME}_CLIService_test
   tests/cli/CLIServiceTest.cpp
-  mock/terminal/TerminalMock.cpp
+  mock/io/CharIOStreamMock.cpp
   mock/command/CommandMock.hpp
 )
 
@@ -125,7 +125,7 @@ target_link_libraries(${PROJECT_NAME}_PathCompleterAdvanced_test
 # CLIService Advanced test
 add_executable(${PROJECT_NAME}_CLIServiceAdvanced_test
   tests/cli/CLIServiceAdvancedTest.cpp
-  mock/terminal/TerminalMock.cpp
+  mock/io/CharIOStreamMock.cpp
 )
 
 target_include_directories(${PROJECT_NAME}_CLIServiceAdvanced_test
@@ -154,7 +154,7 @@ target_link_libraries(${PROJECT_NAME}_PathResolverNavigation_test
 # TabCompletion tests
 add_executable(${PROJECT_NAME}_TabCompletion_test
   tests/cli/TabCompletionTest.cpp
-  mock/terminal/TerminalMock.cpp
+  mock/io/CharIOStreamMock.cpp
   mock/command/CommandMock.hpp
 )
 

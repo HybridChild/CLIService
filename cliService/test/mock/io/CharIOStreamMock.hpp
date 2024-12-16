@@ -1,15 +1,15 @@
 #pragma once
-#include "cliService/cli/TerminalIf.hpp"
+#include "cliService/cli/CharIOStreamIf.hpp"
 #include <queue>
 #include <string>
 
 namespace cliService
 {
 
-  class TerminalMock : public TerminalIf
+  class CharIOStreamMock : public CharIOStreamIf
   {
   public:
-    TerminalMock() = default;
+    CharIOStreamMock() = default;
 
     bool putChar(char c) override;
     bool getChar(char& c) override;

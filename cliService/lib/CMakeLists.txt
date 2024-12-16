@@ -7,7 +7,7 @@ set(LIB_HEADERS
   include/cliService/cli/InputParser.hpp
   include/cliService/cli/LoginRequest.hpp
   include/cliService/cli/RequestBase.hpp
-  include/cliService/cli/TerminalIf.hpp
+  include/cliService/cli/CharIOStreamIf.hpp
   include/cliService/cli/User.hpp
   include/cliService/tree/CommandIf.hpp
   include/cliService/tree/CommandResponse.hpp

@@ -5,10 +5,10 @@
 namespace cliService
 {
 
-  class TerminalIf
+  class CharIOStreamIf
   {
   public:
-    virtual ~TerminalIf() = default;
+    virtual ~CharIOStreamIf() = default;
 
     virtual bool putChar(char c) = 0;
     virtual bool getChar(char& c) = 0;
@@ -31,9 +31,9 @@ namespace cliService
     virtual void clearError() = 0;
 
   protected:
-    TerminalIf() = default;
-    TerminalIf(const TerminalIf&) = delete;
-    TerminalIf& operator=(const TerminalIf&) = delete;
+    CharIOStreamIf() = default;
+    CharIOStreamIf(const CharIOStreamIf&) = delete;
+    CharIOStreamIf& operator=(const CharIOStreamIf&) = delete;
   };
 
 }

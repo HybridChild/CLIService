@@ -4,8 +4,8 @@
 namespace cliService
 {
 
-  InputParser::InputParser(TerminalIf& terminal, const CLIState& currentState, size_t historySize)
-    : _terminal(terminal)
+  InputParser::InputParser(CharIOStreamIf& ioStream, const CLIState& currentState, size_t historySize)
+    : _ioStream(ioStream)
     , _history(historySize)
     , _currentState(currentState)
     , _inEscapeSequence(false)
@@ -16,7 +16,7 @@ namespace cliService
 
   std::optional<std::unique_ptr<RequestBase>> InputParser::parseNextRequest()
   {
-    while (_terminal.available())
+    while (_ioStream.available())
     {
       if (processNextChar()) {
         return createRequest();
@@ -31,7 +31,7 @@ namespace cliService
   {
     char c;
 
-    if (!_terminal.getChar(c)) {
+    if (!_ioStream.getChar(c)) {
       return false;
     }
 
@@ -77,7 +77,7 @@ namespace cliService
     {
       if (!_buffer.empty())
       {
-        _terminal.putChar('\n');  // Echo newline
+        _ioStream.putChar('\n');  // Echo newline
         _lastTrigger = ActionRequest::Trigger::Enter;
         return true;
       }
@@ -109,7 +109,7 @@ namespace cliService
         if (!_buffer.empty())
         {
           _buffer.pop_back();
-          _terminal.putString("\b \b");
+          _ioStream.putString("\b \b");
         }
         break;
 
@@ -155,14 +155,14 @@ namespace cliService
           
           // Clear current line
           while (!_buffer.empty()) {
-            _terminal.putString("\b \b");
+            _ioStream.putString("\b \b");
             _buffer.pop_back();
           }
           
           // Show previous command
           std::string prevCmd = _history.getPreviousCommand();
           _buffer = prevCmd;
-          _terminal.putString(prevCmd);
+          _ioStream.putString(prevCmd);
           
           _lastTrigger = ActionRequest::Trigger::ArrowUp;
           return true;
@@ -175,7 +175,7 @@ namespace cliService
           // Clear current line
           while (!_buffer.empty())
           {
-            _terminal.putString("\b \b");
+            _ioStream.putString("\b \b");
             _buffer.pop_back();
           }
           
@@ -189,7 +189,7 @@ namespace cliService
           }
           
           _buffer = nextCmd;
-          _terminal.putString(nextCmd);
+          _ioStream.putString(nextCmd);
           
           _lastTrigger = ActionRequest::Trigger::ArrowDown;
           return true;
@@ -235,15 +235,15 @@ namespace cliService
       
       // If we've found a colon and this character is after it, mask it
       if (colonPos != std::string::npos && _buffer.length() > colonPos + 1) {
-        _terminal.putChar('*');
+        _ioStream.putChar('*');
       }
       else {
-        _terminal.putChar(c);
+        _ioStream.putChar(c);
       }
     }
     else
     {
-      _terminal.putChar(c);
+      _ioStream.putChar(c);
     }
   }
 

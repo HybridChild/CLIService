@@ -1,4 +1,4 @@
-#include "UnixWinTerminal.hpp"
+#include "UnixWinCharIOStream.hpp"
 #include <cassert>
 
 #ifdef _WIN32
@@ -14,7 +14,7 @@
 namespace cliService
 {
 
-  UnixWinTerminal::UnixWinTerminal()
+  UnixWinCharIOStream::UnixWinCharIOStream()
     : _isOpen(false), _lastError("")
   {
   #ifdef _WIN32
@@ -28,13 +28,13 @@ namespace cliService
     _oldTermios = new termios;
   #endif
 
-    setupTerminal();
+    setupIOStream();
     _isOpen = true;
   }
 
-  UnixWinTerminal::~UnixWinTerminal()
+  UnixWinCharIOStream::~UnixWinCharIOStream()
   {
-    restoreTerminal();
+    restoreIOStream();
 
   #ifdef _WIN32
     delete static_cast<DWORD*>(_oldInMode);
@@ -44,7 +44,7 @@ namespace cliService
   #endif
   }
 
-  void UnixWinTerminal::setupTerminal()
+  void UnixWinCharIOStream::setupIOStream()
   {
   #ifdef _WIN32
     // Get current console mode
@@ -88,7 +88,7 @@ namespace cliService
   #endif
   }
 
-  void UnixWinTerminal::restoreTerminal()
+  void UnixWinCharIOStream::restoreIOStream()
   {
   #ifdef _WIN32
     SetConsoleMode(_hStdin, *static_cast<DWORD*>(_oldInMode));
@@ -98,7 +98,7 @@ namespace cliService
   #endif
   }
 
-  bool UnixWinTerminal::putChar(char c)
+  bool UnixWinCharIOStream::putChar(char c)
   {
   #ifdef _WIN32
     DWORD written;
@@ -117,7 +117,7 @@ namespace cliService
     return true;
   }
 
-  bool UnixWinTerminal::getChar(char& c)
+  bool UnixWinCharIOStream::getChar(char& c)
   {
   #ifdef _WIN32
     DWORD read;
@@ -138,7 +138,7 @@ namespace cliService
     return true;
   }
 
-  bool UnixWinTerminal::getCharTimeout(char& c, uint32_t timeout_ms)
+  bool UnixWinCharIOStream::getCharTimeout(char& c, uint32_t timeout_ms)
   {
   #ifdef _WIN32
     // Windows implementation using WaitForSingleObject
@@ -168,7 +168,7 @@ namespace cliService
   #endif
   }
 
-  bool UnixWinTerminal::available() const
+  bool UnixWinCharIOStream::available() const
   {
   #ifdef _WIN32
     DWORD events;
@@ -181,7 +181,7 @@ namespace cliService
   #endif
   }
 
-  void UnixWinTerminal::flush()
+  void UnixWinCharIOStream::flush()
   {
   #ifdef _WIN32
     FlushConsoleInputBuffer(_hStdin);
@@ -190,19 +190,19 @@ namespace cliService
   #endif
   }
 
-  bool UnixWinTerminal::isOpen() const {
+  bool UnixWinCharIOStream::isOpen() const {
     return _isOpen;
   }
 
-  bool UnixWinTerminal::hasError() const {
+  bool UnixWinCharIOStream::hasError() const {
     return !_lastError.empty();
   }
 
-  const char* UnixWinTerminal::getLastError() const {
+  const char* UnixWinCharIOStream::getLastError() const {
     return _lastError.c_str();
   }
 
-  void UnixWinTerminal::clearError() {
+  void UnixWinCharIOStream::clearError() {
     _lastError.clear();
   }
 

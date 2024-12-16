@@ -1,4 +1,4 @@
-#include "terminal/UnixWinTerminal.hpp"
+#include "io/UnixWinCharIOStream.hpp"
 #include "commands/AccessLevel.hpp"
 #include "commands/system/RebootCommand.hpp"
 #include "commands/system/HeapStatsGetCommand.hpp"
@@ -39,7 +39,7 @@ std::unique_ptr<Directory> createMenuTree()
 
 int main()
 {
-  UnixWinTerminal terminal{};
+  UnixWinCharIOStream ioStream{};
 
   std::vector<cliService::User> users = {
     {"admin", "admin123", AccessLevel::Admin},
@@ -48,7 +48,7 @@ int main()
 
   auto tree = createMenuTree();
 
-  CLIServiceConfiguration cliConfig{static_cast<TerminalIf&>(terminal), std::move(users), std::move(tree), COMMAND_HISTORY_SIZE};
+  CLIServiceConfiguration cliConfig{static_cast<CharIOStreamIf&>(ioStream), std::move(users), std::move(tree), COMMAND_HISTORY_SIZE};
   CLIService cli(std::move(cliConfig));
   
   cli.activate();

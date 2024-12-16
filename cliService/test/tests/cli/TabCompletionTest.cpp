@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "cliService/cli/CLIService.hpp"
 #include "mock/command/CommandMock.hpp"
-#include "mock/terminal/TerminalMock.hpp"
+#include "mock/io/CharIOStreamMock.hpp"
 
 namespace cliService
 {
@@ -39,31 +39,31 @@ namespace cliService
           {"user", "user123", AccessLevel::User}};
 
       _service = std::make_unique<CLIService>(
-          CLIServiceConfiguration{_terminal, std::move(users), std::move(root), HISTORY_SIZE});
+          CLIServiceConfiguration{_ioStream, std::move(users), std::move(root), HISTORY_SIZE});
     }
 
     void loginAsUser()
     {
-      _terminal.queueInput("user:user123\n");
+      _ioStream.queueInput("user:user123\n");
       _service->activate();
       _service->service();
-      _terminal.clearOutput();
+      _ioStream.clearOutput();
     }
 
     void navigateToSubfolder1()
     {
-      _terminal.queueInput("folder1/subfolder1\n");
+      _ioStream.queueInput("folder1/subfolder1\n");
       _service->service();
-      _terminal.clearOutput();
+      _ioStream.clearOutput();
     }
 
     void pressTab()
     {
-      _terminal.queueInput("\t");
+      _ioStream.queueInput("\t");
       _service->service();
     }
 
-    TerminalMock _terminal;
+    CharIOStreamMock _ioStream;
     std::unique_ptr<CLIService> _service;
   };
 
@@ -72,11 +72,11 @@ namespace cliService
     loginAsUser();
     navigateToSubfolder1(); // Now in /folder1/subfolder1
 
-    _terminal.queueInput("../../f");
+    _ioStream.queueInput("../../f");
     _service->service();
     pressTab();
 
-    std::string output = _terminal.getOutput();
+    std::string output = _ioStream.getOutput();
     EXPECT_TRUE(output.find("folder1/") != std::string::npos);
     EXPECT_TRUE(output.find("folder2/") != std::string::npos);
   }
@@ -86,11 +86,11 @@ namespace cliService
     loginAsUser();
     navigateToSubfolder1(); // Now in /folder1/subfolder1
 
-    _terminal.queueInput("../../folder2/t");
+    _ioStream.queueInput("../../folder2/t");
     _service->service();
     pressTab();
 
-    std::string output = _terminal.getOutput();
+    std::string output = _ioStream.getOutput();
     EXPECT_TRUE(output.find("target1/") != std::string::npos);
     EXPECT_TRUE(output.find("target2/") != std::string::npos);
   }
@@ -100,15 +100,15 @@ namespace cliService
     loginAsUser();
     navigateToSubfolder1();
 
-    _terminal.queueInput("deep\n");
+    _ioStream.queueInput("deep\n");
     _service->service();
-    _terminal.clearOutput();
+    _ioStream.clearOutput();
 
-    _terminal.queueInput("../../../f");
+    _ioStream.queueInput("../../../f");
     _service->service();
     pressTab();
 
-    std::string output = _terminal.getOutput();
+    std::string output = _ioStream.getOutput();
     EXPECT_TRUE(output.find("folder1/") != std::string::npos);
     EXPECT_TRUE(output.find("folder2/") != std::string::npos);
   }
@@ -118,11 +118,11 @@ namespace cliService
     loginAsUser();
     navigateToSubfolder1();
 
-    _terminal.queueInput("../../../../folder2/t");
+    _ioStream.queueInput("../../../../folder2/t");
     _service->service();
     pressTab();
 
-    std::string output = _terminal.getOutput();
+    std::string output = _ioStream.getOutput();
     EXPECT_TRUE(output.find("target1/") != std::string::npos);
     EXPECT_TRUE(output.find("target2/") != std::string::npos);
   }
@@ -132,11 +132,11 @@ namespace cliService
     loginAsUser();
     navigateToSubfolder1();
 
-    _terminal.queueInput("../s");
+    _ioStream.queueInput("../s");
     _service->service();
     pressTab();
 
-    std::string output = _terminal.getOutput();
+    std::string output = _ioStream.getOutput();
     EXPECT_TRUE(output.find("subfolder2") != std::string::npos);
   }
 
@@ -145,11 +145,11 @@ namespace cliService
     loginAsUser();
     navigateToSubfolder1();
 
-    _terminal.queueInput("./../s");
+    _ioStream.queueInput("./../s");
     _service->service();
     pressTab();
 
-    std::string output = _terminal.getOutput();
+    std::string output = _ioStream.getOutput();
     EXPECT_TRUE(output.find("subfolder2") != std::string::npos);
   }
 
@@ -158,11 +158,11 @@ namespace cliService
     loginAsUser();
     navigateToSubfolder1();
 
-    _terminal.queueInput("../nonexistent/s");
+    _ioStream.queueInput("../nonexistent/s");
     _service->service();
     pressTab();
 
-    std::string output = _terminal.getOutput();
+    std::string output = _ioStream.getOutput();
     EXPECT_FALSE(output.find("subfolder") != std::string::npos);
   }
 
@@ -171,11 +171,11 @@ namespace cliService
     loginAsUser();
     navigateToSubfolder1();
 
-    _terminal.queueInput("./../subfolder2/../subfolder1/d");
+    _ioStream.queueInput("./../subfolder2/../subfolder1/d");
     _service->service();
     pressTab();
 
-    std::string output = _terminal.getOutput();
+    std::string output = _ioStream.getOutput();
     EXPECT_TRUE(output.find("deep") != std::string::npos);
   }
 
@@ -183,11 +183,11 @@ namespace cliService
   {
     loginAsUser();
 
-    _terminal.queueInput("../f");
+    _ioStream.queueInput("../f");
     _service->service();
     pressTab();
 
-    std::string output = _terminal.getOutput();
+    std::string output = _ioStream.getOutput();
     EXPECT_TRUE(output.find("folder1/") != std::string::npos);
     EXPECT_TRUE(output.find("folder2/") != std::string::npos);
   }

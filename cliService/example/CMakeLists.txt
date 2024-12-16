@@ -5,13 +5,13 @@ set(EXAMPLE_HEADERS
   commands/hw/ToggleSwitchGetCommand.hpp
   commands/system/HeapStatsGetCommand.hpp
   commands/system/RebootCommand.hpp
-  terminal/UnixWinTerminal.hpp
+  io/UnixWinCharIO.hpp
   util/util.hpp
 )
 
 set(EXAMPLE_SOURCES
   main.cpp
-  terminal/UnixWinTerminal.cpp
+  io/UnixWinCharIOStream.cpp
 )
 
 add_executable(${PROJECT_NAME}_example ${EXAMPLE_SOURCES})

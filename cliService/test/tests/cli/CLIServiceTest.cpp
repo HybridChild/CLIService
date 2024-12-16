@@ -2,7 +2,7 @@
 #include "gmock/gmock.h"
 #include "cliService/cli/CLIService.hpp"
 #include "mock/command/CommandMock.hpp"
-#include "mock/terminal/TerminalMock.hpp"
+#include "mock/io/CharIOStreamMock.hpp"
 
 namespace cliService
 {
@@ -25,10 +25,10 @@ namespace cliService
         {"user", "pass123", AccessLevel::User}
       };
 
-      _service = std::make_unique<CLIService>(CLIServiceConfiguration{_terminal, std::move(users), std::move(root), HISTORY_SIZE});
+      _service = std::make_unique<CLIService>(CLIServiceConfiguration{_ioStream, std::move(users), std::move(root), HISTORY_SIZE});
     }
 
-    TerminalMock _terminal;
+    CharIOStreamMock _ioStream;
     Directory* _rootDir;
     CommandMock* _mockCmd;
     std::unique_ptr<CLIService> _service;
@@ -42,7 +42,7 @@ namespace cliService
 
   TEST_F(CLIServiceTest, LoginSuccess) 
   {
-    _terminal.queueInput("admin:admin123\n");
+    _ioStream.queueInput("admin:admin123\n");
 
     _service->activate();
     _service->service();
@@ -52,8 +52,8 @@ namespace cliService
 
   TEST_F(CLIServiceTest, ExecuteCommand) 
   {
-    _terminal.queueInput("admin:admin123\n");  // Login first
-    _terminal.queueInput("sub/test arg1 arg2\n");
+    _ioStream.queueInput("admin:admin123\n");  // Login first
+    _ioStream.queueInput("sub/test arg1 arg2\n");
 
     EXPECT_CALL(*_mockCmd, execute(testing::ElementsAre("arg1", "arg2")));
 
@@ -64,8 +64,8 @@ namespace cliService
 
   TEST_F(CLIServiceTest, AccessDenied) 
   {
-    _terminal.queueInput("user:pass123\n");  // Login as regular user
-    _terminal.queueInput("sub/test arg1\n"); // Try to access admin command
+    _ioStream.queueInput("user:pass123\n");  // Login as regular user
+    _ioStream.queueInput("sub/test arg1\n"); // Try to access admin command
 
     EXPECT_CALL(*_mockCmd, execute).Times(0);
 
@@ -73,13 +73,13 @@ namespace cliService
     _service->service();
     _service->service();
 
-    EXPECT_THAT(_terminal.getOutput(), testing::HasSubstr("Access denied"));
+    EXPECT_THAT(_ioStream.getOutput(), testing::HasSubstr("Access denied"));
   }
 
   TEST_F(CLIServiceTest, GlobalCommandLogout) 
   {
-    _terminal.queueInput("admin:admin123\n");
-    _terminal.queueInput("logout\n");
+    _ioStream.queueInput("admin:admin123\n");
+    _ioStream.queueInput("logout\n");
 
     _service->activate();
     _service->service();
@@ -90,57 +90,57 @@ namespace cliService
 
   TEST_F(CLIServiceTest, InvalidPath) 
   {
-    _terminal.queueInput("admin:admin123\n");
-    _terminal.queueInput("invalid/path\n");
+    _ioStream.queueInput("admin:admin123\n");
+    _ioStream.queueInput("invalid/path\n");
 
     _service->activate();
     _service->service();
     _service->service();
 
-    EXPECT_THAT(_terminal.getOutput(), testing::HasSubstr("Invalid path"));
+    EXPECT_THAT(_ioStream.getOutput(), testing::HasSubstr("Invalid path"));
   }
 
   TEST_F(CLIServiceTest, NavigateToDirectory) 
   {
-    _terminal.queueInput("admin:admin123\n");
-    _terminal.queueInput("sub\n");
+    _ioStream.queueInput("admin:admin123\n");
+    _ioStream.queueInput("sub\n");
 
     _service->activate();
     _service->service();
     _service->service();
 
-    EXPECT_THAT(_terminal.getOutput(), testing::EndsWith("admin@/sub > "));
+    EXPECT_THAT(_ioStream.getOutput(), testing::EndsWith("admin@/sub > "));
   }
 
   TEST_F(CLIServiceTest, InvalidLoginFormat)
   {
-    _terminal.queueInput("invalidloginformat\n");
+    _ioStream.queueInput("invalidloginformat\n");
     _service->activate();
     _service->service();
     
-    EXPECT_THAT(_terminal.getOutput(), 
+    EXPECT_THAT(_ioStream.getOutput(), 
       testing::HasSubstr(CLIService::getLoggedOutMessage()));
     EXPECT_EQ(_service->getState(), CLIState::LoggedOut);
   }
 
   TEST_F(CLIServiceTest, EmptyUsername)
   {
-    _terminal.queueInput(":password123\n");
+    _ioStream.queueInput(":password123\n");
     _service->activate();
     _service->service();
     
-    EXPECT_THAT(_terminal.getOutput(), 
+    EXPECT_THAT(_ioStream.getOutput(), 
       testing::HasSubstr(CLIService::getLoggedOutMessage()));
     EXPECT_EQ(_service->getState(), CLIState::LoggedOut);
   }
 
   TEST_F(CLIServiceTest, EmptyPassword)
   {
-    _terminal.queueInput("username:\n");
+    _ioStream.queueInput("username:\n");
     _service->activate();
     _service->service();
     
-    EXPECT_THAT(_terminal.getOutput(), 
+    EXPECT_THAT(_ioStream.getOutput(), 
       testing::HasSubstr(CLIService::getLoggedOutMessage()));
     EXPECT_EQ(_service->getState(), CLIState::LoggedOut);
   }

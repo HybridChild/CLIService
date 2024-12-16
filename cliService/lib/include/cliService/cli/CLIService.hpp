@@ -43,7 +43,7 @@ namespace cliService
     void resetToRoot();
     void displayPrompt() const;
 
-    TerminalIf& _terminal;
+    CharIOStreamIf& _ioStream;
     InputParser _parser;
 
     std::vector<User> _users;

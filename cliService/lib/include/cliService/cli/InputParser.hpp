@@ -1,5 +1,5 @@
 #pragma once
-#include "cliService/cli/TerminalIf.hpp"
+#include "cliService/cli/CharIOStreamIf.hpp"
 #include "cliService/cli/ActionRequest.hpp"
 #include "cliService/cli/LoginRequest.hpp"
 #include "cliService/cli/CLIState.hpp"
@@ -22,7 +22,7 @@ namespace cliService
     static constexpr char TAB = 0x09;
     static constexpr char ESC = 0x1B;
 
-    InputParser(TerminalIf& terminal, const CLIState& currentState, size_t historySize);
+    InputParser(CharIOStreamIf& ioStream, const CLIState& currentState, size_t historySize);
 
     std::optional<std::unique_ptr<RequestBase>> parseNextRequest();
 
@@ -37,7 +37,7 @@ namespace cliService
     void echoCharacter(char c);
     std::unique_ptr<RequestBase> createRequest();
 
-    TerminalIf& _terminal;
+    CharIOStreamIf& _ioStream;
     std::string _buffer;
     CommandHistory _history;
     std::string _savedBuffer;  // Saves current input when navigating history

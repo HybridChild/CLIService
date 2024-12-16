@@ -1,16 +1,16 @@
-#include "mock/terminal/TerminalMock.hpp"
+#include "mock/io/CharIOStreamMock.hpp"
 
 namespace cliService
 {
 
-  bool TerminalMock::putChar(char c)
+  bool CharIOStreamMock::putChar(char c)
   {
     _output += c;
     return true;
   }
 
 
-  bool TerminalMock::getChar(char& c)
+  bool CharIOStreamMock::getChar(char& c)
   {
     if (_inputQueue.empty()) {
       return false;
@@ -22,18 +22,18 @@ namespace cliService
   }
 
 
-  bool TerminalMock::getCharTimeout(char& c, uint32_t timeout_ms)
+  bool CharIOStreamMock::getCharTimeout(char& c, uint32_t timeout_ms)
   {
     return getChar(c);  // For mock, ignore timeout
   }
 
 
-  bool TerminalMock::available() const {
+  bool CharIOStreamMock::available() const {
     return !_inputQueue.empty();
   }
 
 
-  void TerminalMock::flush()
+  void CharIOStreamMock::flush()
   {
     // Clear input queue
     std::queue<char> empty;
@@ -41,27 +41,27 @@ namespace cliService
   }
 
 
-  bool TerminalMock::isOpen() const {
+  bool CharIOStreamMock::isOpen() const {
     return _isOpen;
   }
 
 
-  bool TerminalMock::hasError() const {
+  bool CharIOStreamMock::hasError() const {
     return !_lastError.empty();
   }
 
 
-  const char* TerminalMock::getLastError() const {
+  const char* CharIOStreamMock::getLastError() const {
     return _lastError.c_str();
   }
 
 
-  void TerminalMock::clearError() {
+  void CharIOStreamMock::clearError() {
     _lastError.clear();
   }
 
 
-  void TerminalMock::queueInput(const std::string& input)
+  void CharIOStreamMock::queueInput(const std::string& input)
   {
     for (char c : input)
     {
@@ -70,12 +70,12 @@ namespace cliService
   }
 
 
-  std::string TerminalMock::getOutput() const {
+  std::string CharIOStreamMock::getOutput() const {
     return _output;
   }
 
 
-  void TerminalMock::clearOutput() {
+  void CharIOStreamMock::clearOutput() {
     _output.clear();
   }
 

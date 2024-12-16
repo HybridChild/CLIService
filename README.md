@@ -12,8 +12,8 @@ A lightweight C++ library for adding a flexible command-line interface to embedd
 
 ## Quick Start
 ```cpp
-// Provide platform specific implementation of the Terminal interface
-class MyTerminal : public TerminalIf
+// Provide platform specific implementation of the CharIOStream interface
+class MyCharIOStream : public CharIOStreamIf
 {
 public:
   bool putChar(char c) override { /* Write to your hardware */ }
@@ -74,8 +74,8 @@ int main()
       dirSystem.addCommand<HeapStatsGetCommand>("heap", AccessLevel::User);
 
   // Create and activate CLI service
-  MyTerminal terminal{};
-  CLIServiceConfiguration config{terminal, std::move(users), std::move(dirRoot)};
+  MyCharIOStream ioStream{};
+  CLIServiceConfiguration config{ioStream, std::move(users), std::move(dirRoot)};
   CLIService cli(std::move(config));
   cli.activate();
 

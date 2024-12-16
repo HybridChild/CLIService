@@ -1,7 +1,7 @@
 #include "cliService/cli/CLIService.hpp"
 #include "cliService/cli/ActionRequest.hpp"
 #include "cliService/cli/LoginRequest.hpp"
-#include "cliService/cli/TerminalIf.hpp"
+#include "cliService/cli/CharIOStreamIf.hpp"
 #include "cliService/cli/User.hpp"
 #include "cliService/tree/CommandIf.hpp"
 #include "cliService/tree/Directory.hpp"
@@ -18,8 +18,8 @@ namespace cliService
 
 
   CLIService::CLIService(CLIServiceConfiguration config)
-    : _terminal(config._terminal)
-    , _parser(_terminal, _currentState, config._historySize)
+    : _ioStream(config._ioStream)
+    , _parser(_ioStream, _currentState, config._historySize)
     , _users(std::move(config._users))
     , _currentUser(std::nullopt)
     , _rootDirectory(std::move(config._rootDirectory))
@@ -37,10 +37,10 @@ namespace cliService
   {
     assert(_currentState == CLIState::Inactive && "Service must be inactive to activate");
     _currentState = CLIState::LoggedOut;
-    _terminal.putString(WELCOME_MESSAGE);
-    _terminal.putChar('\n');
-    _terminal.putString(LOGGED_OUT_MESSAGE);
-    _terminal.putChar('\n');
+    _ioStream.putString(WELCOME_MESSAGE);
+    _ioStream.putChar('\n');
+    _ioStream.putString(LOGGED_OUT_MESSAGE);
+    _ioStream.putChar('\n');
     displayPrompt();
   }
 
@@ -79,8 +79,8 @@ namespace cliService
 
   void CLIService::handleInvalidLoginRequest()
   {
-    _terminal.putString(LOGGED_OUT_MESSAGE);
-    _terminal.putChar('\n');
+    _ioStream.putString(LOGGED_OUT_MESSAGE);
+    _ioStream.putChar('\n');
     displayPrompt();
   }
 
@@ -101,7 +101,7 @@ namespace cliService
       _currentState = CLIState::LoggedIn;
     }
     else {
-      _terminal.putString("Invalid username or password\n");
+      _ioStream.putString("Invalid username or password\n");
     }
 
     displayPrompt();
@@ -132,14 +132,14 @@ namespace cliService
     NodeIf* node = resolvePath(path);
     if (!node)
     {
-      _terminal.putString("Invalid path\n");
+      _ioStream.putString("Invalid path\n");
       displayPrompt();
       return;
     }
 
     if (!validatePathAccess(node))
     {
-      _terminal.putString("Access denied\n");
+      _ioStream.putString("Access denied\n");
       return;
     }
 
@@ -156,8 +156,8 @@ namespace cliService
 
       if (!response.getMessage().empty())
       {
-        _terminal.putString(response.getMessage());
-        _terminal.putChar('\n');
+        _ioStream.putString(response.getMessage());
+        _ioStream.putChar('\n');
       }
 
       if (response.shouldShowPrompt())
@@ -174,8 +174,8 @@ namespace cliService
     {
       if (!args.empty())
       {
-        _terminal.putString(NO_ARGUMENTS_MESSAGE);
-        _terminal.putChar('\n');
+        _ioStream.putString(NO_ARGUMENTS_MESSAGE);
+        _ioStream.putChar('\n');
         displayPrompt();
         return;
       }
@@ -183,16 +183,16 @@ namespace cliService
       _currentState = CLIState::LoggedOut;
       _currentUser = std::nullopt;
       resetToRoot();
-      _terminal.putString(LOGGED_OUT_MESSAGE);
-      _terminal.putChar('\n');
+      _ioStream.putString(LOGGED_OUT_MESSAGE);
+      _ioStream.putChar('\n');
       displayPrompt();
     }
     else if (command == "exit")
     {
       if (!args.empty())
       {
-        _terminal.putString(NO_ARGUMENTS_MESSAGE);
-        _terminal.putChar('\n');
+        _ioStream.putString(NO_ARGUMENTS_MESSAGE);
+        _ioStream.putChar('\n');
         displayPrompt();
         return;
       }
@@ -200,44 +200,44 @@ namespace cliService
       _currentState = CLIState::Inactive;
       _currentUser = std::nullopt;
       resetToRoot();
-      _terminal.putString(EXIT_MESSAGE);
-      _terminal.putChar('\n');
+      _ioStream.putString(EXIT_MESSAGE);
+      _ioStream.putChar('\n');
     }
     else if (command == "tree")
     {
       if (!args.empty())
       {
-        _terminal.putString(NO_ARGUMENTS_MESSAGE);
-        _terminal.putChar('\n');
+        _ioStream.putString(NO_ARGUMENTS_MESSAGE);
+        _ioStream.putChar('\n');
         displayPrompt();
         return;
       }
 
-      _terminal.putChar('\n');
+      _ioStream.putChar('\n');
 
       _currentDirectory->traverse([&](const NodeIf& node, size_t depth) {
         if (node.getAccessLevel() <= _currentUser->getAccessLevel()) {
           std::string indent(depth * 2, ' ');
           std::string treeStr = indent + node.getName() + (node.isDirectory() ? "/" : "") + "\n";
-          _terminal.putString(treeStr);
+          _ioStream.putString(treeStr);
         }
       });
 
-      _terminal.putChar('\n');
+      _ioStream.putChar('\n');
       displayPrompt();
     }
     else if (command == "?")
     {
       if (!args.empty())
       {
-        _terminal.putString(NO_ARGUMENTS_MESSAGE);
-        _terminal.putChar('\n');
+        _ioStream.putString(NO_ARGUMENTS_MESSAGE);
+        _ioStream.putChar('\n');
         displayPrompt();
         return;
       }
 
-      _terminal.putChar('\n');
-      _terminal.putString("Available commands in current directory:\n");
+      _ioStream.putChar('\n');
+      _ioStream.putString("Available commands in current directory:\n");
 
       _currentDirectory->traverse([&](const NodeIf& node, size_t depth) {
         // Only show items in current directory and with appropriate access level
@@ -258,30 +258,30 @@ namespace cliService
           }
 
           entry += "\n";
-          _terminal.putString(entry);
+          _ioStream.putString(entry);
         }
       });
 
-      _terminal.putChar('\n');
+      _ioStream.putChar('\n');
       displayPrompt();
     }
     else if (command == "help")
     {
       if (!args.empty())
       {
-        _terminal.putString(NO_ARGUMENTS_MESSAGE);
-        _terminal.putChar('\n');
+        _ioStream.putString(NO_ARGUMENTS_MESSAGE);
+        _ioStream.putChar('\n');
         displayPrompt();
         return;
       }
 
       // Show global commands
-      _terminal.putString("\nGlobal commands:\n");
-      _terminal.putString("  help   - List global commands\n");
-      _terminal.putString("  tree   - Show directory structure\n");
-      _terminal.putString("  ?      - Show description of available commands in current directory\n");
-      _terminal.putString("  logout - Exit current session\n");
-      _terminal.putString("  exit   - Exit the CLI\n\n");
+      _ioStream.putString("\nGlobal commands:\n");
+      _ioStream.putString("  help   - List global commands\n");
+      _ioStream.putString("  tree   - Show directory structure\n");
+      _ioStream.putString("  ?      - Show description of available commands in current directory\n");
+      _ioStream.putString("  logout - Exit current session\n");
+      _ioStream.putString("  exit   - Exit the CLI\n\n");
 
       displayPrompt();
     }
@@ -340,7 +340,7 @@ namespace cliService
 
     if (node && node->isDirectory() && !currentInput.empty() && currentInput.back() != '/')
     {
-      _terminal.putChar('/');
+      _ioStream.putChar('/');
       _parser.appendToBuffer("/");
       return;
     }
@@ -349,26 +349,26 @@ namespace cliService
 
     if (!result.fillCharacters.empty())
     {
-      _terminal.putString(result.fillCharacters);
+      _ioStream.putString(result.fillCharacters);
       _parser.appendToBuffer(result.fillCharacters);
 
       if (result.isDirectory)
       {
-        _terminal.putChar('/');
+        _ioStream.putChar('/');
         _parser.appendToBuffer("/");
       }
     }
     else if (!result.allOptions.empty())
     {
-      _terminal.putChar('\n');
+      _ioStream.putChar('\n');
       for (const auto& opt : result.allOptions)
       {
-        _terminal.putString(opt + "   ");
+        _ioStream.putString(opt + "   ");
       }
 
-      _terminal.putChar('\n');
+      _ioStream.putChar('\n');
       displayPrompt();
-      _terminal.putString(_parser.getBuffer());
+      _ioStream.putString(_parser.getBuffer());
     }
   }
 
@@ -382,13 +382,13 @@ namespace cliService
   {
     if (_currentState == CLIState::LoggedIn && _currentUser)
     {
-      _terminal.putString(_currentUser->getUsername());
-      _terminal.putString("@");
+      _ioStream.putString(_currentUser->getUsername());
+      _ioStream.putString("@");
       std::string pathStr = _pathResolver.getAbsolutePath(*_currentDirectory).toString();
-      _terminal.putString(pathStr);
+      _ioStream.putString(pathStr);
     }
 
-    _terminal.putString(" > ");
+    _ioStream.putString(" > ");
   }
 
 }

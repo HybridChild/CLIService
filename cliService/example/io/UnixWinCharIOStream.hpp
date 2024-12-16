@@ -1,16 +1,16 @@
 #pragma once
-#include "cliService/cli/TerminalIf.hpp"
+#include "cliService/cli/CharIOStreamIf.hpp"
 #include <atomic>
 #include <string>
 
 namespace cliService
 {
 
-  class UnixWinTerminal : public TerminalIf
+  class UnixWinCharIOStream : public CharIOStreamIf
   {
   public:
-    UnixWinTerminal();
-    ~UnixWinTerminal() override;
+    UnixWinCharIOStream();
+    ~UnixWinCharIOStream() override;
 
     bool putChar(char c) override;
     bool getChar(char& c) override;
@@ -23,8 +23,8 @@ namespace cliService
     void clearError() override;
 
   private:
-    void setupTerminal();
-    void restoreTerminal();
+    void setupIOStream();
+    void restoreIOStream();
 
     std::atomic<bool> _isOpen;
     std::string _lastError;
