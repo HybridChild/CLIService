@@ -61,7 +61,7 @@ namespace cliService
     auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
     ASSERT_NE(actionRequest, nullptr);
     EXPECT_EQ(actionRequest->getPath().elements()[0], "command");
-    EXPECT_EQ(_ioStream.getOutput(), "command\n");
+    EXPECT_EQ(_ioStream.getOutput(), "command\r\n");
   }
 
   TEST_F(InputParserTest, CommandWithArguments)
@@ -92,7 +92,7 @@ namespace cliService
     _ioStream.clearOutput();
     _ioStream.queueInput("d\n");
     auto request = processAllInput();
-    EXPECT_EQ(_ioStream.getOutput(), "d\n");
+    EXPECT_EQ(_ioStream.getOutput(), "d\r\n");
 
     ASSERT_TRUE(request.has_value());
     auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
@@ -114,7 +114,7 @@ namespace cliService
     EXPECT_EQ(loginRequest->getPassword(), "pass");
 
     // Verify password masking
-    std::string expectedOutput = "user:****\n";
+    std::string expectedOutput = "user:****\r\n";
     EXPECT_EQ(_ioStream.getOutput(), expectedOutput);
   }
 

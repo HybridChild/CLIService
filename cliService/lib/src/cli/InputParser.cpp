@@ -77,7 +77,7 @@ namespace cliService
     {
       if (!_buffer.empty())
       {
-        _ioStream.putChar('\n');  // Echo newline
+        _ioStream.putString("\r\n");  // Echo newline
         _lastTrigger = ActionRequest::Trigger::Enter;
         return true;
       }

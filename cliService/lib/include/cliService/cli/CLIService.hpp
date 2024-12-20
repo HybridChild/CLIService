@@ -43,6 +43,8 @@ namespace cliService
     void resetToRoot();
     void displayPrompt() const;
 
+    void displayNewLine(uint32_t number = 1) const;
+
     CharIOStreamIf& _ioStream;
     InputParser _parser;
 
