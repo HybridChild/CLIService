@@ -9,6 +9,7 @@ namespace cliService
   class TabCompletionTest : public ::testing::Test
   {
     static constexpr size_t HISTORY_SIZE = 10;
+    static constexpr uint32_t INPUT_TIMEOUT_MS = 1000;
 
   protected:
     void SetUp() override
@@ -39,7 +40,7 @@ namespace cliService
           {"user", "user123", AccessLevel::User}};
 
       _service = std::make_unique<CLIService>(
-          CLIServiceConfiguration{_ioStream, std::move(users), std::move(root), HISTORY_SIZE});
+          CLIServiceConfiguration{_ioStream, std::move(users), std::move(root), INPUT_TIMEOUT_MS, HISTORY_SIZE});
     }
 
     void loginAsUser()

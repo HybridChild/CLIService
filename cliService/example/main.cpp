@@ -10,7 +10,8 @@
 #include <thread>
 #include <chrono>
 
-#define COMMAND_HISTORY_SIZE 10
+constexpr size_t commandHistorySize = 10;
+constexpr uint32_t inputTimeout_ms = 1000;
 
 using namespace cliService;
 
@@ -48,7 +49,14 @@ int main()
 
   auto tree = createMenuTree();
 
-  CLIServiceConfiguration cliConfig{static_cast<CharIOStreamIf&>(ioStream), std::move(users), std::move(tree), COMMAND_HISTORY_SIZE};
+  CLIServiceConfiguration cliConfig {
+    static_cast<CharIOStreamIf&>(ioStream),
+    std::move(users),
+    std::move(tree),
+    inputTimeout_ms,
+    commandHistorySize
+  };
+  
   CLIService cli(std::move(cliConfig));
   
   cli.activate();

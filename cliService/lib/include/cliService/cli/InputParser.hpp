@@ -23,7 +23,7 @@ namespace cliService
     static constexpr char TAB = 0x09;
     static constexpr char ESC = 0x1B;
 
-    InputParser(CharIOStreamIf& ioStream, const CLIState& currentState, size_t historySize);
+    InputParser(CharIOStreamIf& ioStream, const CLIState& currentState, uint32_t inputTimeout_ms, size_t historySize);
 
     std::optional<std::unique_ptr<RequestBase>> parseNextRequest();
 
@@ -40,6 +40,7 @@ namespace cliService
 
     CharIOStreamIf& _ioStream;
     std::string _buffer;
+    uint32_t _inputTimeout_ms;
     CommandHistory _history;
     std::string _savedBuffer;  // Saves current input when navigating history
 

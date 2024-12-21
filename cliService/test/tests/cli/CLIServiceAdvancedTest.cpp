@@ -11,6 +11,7 @@ namespace cliService
   class CLIServiceAdvancedTest : public ::testing::Test 
   {
     static constexpr size_t HISTORY_SIZE = 10;
+    static constexpr uint32_t INPUT_TIMEOUT_MS = 1000;
     
   protected:
     void SetUp() override 
@@ -37,6 +38,7 @@ namespace cliService
         _ioStream,
         std::move(users),
         std::move(root),
+        INPUT_TIMEOUT_MS,
         HISTORY_SIZE,
         CLIMessages::getDefaults()
       };

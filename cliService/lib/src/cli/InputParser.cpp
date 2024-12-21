@@ -4,8 +4,9 @@
 namespace cliService
 {
 
-  InputParser::InputParser(CharIOStreamIf& ioStream, const CLIState& currentState, size_t historySize)
+  InputParser::InputParser(CharIOStreamIf& ioStream, const CLIState& currentState, uint32_t inputTimeout_ms, size_t historySize)
     : _ioStream(ioStream)
+    , _inputTimeout_ms(inputTimeout_ms)
     , _history(historySize)
     , _currentState(currentState)
     , _inEscapeSequence(false)
@@ -31,7 +32,7 @@ namespace cliService
   {
     char c;
 
-    if (!_ioStream.getChar(c)) {
+    if (!_ioStream.getCharTimeout(c, _inputTimeout_ms)) {
       return false;
     }
 

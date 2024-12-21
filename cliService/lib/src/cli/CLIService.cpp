@@ -24,7 +24,7 @@ namespace cliService
   CLIService::CLIService(CLIServiceConfiguration config)
     : _messages(std::move(config._messages))
     , _ioStream(config._ioStream)
-    , _parser(_ioStream, _currentState, config._historySize)
+    , _parser(_ioStream, _currentState, config._inputTimeout_ms, config._historySize)
     , _users(std::move(config._users))
     , _currentUser(std::nullopt)
     , _rootDirectory(std::move(config._rootDirectory))

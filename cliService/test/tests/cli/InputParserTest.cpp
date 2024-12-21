@@ -10,12 +10,13 @@ namespace cliService
   class InputParserTest : public ::testing::Test
   {
     static constexpr size_t HISTORY_SIZE = 10;
+    static constexpr uint32_t INPUT_TIMEOUT_MS = 1000;
 
   protected:
     void SetUp() override
     {
       _currentState = CLIState::LoggedIn;
-      _parser = std::make_unique<InputParser>(_ioStream, _currentState, HISTORY_SIZE);
+      _parser = std::make_unique<InputParser>(_ioStream, _currentState, INPUT_TIMEOUT_MS, HISTORY_SIZE);
     }
 
     CharIOStreamMock _ioStream;
