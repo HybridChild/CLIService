@@ -14,8 +14,8 @@ namespace cliService
 
     CommandResponse execute(const std::vector<std::string>& args) override
     {
-      if (args.size() > 0) {
-        return CommandResponse(static_cast<std::string>("Command takes no arguments."), CommandStatus::InvalidArguments);
+      if (args.size() != 0) {
+        return CommandIf::createInvalidArgumentCountResponse(0);
       }
 
       std::string response = "Heap stats: \n";

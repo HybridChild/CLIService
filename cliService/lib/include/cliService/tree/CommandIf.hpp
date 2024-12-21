@@ -21,6 +21,10 @@ namespace cliService
     bool isDirectory() const override { return false; }
     const std::string& getDescription() const { return _description; }
 
+    static CommandResponse createInvalidArgumentCountResponse(size_t expected) {
+      return CommandResponse("Expected " + std::to_string(expected) + " argument(s). Try again.", CommandStatus::InvalidArguments);
+    }
+
   private:
     std::string _description;
   };

@@ -16,8 +16,8 @@ namespace cliService
 
     CommandResponse execute(const std::vector<std::string>& args) override
     {
-      if (args.size() < 1 || args.size() > 4) {
-        return CommandResponse(static_cast<std::string>("Invalid number of arguments."), CommandStatus::InvalidArguments);
+      if (args.size() != 4) {
+        return CommandIf::createInvalidArgumentCountResponse(4);
       }
 
       if (!util::isIntegerString(args[0])) {
