@@ -29,12 +29,12 @@ public:
     , _rgbLedCmd("set", AccessLevel::Admin)
   {
     // Build tree with static references
-    _rootDir.addStatic(_sysDir);
-    _rootDir.addStatic(_hwDir);
+    _rootDir.addStaticDirectory(_sysDir);
+    _rootDir.addStaticDirectory(_hwDir);
     
-    _sysDir.addStatic(_rebootCmd);
-    _sysDir.addStatic(_heapCmd);
-    _hwDir.addStatic(_rgbLedCmd);
+    _sysDir.addStaticCommand(_rebootCmd);
+    _sysDir.addStaticCommand(_heapCmd);
+    _hwDir.addStaticCommand(_rgbLedCmd);
   }
 
   Directory& getRoot() { return _rootDir; }
@@ -56,7 +56,7 @@ std::unique_ptr<Directory> createMixedMenuTree()
     
   // Add static system directory
   static Directory sysDir("system", AccessLevel::Admin);
-  dirRoot->addStatic(sysDir);
+  dirRoot->addStaticDirectory(sysDir);
     
   // Add dynamic commands to static directory
   sysDir.addDynamicCommand<RebootCommand>("reboot", AccessLevel::Admin);

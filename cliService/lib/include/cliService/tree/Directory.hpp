@@ -25,14 +25,14 @@ namespace cliService
     void traverse(const std::function<void(const NodeIf&, size_t)>& visitor, size_t depth = 0) const;
 
     // Add references to statically allocated nodes
-    void addStatic(Directory& dir)
+    void addStaticDirectory(Directory& dir)
     {
       checkNameCollision(dir.getName());
       dir.setParent(this);
       _children.emplace_back(&dir);
     }
 
-    void addStatic(CommandIf& cmd)
+    void addStaticCommand(CommandIf& cmd)
     {
       checkNameCollision(cmd.getName());
       cmd.setParent(this);
@@ -60,6 +60,7 @@ namespace cliService
       T* cmdPtr = cmd.get();
       cmdPtr->setParent(this);
       _children.emplace_back(std::move(cmd));
+      
       return *cmdPtr;
     }
 
@@ -72,7 +73,7 @@ namespace cliService
       if (auto staticPtr = std::get_if<NodeIf*>(&child)) {
         return *staticPtr;
       }
-      
+
       return std::get<std::unique_ptr<NodeIf>>(child).get();
     }
 
