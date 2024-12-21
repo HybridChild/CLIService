@@ -22,7 +22,7 @@ namespace cliService
     const std::string& getDescription() const { return _description; }
 
     static CommandResponse createInvalidArgumentCountResponse(size_t expected) {
-      return CommandResponse("Expected " + std::to_string(expected) + " argument(s). Try again.", CommandStatus::InvalidArguments);
+      return CommandResponse("\tExpected " + std::to_string(expected) + " argument(s). Try again.", CommandStatus::InvalidArguments);
     }
 
   private:
