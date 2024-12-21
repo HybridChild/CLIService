@@ -43,8 +43,7 @@ namespace cliService
     assert(_currentState == CLIState::Inactive && "Service must be inactive to activate");
 
     _currentState = CLIState::LoggedOut;
-    _ioStream.putString(_messages.getWelcomeMessage());
-    displayNewLine();
+    displayMessage(_messages.getWelcomeMessage());
     displayPrompt();
   }
 
@@ -115,6 +114,14 @@ namespace cliService
   }
 
 
+  void CLIService::displayMessage(const std::string_view& message) const
+  {
+    displayNewLine();
+    _ioStream.putString(message);
+    displayNewLine(2);
+  }
+
+
   void CLIService::displayPrompt() const
   {
     if (_currentState == CLIState::LoggedIn && _currentUser)
@@ -139,10 +146,16 @@ namespace cliService
   }
 
 
+  void CLIService::displayNoArgumentsError() const
+  {
+    displayMessage(_messages.getNoArgumentsMessage());
+    displayPrompt();
+  }
+
+
   void CLIService::handleInvalidLoginRequest()
   {
-    _ioStream.putString(_messages.getInvalidLoginMessage());
-    displayNewLine();
+    displayMessage(_messages.getInvalidLoginMessage());
     displayPrompt();
   }
 
@@ -161,13 +174,12 @@ namespace cliService
     {
       _currentUser = *userIt;
       _currentState = CLIState::LoggedIn;
-      _ioStream.putString(_messages.getLoggedInMessage());
+      displayMessage(_messages.getLoggedInMessage());
     }
     else {
-      _ioStream.putString(_messages.getInvalidLoginMessage());
+      displayMessage(_messages.getInvalidLoginMessage());
     }
 
-    displayNewLine();
     displayPrompt();
   }
 
@@ -201,16 +213,14 @@ namespace cliService
 
     if (!node)
     {
-      _ioStream.putString(_messages.getInvalidPathMessage());
-      displayNewLine();
+      displayMessage(_messages.getInvalidPathMessage());
       displayPrompt();
       return;
     }
 
     if (!validatePathAccess(node))
     {
-      _ioStream.putString(_messages.getAccessDeniedMessage());
-      displayNewLine();
+      displayMessage(_messages.getAccessDeniedMessage());
       displayPrompt();
       return;
     }
@@ -226,8 +236,7 @@ namespace cliService
       auto* cmd = static_cast<CommandIf*>(node);
       CommandResponse response = cmd->execute(request.getArgs());
 
-      if (!response.getMessage().empty())
-      {
+      if (!response.getMessage().empty()) {
         _ioStream.putString(response.getMessage());
         displayNewLine();
       }
@@ -308,22 +317,19 @@ namespace cliService
   {
     if (!args.empty())
     {
-      _ioStream.putString(_messages.getNoArgumentsMessage());
-      displayNewLine();
-      displayPrompt();
+      displayNoArgumentsError();
       return;
     }
 
-    // List global commands
-    displayNewLine();
-    _ioStream.putString("\thelp   - List global commands\r\n");
-    _ioStream.putString("\ttree   - Print directory tree\r\n");
-    _ioStream.putString("\t?      - Show description of available commands in current directory\r\n");
-    _ioStream.putString("\tlogout - Exit current session\r\n");
-    _ioStream.putString("\tclear  - Clear screen\r\n");
-    _ioStream.putString("\texit   - Exit the CLI\r\n");
-    displayNewLine();
+    std::string helpMessage = "";
+    helpMessage += "\thelp   - List global commands\r\n";
+    helpMessage += "\ttree   - Print directory tree\r\n";
+    helpMessage += "\t?      - Detail items in current directory\r\n";
+    helpMessage += "\tlogout - Exit current session\r\n";
+    helpMessage += "\tclear  - Clear screen\r\n";
+    helpMessage += "\texit   - Exit the CLI";
 
+    displayMessage(helpMessage);
     displayPrompt();
   }
 
@@ -331,9 +337,7 @@ namespace cliService
   {
     if (!args.empty())
     {
-      _ioStream.putString(_messages.getNoArgumentsMessage());
-      displayNewLine();
-      displayPrompt();
+      displayNoArgumentsError();
       return;
     }
 
@@ -357,9 +361,7 @@ namespace cliService
   {
     if (!args.empty())
     {
-      _ioStream.putString(_messages.getNoArgumentsMessage());
-      displayNewLine();
-      displayPrompt();
+      displayNoArgumentsError();
       return;
     }
 
@@ -397,17 +399,14 @@ namespace cliService
   {
     if (!args.empty())
     {
-      _ioStream.putString(_messages.getNoArgumentsMessage());
-      displayNewLine();
-      displayPrompt();
+      displayNoArgumentsError();
       return;
     }
 
     _currentState = CLIState::LoggedOut;
     _currentUser = std::nullopt;
     resetToRoot();
-    _ioStream.putString(_messages.getLoggedOutMessage());
-    displayNewLine();
+    displayMessage(_messages.getLoggedOutMessage());
     displayPrompt();
   }
 
@@ -415,9 +414,7 @@ namespace cliService
   {
     if (!args.empty())
     {
-      _ioStream.putString(_messages.getNoArgumentsMessage());
-      displayNewLine();
-      displayPrompt();
+      displayNoArgumentsError();
       return;
     }
 
@@ -432,17 +429,14 @@ namespace cliService
   {
     if (!args.empty())
     {
-      _ioStream.putString(_messages.getNoArgumentsMessage());
-      displayNewLine();
-      displayPrompt();
+      displayNoArgumentsError();
       return;
     }
 
     _currentState = CLIState::Inactive;
     _currentUser = std::nullopt;
     resetToRoot();
-    _ioStream.putString(_messages.getExitMessage());
-    displayNewLine();
+    displayMessage(_messages.getExitMessage());
   }
 
 }

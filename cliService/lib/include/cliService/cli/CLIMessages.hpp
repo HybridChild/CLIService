@@ -34,14 +34,14 @@ namespace cliService
     static CLIMessages getDefaults()
     {
       CLIMessages messages;
-      messages.setWelcomeMessage("Welcome to CLI Service. Please login.");
-      messages.setLoggedInMessage("Logged in. Type 'help' for help.");
-      messages.setLoggedOutMessage("Logged out.");
-      messages.setExitMessage("Exiting CLI Service.");
-      messages.setNoArgumentsMessage("Command takes no arguments.");
-      messages.setAccessDeniedMessage("Access denied");
-      messages.setInvalidPathMessage("Invalid path");
-      messages.setInvalidLoginMessage("Invalid login attempt. Please enter <username>:<password>");
+      messages.setWelcomeMessage("\tWelcome to CLI Service. Please login.");
+      messages.setLoggedInMessage("\tLogged in. Type 'help' for help.");
+      messages.setLoggedOutMessage("\tLogged out.");
+      messages.setExitMessage("\tExiting CLI Service.");
+      messages.setNoArgumentsMessage("\tCommand takes no arguments.");
+      messages.setAccessDeniedMessage("\tAccess denied");
+      messages.setInvalidPathMessage("\tInvalid path");
+      messages.setInvalidLoginMessage("\tInvalid login attempt. Please enter <username>:<password>");
       return messages;
     }
 

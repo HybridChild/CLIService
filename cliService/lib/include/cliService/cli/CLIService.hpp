@@ -30,8 +30,10 @@ namespace cliService
 
     // State management 
     void resetToRoot();
+    void displayMessage(const std::string_view& message) const;
     void displayPrompt() const;
     void displayNewLine(uint32_t number = 1) const;
+    void displayNoArgumentsError() const;
 
   private:
     // Request handlers
@@ -41,6 +43,14 @@ namespace cliService
     void handleGlobalCommand(const std::string_view& command, const std::vector<std::string>& args);
     void handleSpecialKey(const ActionRequest& request);
     void handleTabCompletion(const ActionRequest& request);
+
+    // Global command handlers
+    void handleGlobalLogout(const std::vector<std::string>& args);
+    void handleGlobalExit(const std::vector<std::string>& args);
+    void handleGlobalTree(const std::vector<std::string>& args);
+    void handleGlobalHelp(const std::vector<std::string>& args);
+    void handleGlobalQuestionMark(const std::vector<std::string>& args);
+    void handleGlobalClear(const std::vector<std::string>& args);
 
     CharIOStreamIf& _ioStream;
     InputParser _parser;
@@ -53,14 +63,6 @@ namespace cliService
     PathResolver _pathResolver;
 
     CLIState _currentState;
-
-    // Global command handlers
-    void handleGlobalLogout(const std::vector<std::string>& args);
-    void handleGlobalExit(const std::vector<std::string>& args);
-    void handleGlobalTree(const std::vector<std::string>& args);
-    void handleGlobalHelp(const std::vector<std::string>& args);
-    void handleGlobalQuestionMark(const std::vector<std::string>& args);
-    void handleGlobalClear(const std::vector<std::string>& args);
 
     using GlobalCommandHandler = void (CLIService::*)(const std::vector<std::string>&);
     static const std::unordered_map<std::string_view, GlobalCommandHandler> GLOBAL_COMMAND_HANDLERS;
