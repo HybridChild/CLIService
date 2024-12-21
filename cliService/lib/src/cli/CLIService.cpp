@@ -12,10 +12,14 @@
 namespace cliService
 {
 
-  const std::unordered_set<std::string_view> CLIService::GLOBAL_COMMANDS = {
-    "logout", "exit", "tree", "help", "?", "clear"
+  const std::unordered_map<std::string_view, CLIService::GlobalCommandHandler> CLIService::GLOBAL_COMMAND_HANDLERS = {
+    {"logout" , &CLIService::handleGlobalLogout},
+    {"exit"   , &CLIService::handleGlobalExit},
+    {"tree"   , &CLIService::handleGlobalTree},
+    {"help"   , &CLIService::handleGlobalHelp},
+    {"?"      , &CLIService::handleGlobalQuestionMark},
+    {"clear"  , &CLIService::handleGlobalClear}
   };
-
 
   CLIService::CLIService(CLIServiceConfiguration config)
     : _ioStream(config._ioStream)
@@ -77,6 +81,64 @@ namespace cliService
   }
 
 
+  NodeIf* CLIService::resolvePath(const Path& path) const {
+    return _pathResolver.resolve(path, *_currentDirectory);
+  }
+
+
+  bool CLIService::validatePathAccess(const NodeIf* node) const
+  {
+    assert(_currentUser && "No user logged in");
+    
+    if (!node) {
+      return false;
+    }
+
+    // Check access levels up the tree
+    const NodeIf* current = node;
+
+    while (current)
+    {
+      if (current->getAccessLevel() > _currentUser->getAccessLevel()) {
+        return false;
+      }
+
+      current = current->getParent();
+    }
+    
+    return true;
+  }
+
+
+  void CLIService::resetToRoot() {
+    _currentDirectory = _rootDirectory.get();
+  }
+
+
+  void CLIService::displayPrompt() const
+  {
+    if (_currentState == CLIState::LoggedIn && _currentUser)
+    {
+      _ioStream.putString(_currentUser->getUsername());
+      _ioStream.putString("@");
+      std::string pathStr = _pathResolver.getAbsolutePath(*_currentDirectory).toString();
+      _ioStream.putString(pathStr);
+    }
+
+    _ioStream.putString(" > ");
+  }
+
+
+  void CLIService::displayNewLine(uint32_t number) const
+  {
+    for (uint32_t i = 0; i < number; ++i)
+    {
+      _ioStream.putChar('\r');
+      _ioStream.putChar('\n');
+    }
+  }
+
+
   void CLIService::handleInvalidLoginRequest()
   {
     _ioStream.putString(LOGGED_OUT_MESSAGE);
@@ -121,11 +183,15 @@ namespace cliService
 
     const auto& path = request.getPath();
     
-    // Handle global commands
-    if (!path.isEmpty() && GLOBAL_COMMANDS.find(path.elements().front()) != GLOBAL_COMMANDS.end())
+    if (!path.isEmpty())
     {
-      handleGlobalCommand(path.elements().front(), request.getArgs());
-      return;
+      const auto& command = path.elements().front();
+
+      if (GLOBAL_COMMAND_HANDLERS.find(command) != GLOBAL_COMMAND_HANDLERS.end())
+      {
+        handleGlobalCommand(command, request.getArgs());
+        return;
+      }
     }
 
     // Resolve and validate path
@@ -170,140 +236,13 @@ namespace cliService
 
   void CLIService::handleGlobalCommand(const std::string_view& command, const std::vector<std::string>& args)
   {
-    if (command == "help")
-    {
-      if (!args.empty())
-      {
-        _ioStream.putString(NO_ARGUMENTS_MESSAGE);
-        displayNewLine();
-        displayPrompt();
-        return;
-      }
+    auto it = GLOBAL_COMMAND_HANDLERS.find(command);
 
-      // List global commands
-      displayNewLine();
-      _ioStream.putString("\thelp   - List global commands\r\n");
-      _ioStream.putString("\ttree   - Print directory tree\r\n");
-      _ioStream.putString("\t?      - Show description of available commands in current directory\r\n");
-      _ioStream.putString("\tlogout - Exit current session\r\n");
-      _ioStream.putString("\tclear  - Clear screen\r\n");
-      _ioStream.putString("\texit   - Exit the CLI\r\n");
-      displayNewLine();
-
-      displayPrompt();
-    }
-    else if (command == "tree")
-    {
-      if (!args.empty())
-      {
-        _ioStream.putString(NO_ARGUMENTS_MESSAGE);
-        displayNewLine();
-        displayPrompt();
-        return;
-      }
-
-      displayNewLine();
-
-      _currentDirectory->traverse([&](const NodeIf& node, size_t depth) {
-        if (node.getAccessLevel() <= _currentUser->getAccessLevel()) {
-          std::string indent(depth * 2, ' ');
-          std::string treeStr = indent + node.getName() + (node.isDirectory() ? "/" : "");
-          _ioStream.putString(treeStr);
-          displayNewLine();
-        }
-      });
-
-      displayNewLine();
-      displayPrompt();
-    }
-    else if (command == "?")
-    {
-      if (!args.empty())
-      {
-        _ioStream.putString(NO_ARGUMENTS_MESSAGE);
-        displayNewLine();
-        displayPrompt();
-        return;
-      }
-
-      displayNewLine();
-
-      _currentDirectory->traverse([&](const NodeIf& node, size_t depth) {
-        // Only show items in current directory and with appropriate access level
-        if (depth == 1 && node.getAccessLevel() <= _currentUser->getAccessLevel())
-        {
-          std::string indent("  ");
-          std::string entry = indent + node.getName();
-          
-          if (node.isDirectory())
-          {
-            entry += "/";
-          }
-          else if (auto* cmd = dynamic_cast<const CommandIf*>(&node))
-          {
-            if (!cmd->getDescription().empty()) {
-              entry += " - " + cmd->getDescription();
-            }
-          }
-
-          _ioStream.putString(entry);
-          displayNewLine();
-        }
-      });
-
-      displayNewLine();
-      displayPrompt();
-    }
-    else if (command == "logout")
-    {
-      if (!args.empty())
-      {
-        _ioStream.putString(NO_ARGUMENTS_MESSAGE);
-        displayNewLine();
-        displayPrompt();
-        return;
-      }
-
-      _currentState = CLIState::LoggedOut;
-      _currentUser = std::nullopt;
-      resetToRoot();
-      _ioStream.putString(LOGGED_OUT_MESSAGE);
-      displayNewLine();
-      displayPrompt();
-    }
-    else if (command == "clear")
-    {
-      if (!args.empty())
-      {
-        _ioStream.putString(NO_ARGUMENTS_MESSAGE);
-        displayNewLine();
-        displayPrompt();
-        return;
-      }
-
-      // Send ANSI escape sequence to clear screen and move cursor to home position
-      _ioStream.putString("\033[2J");
-      _ioStream.putString("\033[H");
-      displayPrompt();
-    }
-    else if (command == "exit")
-    {
-      if (!args.empty())
-      {
-        _ioStream.putString(NO_ARGUMENTS_MESSAGE);
-        displayNewLine();
-        displayPrompt();
-        return;
-      }
-
-      _currentState = CLIState::Inactive;
-      _currentUser = std::nullopt;
-      resetToRoot();
-      _ioStream.putString(EXIT_MESSAGE);
-      displayNewLine();
+    if (it != GLOBAL_COMMAND_HANDLERS.end()) {
+      (this->*(it->second))(args);
     }
   }
-  
+
 
   void CLIService::handleSpecialKey(const ActionRequest& request)
   {
@@ -317,35 +256,6 @@ namespace cliService
     default:
       break;
     };
-  }
-
-
-  NodeIf* CLIService::resolvePath(const Path& path) const {
-    return _pathResolver.resolve(path, *_currentDirectory);
-  }
-
-
-  bool CLIService::validatePathAccess(const NodeIf* node) const
-  {
-    assert(_currentUser && "No user logged in");
-    
-    if (!node) {
-      return false;
-    }
-
-    // Check access levels up the tree
-    const NodeIf* current = node;
-
-    while (current)
-    {
-      if (current->getAccessLevel() > _currentUser->getAccessLevel()) {
-        return false;
-      }
-
-      current = current->getParent();
-    }
-    
-    return true;
   }
 
 
@@ -389,32 +299,145 @@ namespace cliService
   }
 
 
-  void CLIService::resetToRoot() {
-    _currentDirectory = _rootDirectory.get();
+  void CLIService::handleGlobalHelp(const std::vector<std::string>& args)
+  {
+    if (!args.empty())
+    {
+      _ioStream.putString(NO_ARGUMENTS_MESSAGE);
+      displayNewLine();
+      displayPrompt();
+      return;
+    }
+
+    // List global commands
+    displayNewLine();
+    _ioStream.putString("\thelp   - List global commands\r\n");
+    _ioStream.putString("\ttree   - Print directory tree\r\n");
+    _ioStream.putString("\t?      - Show description of available commands in current directory\r\n");
+    _ioStream.putString("\tlogout - Exit current session\r\n");
+    _ioStream.putString("\tclear  - Clear screen\r\n");
+    _ioStream.putString("\texit   - Exit the CLI\r\n");
+    displayNewLine();
+
+    displayPrompt();
+  }
+
+  void CLIService::handleGlobalTree(const std::vector<std::string>& args)
+  {
+    if (!args.empty())
+    {
+      _ioStream.putString(NO_ARGUMENTS_MESSAGE);
+      displayNewLine();
+      displayPrompt();
+      return;
+    }
+
+    displayNewLine();
+
+    _currentDirectory->traverse([&](const NodeIf& node, size_t depth) {
+      if (node.getAccessLevel() <= _currentUser->getAccessLevel()) {
+        std::string indent(depth * 2, ' ');
+        std::string treeStr = indent + node.getName() + (node.isDirectory() ? "/" : "");
+        _ioStream.putString(treeStr);
+        displayNewLine();
+      }
+    });
+
+    displayNewLine();
+    displayPrompt();
   }
 
 
-  void CLIService::displayPrompt() const
+  void CLIService::handleGlobalQuestionMark(const std::vector<std::string>& args)
   {
-    if (_currentState == CLIState::LoggedIn && _currentUser)
+    if (!args.empty())
     {
-      _ioStream.putString(_currentUser->getUsername());
-      _ioStream.putString("@");
-      std::string pathStr = _pathResolver.getAbsolutePath(*_currentDirectory).toString();
-      _ioStream.putString(pathStr);
+      _ioStream.putString(NO_ARGUMENTS_MESSAGE);
+      displayNewLine();
+      displayPrompt();
+      return;
     }
 
-    _ioStream.putString(" > ");
+    displayNewLine();
+
+    _currentDirectory->traverse([&](const NodeIf& node, size_t depth) {
+      // Only show items in current directory and with appropriate access level
+      if (depth == 1 && node.getAccessLevel() <= _currentUser->getAccessLevel())
+      {
+        std::string indent("  ");
+        std::string entry = indent + node.getName();
+        
+        if (node.isDirectory())
+        {
+          entry += "/";
+        }
+        else if (auto* cmd = dynamic_cast<const CommandIf*>(&node))
+        {
+          if (!cmd->getDescription().empty()) {
+            entry += " - " + cmd->getDescription();
+          }
+        }
+
+        _ioStream.putString(entry);
+        displayNewLine();
+      }
+    });
+
+    displayNewLine();
+    displayPrompt();
   }
 
 
-  void CLIService::displayNewLine(uint32_t number) const
+  void CLIService::handleGlobalLogout(const std::vector<std::string>& args)
   {
-    for (uint32_t i = 0; i < number; ++i)
+    if (!args.empty())
     {
-      _ioStream.putChar('\r');
-      _ioStream.putChar('\n');
+      _ioStream.putString(NO_ARGUMENTS_MESSAGE);
+      displayNewLine();
+      displayPrompt();
+      return;
     }
+
+    _currentState = CLIState::LoggedOut;
+    _currentUser = std::nullopt;
+    resetToRoot();
+    _ioStream.putString(LOGGED_OUT_MESSAGE);
+    displayNewLine();
+    displayPrompt();
+  }
+
+  void CLIService::handleGlobalClear(const std::vector<std::string>& args)
+  {
+    if (!args.empty())
+    {
+      _ioStream.putString(NO_ARGUMENTS_MESSAGE);
+      displayNewLine();
+      displayPrompt();
+      return;
+    }
+
+    // Send ANSI escape sequence to clear screen and move cursor to home position
+    _ioStream.putString("\033[2J");
+    _ioStream.putString("\033[H");
+    displayPrompt();
+  }
+
+
+  void CLIService::handleGlobalExit(const std::vector<std::string>& args)
+  {
+    if (!args.empty())
+    {
+      _ioStream.putString(NO_ARGUMENTS_MESSAGE);
+      displayNewLine();
+      displayPrompt();
+      return;
+    }
+
+    _currentState = CLIState::Inactive;
+    _currentUser = std::nullopt;
+    resetToRoot();
+    _ioStream.putString(EXIT_MESSAGE);
+    displayNewLine();
   }
 
 }

@@ -34,7 +34,6 @@ namespace cliService
     // State management 
     void resetToRoot();
     void displayPrompt() const;
-
     void displayNewLine(uint32_t number = 1) const;
 
   private:
@@ -58,7 +57,16 @@ namespace cliService
 
     CLIState _currentState;
 
-    static const std::unordered_set<std::string_view> GLOBAL_COMMANDS;
+    // Global command handlers
+    void handleGlobalLogout(const std::vector<std::string>& args);
+    void handleGlobalExit(const std::vector<std::string>& args);
+    void handleGlobalTree(const std::vector<std::string>& args);
+    void handleGlobalHelp(const std::vector<std::string>& args);
+    void handleGlobalQuestionMark(const std::vector<std::string>& args);
+    void handleGlobalClear(const std::vector<std::string>& args);
+
+    using GlobalCommandHandler = void (CLIService::*)(const std::vector<std::string>&);
+    static const std::unordered_map<std::string_view, GlobalCommandHandler> GLOBAL_COMMAND_HANDLERS;
 
     static constexpr std::string_view WELCOME_MESSAGE = "Welcome to CLI Service.";
     static constexpr std::string_view LOGGED_OUT_MESSAGE = "Logged out. Please enter <username>:<password>";
