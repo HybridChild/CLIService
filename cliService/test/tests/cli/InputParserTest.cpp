@@ -85,7 +85,7 @@ namespace cliService
     EXPECT_EQ(_ioStream.getOutput(), "commanf");
 
     _ioStream.clearOutput();
-    _ioStream.queueInput(std::string(1, InputParser::BACKSPACE));
+    _ioStream.queueInput(std::string(1, InputParser::BACKSPACE_BS));
     processAllInput();
     EXPECT_EQ(_ioStream.getOutput(), "\b \b");
 
@@ -217,12 +217,12 @@ namespace cliService
     EXPECT_EQ(_ioStream.getOutput(), "hello");
 
     _ioStream.clearOutput();
-    _ioStream.queueInput(std::string(1, InputParser::BACKSPACE));
+    _ioStream.queueInput(std::string(1, InputParser::BACKSPACE_BS));
     processAllInput();
     EXPECT_EQ(_ioStream.getOutput(), "\b \b");
 
     _ioStream.clearOutput();
-    _ioStream.queueInput(std::string(1, InputParser::BACKSPACE));
+    _ioStream.queueInput(std::string(1, InputParser::BACKSPACE_BS));
     processAllInput();
     EXPECT_EQ(_ioStream.getOutput(), "\b \b");
 

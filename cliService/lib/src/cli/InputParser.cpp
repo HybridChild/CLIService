@@ -73,7 +73,7 @@ namespace cliService
       return false;
     }
 
-    if (c == ENTER_MAC || c == ENTER_WIN)
+    if (c == ENTER_CR || c == ENTER_LF)
     {
       if (!_buffer.empty())
       {
@@ -105,7 +105,8 @@ namespace cliService
   {
     switch (c)
     {
-      case BACKSPACE:
+    case BACKSPACE_BS:
+    case BACKSPACE_DEL:
         if (!_buffer.empty())
         {
           _buffer.pop_back();

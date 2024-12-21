@@ -15,10 +15,11 @@ namespace cliService
   {
   public:
     static constexpr size_t MAX_ESCAPE_LENGTH = 16;
-
-    static constexpr char BACKSPACE = 0x7F;
-    static constexpr char ENTER_MAC = 0x0A;
-    static constexpr char ENTER_WIN = 0x0D;
+    
+    static constexpr char BACKSPACE_DEL = 0x7F;  // ASCII DEL
+    static constexpr char BACKSPACE_BS = 0x08;   // ASCII backspace
+    static constexpr char ENTER_LF = 0x0A;
+    static constexpr char ENTER_CR = 0x0D;
     static constexpr char TAB = 0x09;
     static constexpr char ESC = 0x1B;
 
