@@ -52,10 +52,18 @@ namespace cliService
 
   NodeIf* Directory::resolvePath(std::string_view pathStr, const Directory& currentDir) const
   {
-    PathResolver resolver(*const_cast<Directory*>(this));
+    // Find the actual root by walking up the tree
+    const NodeIf* rootNode = this;
+    while (rootNode->getParent() != nullptr) {
+      rootNode = rootNode->getParent();
+    }
+    
+    // First remove const, then cast to Directory*
+    Directory* rootDir = const_cast<Directory*>(static_cast<const Directory*>(rootNode));
+    PathResolver resolver(*rootDir);
     return resolver.resolveFromString(pathStr, currentDir);
   }
-
+  
 
   Path Directory::getRelativePath(const NodeIf& node) const
   {

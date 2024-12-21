@@ -18,6 +18,9 @@ enable_testing()
 find_package(GTest CONFIG REQUIRED)
 include(GoogleTest)
 
+set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
+
 # Set the working directory for all tests to the test output directory
 set(CMAKE_CTEST_ARGUMENTS "--output-on-failure" "--test-output-size-passed=65536" "--test-output-size-failed=65536")
 set(CMAKE_CTEST_COMMAND_ARGS "--test-dir ${UNITTEST_OUTPUT_DIR}")

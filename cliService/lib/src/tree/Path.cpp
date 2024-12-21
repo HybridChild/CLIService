@@ -28,29 +28,39 @@ namespace cliService
   {
     std::vector<std::string> elements;
     
-    if (pathStr.empty())
-    {
+    if (pathStr.empty()) {
       isAbsolute = false;
       return elements;
     }
 
     isAbsolute = (pathStr[0] == '/');
+    size_t start = 0;
+    bool inElement = false;
 
-    size_t pos = isAbsolute ? 1 : 0;
-    size_t start = pos;
-
-    while (pos <= pathStr.length())
+    for (size_t i = 0; i < pathStr.length(); ++i)
     {
-      if (pos == pathStr.length() || pathStr[pos] == '/')
+      if (pathStr[i] == '/')
       {
-        if (pos > start) {
-          elements.push_back(std::string(pathStr.substr(start, pos - start)));
+        if (inElement)
+        {
+          // Add the element if it's not empty
+          if (i > start) {
+            elements.push_back(std::string(pathStr.substr(start, i - start)));
+          }
+          
+          inElement = false;
         }
-
-        start = pos + 1;
       }
+      else if (!inElement)
+      {
+        start = i;
+        inElement = true;
+      }
+    }
 
-      pos++;
+    // Handle last element if not ending with slash
+    if (inElement && start < pathStr.length()) {
+      elements.push_back(std::string(pathStr.substr(start)));
     }
 
     return elements;
@@ -69,14 +79,14 @@ namespace cliService
         continue;
       }
 
-      // Handle ".." by removing last elements if possible
+      // Handle ".." by removing last element if possible
       if (element == "..")
       {
-        if (!normalized.empty()) {
+        if (!normalized.empty() && normalized.back() != "..") {
           normalized.pop_back();
         }
-        // Keep ".." if we're at the start of a relative path
         else if (!isAbsolute) {
+          // Keep ".." if we're at the start of a relative path
           normalized.push_back("..");
         }
       }

@@ -18,10 +18,11 @@ namespace cliService
   NodeIf* PathResolver::resolve(const Path& path, const Directory& currentDir) const 
   {
     // For relative paths, first convert to absolute by combining with current directory path
-    if (!path.isAbsolute()) {
+    if (!path.isAbsolute())
+    {
       // Get the absolute path of current directory
       Path currentPath = getAbsolutePath(currentDir);
-
+      
       // Join the paths and normalize
       Path absolutePath = currentPath.join(path).normalized();
       return resolveAbsolute(absolutePath);
@@ -37,7 +38,9 @@ namespace cliService
     assert(path.isAbsolute());
 
     // Empty absolute path or just "/" returns root
-    if (path.isEmpty()) { return &_root; }
+    if (path.isEmpty()) { 
+        return &_root; 
+    }
 
     // Start from root
     NodeIf* current = &_root;
@@ -45,17 +48,20 @@ namespace cliService
     // Process each element of the normalized path
     for (const auto& element : path.elements())
     {
-      if (!current->isDirectory()) { return nullptr; }
+      if (!current->isDirectory()) { 
+        return nullptr; 
+      }
 
       auto* dir = static_cast<Directory*>(current);
-      current = dir->findNode({element});
 
-      if (!current) { return nullptr; }
+      current = dir->findNode({element});
+      if (!current) { 
+        return nullptr;
+      }
     }
 
     return current;
   }
-
 
   Path PathResolver::getAbsolutePath(const NodeIf& node) 
   {
