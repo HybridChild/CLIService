@@ -26,15 +26,7 @@ namespace cliService
     static std::string_view getLoggedOutMessage() { return LOGGED_OUT_MESSAGE; }
     static std::string_view getNoArgumentsMessage() { return NO_ARGUMENTS_MESSAGE; }
 
-  private:
-    // Request handlers
-    void handleInvalidLoginRequest();
-    void handleLoginRequest(const LoginRequest& request);
-    void handleActionRequest(const ActionRequest& request);
-    void handleGlobalCommand(const std::string_view& command, const std::vector<std::string>& args);
-    void handleSpecialKey(const ActionRequest& request);
-    void handleTabCompletion(const ActionRequest& request);
-
+  protected:
     // Path operations
     NodeIf* resolvePath(const Path& path) const;
     bool validatePathAccess(const NodeIf* node) const;
@@ -44,6 +36,15 @@ namespace cliService
     void displayPrompt() const;
 
     void displayNewLine(uint32_t number = 1) const;
+
+  private:
+    // Request handlers
+    void handleInvalidLoginRequest();
+    void handleLoginRequest(const LoginRequest& request);
+    void handleActionRequest(const ActionRequest& request);
+    void handleGlobalCommand(const std::string_view& command, const std::vector<std::string>& args);
+    void handleSpecialKey(const ActionRequest& request);
+    void handleTabCompletion(const ActionRequest& request);
 
     CharIOStreamIf& _ioStream;
     InputParser _parser;
