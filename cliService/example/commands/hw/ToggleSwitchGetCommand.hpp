@@ -27,17 +27,17 @@ namespace cliService
       }
 
       if (!util::isIntegerString(args[0])) {
-        return CommandResponse("Invalid toggle switch ID: " + args[0] + ". Must be integer.", CommandStatus::InvalidArguments);
+        return CommandResponse("\r\n\tInvalid toggle switch ID: " + args[0] + ". Must be integer.\r\n", CommandStatus::InvalidArguments);
       }
 
       uint32_t potId = std::stoi(args[0]);
 
       if (potId < 1 || potId > 2) {
-        return CommandResponse("Invalid toggle switch ID: " + args[0] + ". Must be 1 .. 2", CommandStatus::InvalidArguments);
+        return CommandResponse("\r\n\tInvalid toggle switch ID: " + args[0] + ". Must be 1 .. 2\r\n", CommandStatus::InvalidArguments);
       }
 
       ToggleSwitchPosition togglePos = readToggleSwitchPosition(potId);
-      return CommandResponse::success("Toggle switch " + args[0] + " is in position: " + posToString(togglePos));
+      return CommandResponse::success("\r\n\tToggle switch " + args[0] + " is in position: " + posToString(togglePos) + "\r\n");
     }
 
   private:

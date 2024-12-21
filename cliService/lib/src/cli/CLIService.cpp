@@ -237,7 +237,6 @@ namespace cliService
       }
 
       displayNewLine();
-      _ioStream.putString("Available commands in current directory:\r\n");
 
       _currentDirectory->traverse([&](const NodeIf& node, size_t depth) {
         // Only show items in current directory and with appropriate access level
@@ -274,10 +273,9 @@ namespace cliService
         return;
       }
 
-      // Show global commands
-      _ioStream.putString("\r\nGlobal commands:\r\n");
+      // List global commands
       _ioStream.putString("  help   - List global commands\r\n");
-      _ioStream.putString("  tree   - Show directory structure\r\n");
+      _ioStream.putString("  tree   - Print directory tree\r\n");
       _ioStream.putString("  ?      - Show description of available commands in current directory\r\n");
       _ioStream.putString("  logout - Exit current session\r\n");
       _ioStream.putString("  exit   - Exit the CLI\r\n\n");

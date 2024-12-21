@@ -20,7 +20,7 @@ namespace cliService
 
       // signal system reboot
 
-      return CommandResponse::success("System reboot initiated...");
+      return CommandResponse::success("\r\n\tSystem reboot initiated...\r\n");
     }
   };
 

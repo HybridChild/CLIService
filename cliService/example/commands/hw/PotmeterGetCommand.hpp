@@ -23,13 +23,13 @@ namespace cliService
       }
 
       if (!util::isIntegerString(args[0])) {
-        return CommandResponse("Invalid potmeter ID: " + args[0] + ". Must be integer.", CommandStatus::InvalidArguments);
+        return CommandResponse("\r\n\tInvalid potmeter ID: " + args[0] + ". Must be integer.\r\n", CommandStatus::InvalidArguments);
       }
 
       uint32_t potId = std::stoi(args[0]);
 
       if (potId < 1 || potId > 4) {
-        return CommandResponse("Invalid potmeter ID: " + args[0], CommandStatus::InvalidArguments);
+        return CommandResponse("\r\n\tInvalid potmeter ID: " + args[0] + "\r\n", CommandStatus::InvalidArguments);
       }
 
       uint32_t potmeterValue = readPotmeter(potId);
@@ -39,7 +39,11 @@ namespace cliService
       ss << std::fixed << std::setprecision(2) << potmeterPercentage;
       std::string potPercentStr = ss.str();
 
-      return CommandResponse::success("Potmeter " + args[0] + " value: " + std::to_string(potmeterValue) + ", " + potPercentStr + "%");
+      std::string response = "\r\n\t";
+      response += "Potmeter " + args[0] + " value: " + std::to_string(potmeterValue) + ", " + potPercentStr + "%";
+      response += "\r\n";
+
+      return CommandResponse::success(response);
     }
 
   private:
