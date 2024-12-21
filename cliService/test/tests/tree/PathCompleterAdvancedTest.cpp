@@ -43,19 +43,19 @@ namespace cliService
       //     ├── tool2
       //     └── common/
       
-      auto& test = root->addDirectory("test", AccessLevel::User);
-      test.addDirectory("test1", AccessLevel::User);
-      test.addDirectory("test2", AccessLevel::User);
-      test.addDirectory("testing", AccessLevel::User);
+      auto& test = root->addDynamicDirectory("test", AccessLevel::User);
+      test.addDynamicDirectory("test1", AccessLevel::User);
+      test.addDynamicDirectory("test2", AccessLevel::User);
+      test.addDynamicDirectory("testing", AccessLevel::User);
       
-      auto& admin = root->addDirectory("admin", AccessLevel::Admin);
-      admin.addDirectory("conf", AccessLevel::Admin);
-      admin.addDirectory("logs", AccessLevel::Admin);
+      auto& admin = root->addDynamicDirectory("admin", AccessLevel::Admin);
+      admin.addDynamicDirectory("conf", AccessLevel::Admin);
+      admin.addDynamicDirectory("logs", AccessLevel::Admin);
       
-      auto& utils = root->addDirectory("utils", AccessLevel::User);
-      utils.addCommand<TestCommand>("tool1", AccessLevel::User);
-      utils.addCommand<TestCommand>("tool2", AccessLevel::User);
-      utils.addDirectory("common", AccessLevel::User);
+      auto& utils = root->addDynamicDirectory("utils", AccessLevel::User);
+      utils.addDynamicCommand<TestCommand>("tool1", AccessLevel::User);
+      utils.addDynamicCommand<TestCommand>("tool2", AccessLevel::User);
+      utils.addDynamicDirectory("common", AccessLevel::User);
     }
 
     std::unique_ptr<Directory> root;
@@ -163,18 +163,18 @@ namespace cliService
       //         ├── item1
       //         └── item2
       
-      auto& folder1 = root->addDirectory("folder1", AccessLevel::User);
-      auto& subfolder1 = folder1.addDirectory("subfolder1", AccessLevel::User);
-      subfolder1.addDirectory("deep", AccessLevel::User);
-      folder1.addDirectory("subfolder2", AccessLevel::User);
+      auto& folder1 = root->addDynamicDirectory("folder1", AccessLevel::User);
+      auto& subfolder1 = folder1.addDynamicDirectory("subfolder1", AccessLevel::User);
+      subfolder1.addDynamicDirectory("deep", AccessLevel::User);
+      folder1.addDynamicDirectory("subfolder2", AccessLevel::User);
       
-      auto& folder2 = root->addDirectory("folder2", AccessLevel::User);
-      auto& target1 = folder2.addDirectory("target1", AccessLevel::User);
-      target1.addCommand<TestCommand>("item", AccessLevel::User);
+      auto& folder2 = root->addDynamicDirectory("folder2", AccessLevel::User);
+      auto& target1 = folder2.addDynamicDirectory("target1", AccessLevel::User);
+      target1.addDynamicCommand<TestCommand>("item", AccessLevel::User);
       
-      auto& target2 = folder2.addDirectory("target2", AccessLevel::User);
-      target2.addCommand<TestCommand>("item1", AccessLevel::User);
-      target2.addCommand<TestCommand>("item2", AccessLevel::User);
+      auto& target2 = folder2.addDynamicDirectory("target2", AccessLevel::User);
+      target2.addDynamicCommand<TestCommand>("item1", AccessLevel::User);
+      target2.addDynamicCommand<TestCommand>("item2", AccessLevel::User);
 
       // Keep reference to test directory for relative path testing
       testDir = &subfolder1;
@@ -277,8 +277,8 @@ namespace cliService
   {
     // Add some directories with similar names to test precise matching
     auto& folder1 = static_cast<Directory&>(*root->findNode({"folder1"}));
-    folder1.addDirectory("similar", AccessLevel::User);
-    folder1.addDirectory("similar2", AccessLevel::User);
+    folder1.addDynamicDirectory("similar", AccessLevel::User);
+    folder1.addDynamicDirectory("similar2", AccessLevel::User);
 
     auto result = PathCompleter::complete(*testDir, "../sim", AccessLevel::User);
 

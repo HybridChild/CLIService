@@ -54,7 +54,7 @@ namespace cliService
 
   TEST_F(TreeTest, AddDirectory)
   {
-    Directory& dir = _root->addDirectory("test", AccessLevel::User);
+    Directory& dir = _root->addDynamicDirectory("test", AccessLevel::User);
     EXPECT_EQ(dir.getName(), "test");
     EXPECT_TRUE(dir.isDirectory());
     EXPECT_EQ(dir.getParent(), _root.get());
@@ -62,7 +62,7 @@ namespace cliService
 
   TEST_F(TreeTest, AddCommand)
   {
-    TestCommand& cmd = _root->addCommand<TestCommand>("test", AccessLevel::Admin);
+    TestCommand& cmd = _root->addDynamicCommand<TestCommand>("test", AccessLevel::Admin);
     EXPECT_EQ(cmd.getName(), "test");
     EXPECT_FALSE(cmd.isDirectory());
     EXPECT_EQ(cmd.getParent(), _root.get());
@@ -70,7 +70,7 @@ namespace cliService
 
   TEST_F(TreeTest, FindNodeInRoot)
   {
-    auto& cmd = _root->addCommand<TestCommand>("test", AccessLevel::Admin);
+    auto& cmd = _root->addDynamicCommand<TestCommand>("test", AccessLevel::Admin);
 
     NodeIf* found = _root->findNode({"test"});
     EXPECT_EQ(found, &cmd);
@@ -78,8 +78,8 @@ namespace cliService
 
   TEST_F(TreeTest, FindNodeInSubdirectory)
   {
-    auto& dir = _root->addDirectory("subdir", AccessLevel::User);
-    auto& cmd = dir.addCommand<TestCommand>("test", AccessLevel::Admin);
+    auto& dir = _root->addDynamicDirectory("subdir", AccessLevel::User);
+    auto& cmd = dir.addDynamicCommand<TestCommand>("test", AccessLevel::Admin);
 
     NodeIf* found = _root->findNode({"subdir", "test"});
     EXPECT_EQ(found, &cmd);
@@ -87,10 +87,10 @@ namespace cliService
 
   TEST_F(TreeTest, FindNodeInDeepStructure)
   {
-    auto& level1 = _root->addDirectory("level1", AccessLevel::User);
-    auto& level2 = level1.addDirectory("level2", AccessLevel::User);
-    auto& level3 = level2.addDirectory("level3", AccessLevel::User);
-    auto& cmd = level3.addCommand<TestCommand>("test", AccessLevel::Admin);
+    auto& level1 = _root->addDynamicDirectory("level1", AccessLevel::User);
+    auto& level2 = level1.addDynamicDirectory("level2", AccessLevel::User);
+    auto& level3 = level2.addDynamicDirectory("level3", AccessLevel::User);
+    auto& cmd = level3.addDynamicCommand<TestCommand>("test", AccessLevel::Admin);
 
     NodeIf* found = _root->findNode({"level1", "level2", "level3", "test"});
     EXPECT_EQ(found, &cmd);
@@ -104,7 +104,7 @@ namespace cliService
 
   TEST_F(TreeTest, FindWithInvalidPath)
   {
-    auto& cmd = _root->addCommand<TestCommand>("test", AccessLevel::Admin);
+    auto& cmd = _root->addDynamicCommand<TestCommand>("test", AccessLevel::Admin);
 
     // Trying to traverse through a command
     NodeIf* found = _root->findNode({"test", "subpath"});
@@ -113,7 +113,7 @@ namespace cliService
 
   TEST_F(TreeTest, CommandExecution)
   {
-    auto& cmd = _root->addCommand<TestCommand>("test", AccessLevel::Admin);
+    auto& cmd = _root->addDynamicCommand<TestCommand>("test", AccessLevel::Admin);
     
     std::vector<std::string> args = {"arg1", "arg2"};
     NodeIf* found = _root->findNode({"test"});
@@ -138,10 +138,10 @@ namespace cliService
 
   TEST_F(TreeTest, TraverseComplexTree)
   {
-    auto& dir1 = _root->addDirectory("dir1", AccessLevel::User);
-    dir1.addCommand<TestCommand>("test", AccessLevel::Admin);
-    auto& dir2 = dir1.addDirectory("dir2", AccessLevel::User);
-    dir2.addCommand<TestCommand>("test", AccessLevel::Admin);
+    auto& dir1 = _root->addDynamicDirectory("dir1", AccessLevel::User);
+    dir1.addDynamicCommand<TestCommand>("test", AccessLevel::Admin);
+    auto& dir2 = dir1.addDynamicDirectory("dir2", AccessLevel::User);
+    dir2.addDynamicCommand<TestCommand>("test", AccessLevel::Admin);
 
     std::vector<std::pair<std::string, int>> visited;
     _root->traverse([&visited](const NodeIf& node, size_t depth) {
@@ -158,21 +158,21 @@ namespace cliService
 
   TEST_F(TreeTest, NameCollisionInDirectory)
   {
-    _root->addCommand<TestCommand>("test", AccessLevel::Admin);
-    EXPECT_DEATH(_root->addCommand<TestCommand>("test", AccessLevel::Admin), "");
+    _root->addDynamicCommand<TestCommand>("test", AccessLevel::Admin);
+    EXPECT_DEATH(_root->addDynamicCommand<TestCommand>("test", AccessLevel::Admin), "");
   }
 
   TEST_F(TreeTest, NameCollisionInSubdirectory)
   {
-    auto& dir = _root->addDirectory("subdir", AccessLevel::User);
-    dir.addCommand<TestCommand>("test", AccessLevel::Admin);
-    EXPECT_DEATH(dir.addCommand<TestCommand>("test", AccessLevel::Admin), "");
+    auto& dir = _root->addDynamicDirectory("subdir", AccessLevel::User);
+    dir.addDynamicCommand<TestCommand>("test", AccessLevel::Admin);
+    EXPECT_DEATH(dir.addDynamicCommand<TestCommand>("test", AccessLevel::Admin), "");
   }
 
   TEST_F(TreeTest, DirectoryNameCollision)
   {
-    _root->addDirectory("test", AccessLevel::User);
-    EXPECT_DEATH(_root->addDirectory("test", AccessLevel::User), "");
+    _root->addDynamicDirectory("test", AccessLevel::User);
+    EXPECT_DEATH(_root->addDynamicDirectory("test", AccessLevel::User), "");
   }
 
   TEST_F(TreeTest, FindEmptyPath)
@@ -183,8 +183,8 @@ namespace cliService
 
   TEST_F(TreeTest, MixedNameCollision)
   {
-    _root->addDirectory("test", AccessLevel::User);
-    EXPECT_DEATH(_root->addCommand<TestCommand>("test", AccessLevel::Admin), "");
+    _root->addDynamicDirectory("test", AccessLevel::User);
+    EXPECT_DEATH(_root->addDynamicCommand<TestCommand>("test", AccessLevel::Admin), "");
   }
 
 }

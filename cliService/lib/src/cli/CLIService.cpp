@@ -28,12 +28,12 @@ namespace cliService
     , _users(std::move(config._users))
     , _currentUser(std::nullopt)
     , _rootDirectory(std::move(config._rootDirectory))
-    , _currentDirectory(_rootDirectory.get())
-    , _pathResolver(*_rootDirectory)
+    , _currentDirectory(getRootPtr())
+    , _pathResolver(*getRootPtr())
     , _currentState(CLIState::Inactive)
   {
     assert(!_users.empty() && "User list cannot be empty");
-    assert(_rootDirectory != nullptr && "Root directory cannot be null");
+    assert(getRootPtr() != nullptr && "Root directory cannot be null");
     assert(_currentDirectory != nullptr && "Current directory must be set");
   }
 
@@ -110,7 +110,7 @@ namespace cliService
 
 
   void CLIService::resetToRoot() {
-    _currentDirectory = _rootDirectory.get();
+    _currentDirectory = getRootPtr();
   }
 
 
@@ -193,6 +193,16 @@ namespace cliService
 
     displayNewLine();
     displayPrompt();
+  }
+
+
+  Directory* CLIService::getRootPtr() const
+  {
+    if (auto staticPtr = std::get_if<Directory*>(&_rootDirectory)) {
+      return *staticPtr;
+    }
+    
+    return std::get<std::unique_ptr<Directory>>(_rootDirectory).get();
   }
 
 

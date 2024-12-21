@@ -18,8 +18,8 @@ namespace cliService
       auto root = std::make_unique<Directory>("root", AccessLevel::User);
       _rootDir = root.get();
       
-      auto& subDir = _rootDir->addDirectory("sub", AccessLevel::User);
-      _mockCmd = &subDir.addCommand<CommandMock>("test", AccessLevel::Admin);
+      auto& subDir = _rootDir->addDynamicDirectory("sub", AccessLevel::User);
+      _mockCmd = &subDir.addDynamicCommand<CommandMock>("test", AccessLevel::Admin);
       
       std::vector<User> users = {
         {"admin", "admin123", AccessLevel::Admin},

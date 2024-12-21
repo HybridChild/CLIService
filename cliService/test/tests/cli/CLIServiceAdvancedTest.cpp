@@ -20,14 +20,14 @@ namespace cliService
       _rootDir = root.get();
 
       // Create a more complex directory structure
-      auto& adminDir = _rootDir->addDirectory("admin", AccessLevel::Admin);
-      _adminCmd = &adminDir.addCommand<CommandMock>("config", AccessLevel::Admin);
+      auto& adminDir = _rootDir->addDynamicDirectory("admin", AccessLevel::Admin);
+      _adminCmd = &adminDir.addDynamicCommand<CommandMock>("config", AccessLevel::Admin);
 
-      auto& publicDir = _rootDir->addDirectory("public", AccessLevel::User);
-      _publicCmd = &publicDir.addCommand<CommandMock>("info", AccessLevel::User);
+      auto& publicDir = _rootDir->addDynamicDirectory("public", AccessLevel::User);
+      _publicCmd = &publicDir.addDynamicCommand<CommandMock>("info", AccessLevel::User);
 
-      auto& nestedDir = publicDir.addDirectory("nested", AccessLevel::User);
-      _nestedCmd = &nestedDir.addCommand<CommandMock>("test", AccessLevel::User);
+      auto& nestedDir = publicDir.addDynamicDirectory("nested", AccessLevel::User);
+      _nestedCmd = &nestedDir.addDynamicCommand<CommandMock>("test", AccessLevel::User);
 
       std::vector<User> users = {
         {"admin", "admin123", AccessLevel::Admin},

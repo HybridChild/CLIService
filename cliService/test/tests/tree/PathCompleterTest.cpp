@@ -29,19 +29,19 @@ namespace cliService
       root = std::make_unique<Directory>("root", AccessLevel::User);
 
       // /utils/
-      auto& utils = root->addDirectory("utils", AccessLevel::User);
-      utils.addCommand<TestCommand>("print", AccessLevel::User);
-      utils.addCommand<TestCommand>("help", AccessLevel::User);
+      auto& utils = root->addDynamicDirectory("utils", AccessLevel::User);
+      utils.addDynamicCommand<TestCommand>("print", AccessLevel::User);
+      utils.addDynamicCommand<TestCommand>("help", AccessLevel::User);
 
       // /utils/format/
-      auto& format = utils.addDirectory("format", AccessLevel::User);
-      format.addCommand<TestCommand>("json", AccessLevel::User);
-      format.addCommand<TestCommand>("xml", AccessLevel::User);
+      auto& format = utils.addDynamicDirectory("format", AccessLevel::User);
+      format.addDynamicCommand<TestCommand>("json", AccessLevel::User);
+      format.addDynamicCommand<TestCommand>("xml", AccessLevel::User);
 
       // /admin/ (restricted access)
-      auto& admin = root->addDirectory("admin", AccessLevel::Admin);
-      admin.addCommand<TestCommand>("config", AccessLevel::Admin);
-      admin.addCommand<TestCommand>("users", AccessLevel::Admin);
+      auto& admin = root->addDynamicDirectory("admin", AccessLevel::Admin);
+      admin.addDynamicCommand<TestCommand>("config", AccessLevel::Admin);
+      admin.addDynamicCommand<TestCommand>("users", AccessLevel::Admin);
     }
 
     std::unique_ptr<Directory> root;
@@ -123,7 +123,7 @@ namespace cliService
   TEST_F(PathCompleterTest, MultipleMatches)
   {
     // Add another command starting with 'p' to test multiple matches
-    static_cast<Directory*>(root->findNode({"utils"}))->addCommand<TestCommand>("process", AccessLevel::User);
+    static_cast<Directory*>(root->findNode({"utils"}))->addDynamicCommand<TestCommand>("process", AccessLevel::User);
 
     auto result = PathCompleter::complete(*root, "utils/p", AccessLevel::User);
 

@@ -16,48 +16,88 @@ constexpr uint32_t inputTimeout_ms = 1000;
 using namespace cliService;
 
 
-std::unique_ptr<Directory> createMenuTree()
+// Example of static allocation
+class StaticMenuTree
 {
-  auto dirRoot = std::make_unique<cliService::Directory>("root", AccessLevel::User);
+public:
+  StaticMenuTree()
+    : _rootDir("root", AccessLevel::User)
+    , _sysDir("system", AccessLevel::Admin)
+    , _hwDir("hw", AccessLevel::User)
+    , _rebootCmd("reboot", AccessLevel::Admin)
+    , _heapCmd("heap", AccessLevel::Admin)
+    , _rgbLedCmd("set", AccessLevel::Admin)
+  {
+    // Build tree with static references
+    _rootDir.addStatic(_sysDir);
+    _rootDir.addStatic(_hwDir);
     
-    auto& dirSystem = dirRoot->addDirectory("system", AccessLevel::Admin);
-      dirSystem.addCommand<RebootCommand>("reboot", AccessLevel::Admin);
-      dirSystem.addCommand<HeapStatsGetCommand>("heap", AccessLevel::Admin);
+    _sysDir.addStatic(_rebootCmd);
+    _sysDir.addStatic(_heapCmd);
+    _hwDir.addStatic(_rgbLedCmd);
+  }
 
-    auto& dirHw = dirRoot->addDirectory("hw", AccessLevel::User);
-      auto& dirHwPot = dirHw.addDirectory("potmeter", AccessLevel::User);
-        dirHwPot.addCommand<PotmeterGetCommand>("get", AccessLevel::User);
+  Directory& getRoot() { return _rootDir; }
 
-      auto& dirHwRgbLed = dirHw.addDirectory("rgbLed", AccessLevel::Admin);
-        dirHwRgbLed.addCommand<RgbLedSetCommand>("set", AccessLevel::Admin);
+private:
+  Directory _rootDir;
+  Directory _sysDir;
+  Directory _hwDir;
+  RebootCommand _rebootCmd;
+  HeapStatsGetCommand _heapCmd;
+  RgbLedSetCommand _rgbLedCmd;
+};
 
-      auto& dirHwToggleSwitch = dirHw.addDirectory("toggleSwitch", AccessLevel::User);
-        dirHwToggleSwitch.addCommand<ToggleSwitchGetCommand>("get", AccessLevel::User);
-
-  return std::move(dirRoot);
+// Example of mixed allocation
+std::unique_ptr<Directory> createMixedMenuTree()
+{
+  // Create dynamic root
+  auto dirRoot = std::make_unique<Directory>("root", AccessLevel::User);
+    
+  // Add static system directory
+  static Directory sysDir("system", AccessLevel::Admin);
+  dirRoot->addStatic(sysDir);
+    
+  // Add dynamic commands to static directory
+  sysDir.addDynamicCommand<RebootCommand>("reboot", AccessLevel::Admin);
+  sysDir.addDynamicCommand<HeapStatsGetCommand>("heap", AccessLevel::Admin);
+    
+  // Add dynamic hardware directory with dynamic command
+  auto& hwDir = dirRoot->addDynamicDirectory("hw", AccessLevel::User);
+  hwDir.addDynamicCommand<RgbLedSetCommand>("set", AccessLevel::Admin);
+    
+  return dirRoot;
 }
 
-
+// Example usage in main
 int main()
 {
   UnixWinCharIOStream ioStream{};
 
-  std::vector<cliService::User> users = {
-    {"admin", "admin123", AccessLevel::Admin},
-    {"user", "user123", AccessLevel::User}
-  };
-
-  auto tree = createMenuTree();
-
-  CLIServiceConfiguration cliConfig {
+  // Using fully static allocation
+  StaticMenuTree staticTree;
+  
+  CLIServiceConfiguration staticConfig {
     static_cast<CharIOStreamIf&>(ioStream),
-    std::move(users),
-    std::move(tree),
+    std::vector<User>{{"admin", "admin123", AccessLevel::Admin}},
+    staticTree.getRoot(),  // Pass reference instead of pointer
     inputTimeout_ms,
     commandHistorySize
   };
+
+  // OR using mixed allocation
+  auto mixedTree = createMixedMenuTree();
   
-  CLIService cli(std::move(cliConfig));
+  CLIServiceConfiguration mixedConfig {
+    static_cast<CharIOStreamIf&>(ioStream),
+    std::vector<User>{{"admin", "admin123", AccessLevel::Admin}},
+    std::move(mixedTree),  // This constructor takes unique_ptr
+    inputTimeout_ms,
+    commandHistorySize
+  };
+
+  // Create service with static configuration
+  CLIService cli(std::move(staticConfig));
   
   cli.activate();
 

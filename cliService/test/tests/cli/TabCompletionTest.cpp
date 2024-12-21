@@ -26,14 +26,14 @@ namespace cliService
 
       auto root = std::make_unique<Directory>("root", AccessLevel::User);
 
-      auto &folder1 = root->addDirectory("folder1", AccessLevel::User);
-      auto &subfolder1 = folder1.addDirectory("subfolder1", AccessLevel::User);
-      subfolder1.addDirectory("deep", AccessLevel::User);
-      folder1.addDirectory("subfolder2", AccessLevel::User);
+      auto &folder1 = root->addDynamicDirectory("folder1", AccessLevel::User);
+      auto &subfolder1 = folder1.addDynamicDirectory("subfolder1", AccessLevel::User);
+      subfolder1.addDynamicDirectory("deep", AccessLevel::User);
+      folder1.addDynamicDirectory("subfolder2", AccessLevel::User);
 
-      auto &folder2 = root->addDirectory("folder2", AccessLevel::User);
-      folder2.addDirectory("target1", AccessLevel::User);
-      folder2.addDirectory("target2", AccessLevel::User);
+      auto &folder2 = root->addDynamicDirectory("folder2", AccessLevel::User);
+      folder2.addDynamicDirectory("target1", AccessLevel::User);
+      folder2.addDynamicDirectory("target2", AccessLevel::User);
 
       std::vector<User> users = {
           {"admin", "admin123", AccessLevel::Admin},

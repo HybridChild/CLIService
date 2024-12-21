@@ -43,6 +43,8 @@ namespace cliService
     void displayNodeList(NodeDisplayMode mode, bool showCmdDescription) const;
 
   private:
+    Directory* getRootPtr() const;
+
     // Request handlers
     void handleInvalidLoginRequest();
     void handleLoginRequest(const LoginRequest& request);
@@ -65,7 +67,7 @@ namespace cliService
     std::vector<User> _users;
     std::optional<User> _currentUser;
 
-    std::unique_ptr<Directory> _rootDirectory;
+    std::variant<Directory*, std::unique_ptr<Directory>> _rootDirectory;
     Directory* _currentDirectory;
     PathResolver _pathResolver;
 

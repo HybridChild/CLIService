@@ -1,15 +1,17 @@
 cmake_minimum_required(VERSION 3.20)
-project(cliService VERSION 1.0)
+project(CLIService VERSION 1.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Set the testing output directory
+# Set the output directory for executables
+# (binary dir = build dir set with 'cmake -B <dir>')
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(UNITTEST_OUTPUT_DIR ${CMAKE_BINARY_DIR}/Testing)
 
-# Create the output directory
+# Create the output directories
 file(MAKE_DIRECTORY ${UNITTEST_OUTPUT_DIR})
+file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 enable_testing()
 

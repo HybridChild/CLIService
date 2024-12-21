@@ -22,12 +22,12 @@ namespace cliService
       //     └── subdir3
 
       root = std::make_unique<Directory>("", AccessLevel::Public);
-      auto& dir1 = root->addDirectory("dir1", AccessLevel::Public);
-      dir1.addDirectory("subdir1", AccessLevel::Public);
-      subdir2 = &dir1.addDirectory("subdir2", AccessLevel::Public);
+      auto& dir1 = root->addDynamicDirectory("dir1", AccessLevel::Public);
+      dir1.addDynamicDirectory("subdir1", AccessLevel::Public);
+      subdir2 = &dir1.addDynamicDirectory("subdir2", AccessLevel::Public);
 
-      auto& dir2 = root->addDirectory("dir2", AccessLevel::Public);
-      dir2.addDirectory("subdir3", AccessLevel::Public);
+      auto& dir2 = root->addDynamicDirectory("dir2", AccessLevel::Public);
+      dir2.addDynamicDirectory("subdir3", AccessLevel::Public);
 
       resolver = std::make_unique<PathResolver>(*root);
     }

@@ -69,9 +69,9 @@ int main()
 
   // Create menu structure
   auto dirRoot = std::make_unique<Directory>("root", AccessLevel::User);
-    auto& dirSystem = dirRoot->addDirectory("system", AccessLevel::User);
-      dirSystem.addCommand<RebootCommand>("reboot", AccessLevel::Admin);
-      dirSystem.addCommand<HeapStatsGetCommand>("heap", AccessLevel::User);
+    auto& dirSystem = dirRoot->addDynamicDirectory("system", AccessLevel::User);
+      dirSystem.addDynamicCommand<RebootCommand>("reboot", AccessLevel::Admin);
+      dirSystem.addDynamicCommand<HeapStatsGetCommand>("heap", AccessLevel::User);
 
   // Create and activate CLI service
   MyCharIOStream ioStream{};
