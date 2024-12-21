@@ -105,7 +105,7 @@ namespace cliService
 
     _ioStream.queueInput("public/info invalid args\n");
     EXPECT_CALL(*_publicCmd, execute(testing::_))
-      .WillOnce(testing::Return(CommandResponse("Invalid arguments", CommandStatus::InvalidArguments)));
+      .WillOnce(testing::Return(CommandResponse(static_cast<std::string>("Invalid arguments"), CommandStatus::InvalidArguments)));
     _service->service();
     EXPECT_THAT(_ioStream.getOutput(), testing::HasSubstr("Invalid arguments"));
   }

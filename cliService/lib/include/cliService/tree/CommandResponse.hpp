@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <string_view>
 
 namespace cliService
 {
@@ -16,6 +17,12 @@ namespace cliService
   public:
     explicit CommandResponse(std::string msg = "", CommandStatus status = CommandStatus::Success)
       : _message(std::move(msg))
+      , _status(status)
+      , _showPrompt(true)
+    {}
+
+    explicit CommandResponse(std::string_view msg = "", CommandStatus status = CommandStatus::Success)
+      : _message(msg)
       , _status(status)
       , _showPrompt(true)
     {}
