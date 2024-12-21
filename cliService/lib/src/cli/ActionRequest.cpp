@@ -54,11 +54,14 @@ namespace cliService
       }
 
       argsStr = input.substr(argsStart);
-    }
 
-    // Validate path doesn't end with slash when args present
-    if (!argsStr.empty()) {
-      assert(pathStr.empty() || pathStr.back() != '/' && "Paths with arguments must not end with a slash");
+      // If we have arguments and path ends with slashes, trim them
+      if (!argsStr.empty() && !pathStr.empty())
+      {
+        while (!pathStr.empty() && pathStr.back() == '/') {
+          pathStr = pathStr.substr(0, pathStr.length() - 1);
+        }
+      }
     }
   }
 
