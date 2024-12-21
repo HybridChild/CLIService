@@ -13,10 +13,10 @@ namespace cliService
     // Split input into path and args
     std::string_view pathStr, argsStr;
     parseInput(inputStr, pathStr, argsStr);
-    
+
     // Create path object
     _path = Path(pathStr);
-    
+
     // Parse args if present
     if (!argsStr.empty())
     {
@@ -35,7 +35,7 @@ namespace cliService
   {
     // Find first space that separates path from args
     size_t spacePos = input.find(' ');
-    
+
     if (spacePos == std::string_view::npos)
     {
       // No args, entire input is path
@@ -49,17 +49,15 @@ namespace cliService
       
       // Skip spaces between path and args
       size_t argsStart = spacePos + 1;
-      while (argsStart < input.length() && input[argsStart] == ' ')
-      {
+      while (argsStart < input.length() && input[argsStart] == ' ') {
         argsStart++;
       }
-      
+
       argsStr = input.substr(argsStart);
     }
-    
+
     // Validate path doesn't end with slash when args present
-    if (!argsStr.empty())
-    {
+    if (!argsStr.empty()) {
       assert(pathStr.empty() || pathStr.back() != '/' && "Paths with arguments must not end with a slash");
     }
   }

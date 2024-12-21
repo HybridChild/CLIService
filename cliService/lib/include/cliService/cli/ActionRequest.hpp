@@ -22,7 +22,7 @@ namespace cliService
     };
 
     explicit ActionRequest(std::string_view inputStr, Trigger trigger);
-    
+
     const Path& getPath() const { return _path; }
     const std::vector<std::string>& getArgs() const { return _args; }
     Trigger getTrigger() const { return _trigger; }

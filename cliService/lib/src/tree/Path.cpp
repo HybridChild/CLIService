@@ -80,8 +80,7 @@ namespace cliService
           normalized.push_back("..");
         }
       }
-      else
-      {
+      else {
         normalized.push_back(element);
       }
     }
@@ -90,8 +89,7 @@ namespace cliService
   }
 
 
-  Path Path::normalized() const
-  {
+  Path Path::normalized() const {
     return Path(normalizeElements(_elements, _isAbsolute), _isAbsolute);
   }
 
@@ -145,7 +143,7 @@ namespace cliService
     for (size_t i = commonPrefix; i < base._elements.size(); i++) {
       relativeElements.push_back("..");
     }
-    
+
     // Add remaining elements from this path
     relativeElements.insert(relativeElements.end(), _elements.begin() + commonPrefix, _elements.end());
         
@@ -174,8 +172,7 @@ namespace cliService
   }
 
 
-  bool Path::operator==(const Path& other) const
-  {
+  bool Path::operator==(const Path& other) const {
     return _isAbsolute == other._isAbsolute && _elements == other._elements;
   }
 

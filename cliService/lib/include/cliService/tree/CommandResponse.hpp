@@ -23,7 +23,7 @@ namespace cliService
     static CommandResponse success(const std::string& msg = "") {
       return CommandResponse(msg, CommandStatus::Success);
     }
-    
+
     static CommandResponse error(const std::string& msg) {
       return CommandResponse(msg, CommandStatus::Error);
     }

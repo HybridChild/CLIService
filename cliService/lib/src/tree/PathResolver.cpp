@@ -21,7 +21,7 @@ namespace cliService
     if (!path.isAbsolute()) {
       // Get the absolute path of current directory
       Path currentPath = getAbsolutePath(currentDir);
-      
+
       // Join the paths and normalize
       Path absolutePath = currentPath.join(path).normalized();
       return resolveAbsolute(absolutePath);
@@ -63,7 +63,7 @@ namespace cliService
 
     // Walk up the tree collecting node names
     const NodeIf* current = &node;
-    
+
     while (current->getParent())
     {
       elements.push_back(current->getName());

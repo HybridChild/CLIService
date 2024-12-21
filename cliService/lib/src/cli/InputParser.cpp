@@ -59,7 +59,7 @@ namespace cliService
           _escapeIndex = 0;
           return true;
         }
-        
+
         // If not a recognized 2-char sequence, keep reading until we 
         // hit a terminal character (usually an alphabetic character)
         if (_escapeIndex >= 2 && std::isalpha(c))
@@ -124,7 +124,7 @@ namespace cliService
       default:
         break;
     }
-    
+
     return false;
   }
 
@@ -158,7 +158,7 @@ namespace cliService
             _ioStream.putString("\b \b");
             _buffer.pop_back();
           }
-          
+
           // Show previous command
           std::string prevCmd = _history.getPreviousCommand();
           _buffer = prevCmd;
@@ -178,7 +178,7 @@ namespace cliService
             _ioStream.putString("\b \b");
             _buffer.pop_back();
           }
-          
+
           // Show next command or restore saved buffer
           std::string nextCmd = _history.getNextCommand();
 

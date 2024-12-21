@@ -27,7 +27,7 @@ namespace cliService
 
       std::string username = input.substr(0, delimPos);
       std::string password = input.substr(delimPos + 1);
-      
+
       if (username.empty() || password.empty()) {
         return std::nullopt;
       }

@@ -24,6 +24,7 @@ namespace cliService
 
   bool CharIOStreamMock::getCharTimeout(char& c, uint32_t timeout_ms)
   {
+    (void)(timeout_ms);  // Ignore timeout for mock
     return getChar(c);  // For mock, ignore timeout
   }
 
@@ -55,7 +56,6 @@ namespace cliService
     return _lastError.c_str();
   }
 
-
   void CharIOStreamMock::clearError() {
     _lastError.clear();
   }
@@ -63,8 +63,7 @@ namespace cliService
 
   void CharIOStreamMock::queueInput(const std::string& input)
   {
-    for (char c : input)
-    {
+    for (char c : input) {
       _inputQueue.push(c);
     }
   }

@@ -10,8 +10,7 @@ namespace cliService
   {}
 
 
-  bool Directory::isDirectory() const
-  {
+  bool Directory::isDirectory() const {
     return true;
   }
 
