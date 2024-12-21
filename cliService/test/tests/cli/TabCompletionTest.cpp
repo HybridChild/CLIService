@@ -68,7 +68,7 @@ namespace cliService
     std::unique_ptr<CLIService> _service;
   };
 
-  TEST_F(TabCompletionTest, DISABLED_TabCompleteParentDirectory)
+  TEST_F(TabCompletionTest, TabCompleteParentDirectory)
   {
     loginAsUser();
     navigateToSubfolder1(); // Now in /folder1/subfolder1
@@ -82,7 +82,7 @@ namespace cliService
     EXPECT_TRUE(output.find("folder2/") != std::string::npos);
   }
 
-  TEST_F(TabCompletionTest, DISABLED_TabCompleteAfterParentNavigation)
+  TEST_F(TabCompletionTest, TabCompleteAfterParentNavigation)
   {
     loginAsUser();
     navigateToSubfolder1(); // Now in /folder1/subfolder1
@@ -96,7 +96,7 @@ namespace cliService
     EXPECT_TRUE(output.find("target2/") != std::string::npos);
   }
 
-  TEST_F(TabCompletionTest, DISABLED_TabCompleteWithMultiLevelParentNavigation)
+  TEST_F(TabCompletionTest, TabCompleteWithMultiLevelParentNavigation)
   {
     loginAsUser();
     navigateToSubfolder1();
@@ -114,7 +114,7 @@ namespace cliService
     EXPECT_TRUE(output.find("folder2/") != std::string::npos);
   }
 
-  TEST_F(TabCompletionTest, DISABLED_TabCompleteWithExtraParentDirectories)
+  TEST_F(TabCompletionTest, TabCompleteWithExtraParentDirectories)
   {
     loginAsUser();
     navigateToSubfolder1();
@@ -128,7 +128,7 @@ namespace cliService
     EXPECT_TRUE(output.find("target2/") != std::string::npos);
   }
 
-  TEST_F(TabCompletionTest, DISABLED_TabCompletePartialParentDirectory)
+  TEST_F(TabCompletionTest, TabCompletePartialParentDirectory)
   {
     loginAsUser();
     navigateToSubfolder1();
@@ -141,7 +141,7 @@ namespace cliService
     EXPECT_TRUE(output.find("subfolder2") != std::string::npos);
   }
 
-  TEST_F(TabCompletionTest, DISABLED_TabCompleteAfterDotDirectory)
+  TEST_F(TabCompletionTest, TabCompleteAfterDotDirectory)
   {
     loginAsUser();
     navigateToSubfolder1();
@@ -154,7 +154,7 @@ namespace cliService
     EXPECT_TRUE(output.find("subfolder2") != std::string::npos);
   }
 
-  TEST_F(TabCompletionTest, DISABLED_TabCompleteNonexistentParentPath)
+  TEST_F(TabCompletionTest, TabCompleteNonexistentParentPath)
   {
     loginAsUser();
     navigateToSubfolder1();
@@ -167,7 +167,7 @@ namespace cliService
     EXPECT_FALSE(output.find("subfolder") != std::string::npos);
   }
 
-  TEST_F(TabCompletionTest, DISABLED_TabCompleteWithMixedPaths)
+  TEST_F(TabCompletionTest, TabCompleteWithMixedPaths)
   {
     loginAsUser();
     navigateToSubfolder1();
@@ -180,7 +180,7 @@ namespace cliService
     EXPECT_TRUE(output.find("deep") != std::string::npos);
   }
 
-  TEST_F(TabCompletionTest, DISABLED_TabCompleteParentDirectoryFromRoot)
+  TEST_F(TabCompletionTest, TabCompleteParentDirectoryFromRoot)
   {
     loginAsUser();
 

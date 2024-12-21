@@ -329,17 +329,23 @@ namespace cliService
   void CLIService::handleTabCompletion(const ActionRequest& request)
   {
     auto currentInput = _parser.getBuffer();
-    auto node = resolvePath(request.getPath());
 
-    if (node && node->isDirectory() && !currentInput.empty() && currentInput.back() != '/')
+    // Skip directory handling for paths with parent references
+    if (currentInput.find("..") == std::string::npos)
     {
-      _ioStream.putChar('/');
-      _parser.appendToBuffer("/");
-      return;
+      auto node = resolvePath(request.getPath());
+
+      if (node && node->isDirectory() && !currentInput.empty() && currentInput.back() != '/')
+      {
+        _ioStream.putChar('/');
+        _parser.appendToBuffer("/");
+        return;
+      }
     }
 
     auto result = PathCompleter::complete(*_currentDirectory, currentInput, _currentUser->getAccessLevel());
 
+    // First append any fill characters
     if (!result.fillCharacters.empty())
     {
       _ioStream.putString(result.fillCharacters);
@@ -351,7 +357,9 @@ namespace cliService
         _parser.appendToBuffer("/");
       }
     }
-    else if (!result.allOptions.empty())
+
+    // If there are multiple options, always show them
+    if (result.allOptions.size() > 1)
     {
       displayNewLine();
 
