@@ -25,7 +25,15 @@ namespace cliService
         {"user", "pass123", AccessLevel::User}
       };
 
-      _service = std::make_unique<CLIService>(CLIServiceConfiguration{_ioStream, std::move(users), std::move(root), HISTORY_SIZE});
+      CLIServiceConfiguration config{
+        _ioStream,
+        std::move(users),
+        std::move(root),
+        HISTORY_SIZE,
+        CLIMessages::getDefaults()
+      };
+
+      _service = std::make_unique<CLIService>(std::move(config));
     }
 
     CharIOStreamMock _ioStream;
@@ -120,7 +128,7 @@ namespace cliService
     _service->service();
     
     EXPECT_THAT(_ioStream.getOutput(), 
-      testing::HasSubstr(CLIService::getLoggedOutMessage()));
+      testing::HasSubstr(_service->_messages.getInvalidLoginMessage()));
     EXPECT_EQ(_service->getState(), CLIState::LoggedOut);
   }
 
@@ -131,7 +139,7 @@ namespace cliService
     _service->service();
     
     EXPECT_THAT(_ioStream.getOutput(), 
-      testing::HasSubstr(CLIService::getLoggedOutMessage()));
+      testing::HasSubstr(_service->_messages.getInvalidLoginMessage()));
     EXPECT_EQ(_service->getState(), CLIState::LoggedOut);
   }
 
@@ -142,7 +150,7 @@ namespace cliService
     _service->service();
     
     EXPECT_THAT(_ioStream.getOutput(), 
-      testing::HasSubstr(CLIService::getLoggedOutMessage()));
+      testing::HasSubstr(_service->_messages.getInvalidLoginMessage()));
     EXPECT_EQ(_service->getState(), CLIState::LoggedOut);
   }
 

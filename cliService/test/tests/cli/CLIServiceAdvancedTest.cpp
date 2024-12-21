@@ -33,7 +33,15 @@ namespace cliService
         {"user", "user123", AccessLevel::User}
       };
 
-      _service = std::make_unique<CLIService>(CLIServiceConfiguration{_ioStream, std::move(users), std::move(root), HISTORY_SIZE});
+      CLIServiceConfiguration config{
+        _ioStream,
+        std::move(users),
+        std::move(root),
+        HISTORY_SIZE,
+        CLIMessages::getDefaults()
+      };
+
+      _service = std::make_unique<CLIService>(std::move(config));
     }
 
     CharIOStreamMock _ioStream;

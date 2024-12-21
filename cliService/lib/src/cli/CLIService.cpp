@@ -22,7 +22,8 @@ namespace cliService
   };
 
   CLIService::CLIService(CLIServiceConfiguration config)
-    : _ioStream(config._ioStream)
+    : _messages(std::move(config._messages))
+    , _ioStream(config._ioStream)
     , _parser(_ioStream, _currentState, config._historySize)
     , _users(std::move(config._users))
     , _currentUser(std::nullopt)
@@ -40,10 +41,9 @@ namespace cliService
   void CLIService::activate()
   {
     assert(_currentState == CLIState::Inactive && "Service must be inactive to activate");
+
     _currentState = CLIState::LoggedOut;
-    _ioStream.putString(WELCOME_MESSAGE);
-    displayNewLine();
-    _ioStream.putString(LOGGED_OUT_MESSAGE);
+    _ioStream.putString(_messages.getWelcomeMessage());
     displayNewLine();
     displayPrompt();
   }
@@ -141,7 +141,7 @@ namespace cliService
 
   void CLIService::handleInvalidLoginRequest()
   {
-    _ioStream.putString(LOGGED_OUT_MESSAGE);
+    _ioStream.putString(_messages.getInvalidLoginMessage());
     displayNewLine();
     displayPrompt();
   }
@@ -161,11 +161,13 @@ namespace cliService
     {
       _currentUser = *userIt;
       _currentState = CLIState::LoggedIn;
+      _ioStream.putString(_messages.getLoggedInMessage());
     }
     else {
-      _ioStream.putString("Invalid username or password\r\n");
+      _ioStream.putString(_messages.getInvalidLoginMessage());
     }
 
+    displayNewLine();
     displayPrompt();
   }
 
@@ -196,16 +198,20 @@ namespace cliService
 
     // Resolve and validate path
     NodeIf* node = resolvePath(path);
+
     if (!node)
     {
-      _ioStream.putString("Invalid path\r\n");
+      _ioStream.putString(_messages.getInvalidPathMessage());
+      displayNewLine();
       displayPrompt();
       return;
     }
 
     if (!validatePathAccess(node))
     {
-      _ioStream.putString("Access denied\r\n");
+      _ioStream.putString(_messages.getAccessDeniedMessage());
+      displayNewLine();
+      displayPrompt();
       return;
     }
 
@@ -226,8 +232,7 @@ namespace cliService
         displayNewLine();
       }
 
-      if (response.shouldShowPrompt())
-      {
+      if (response.shouldShowPrompt()) {
         displayPrompt();
       }
     }
@@ -303,7 +308,7 @@ namespace cliService
   {
     if (!args.empty())
     {
-      _ioStream.putString(NO_ARGUMENTS_MESSAGE);
+      _ioStream.putString(_messages.getNoArgumentsMessage());
       displayNewLine();
       displayPrompt();
       return;
@@ -326,7 +331,7 @@ namespace cliService
   {
     if (!args.empty())
     {
-      _ioStream.putString(NO_ARGUMENTS_MESSAGE);
+      _ioStream.putString(_messages.getNoArgumentsMessage());
       displayNewLine();
       displayPrompt();
       return;
@@ -352,7 +357,7 @@ namespace cliService
   {
     if (!args.empty())
     {
-      _ioStream.putString(NO_ARGUMENTS_MESSAGE);
+      _ioStream.putString(_messages.getNoArgumentsMessage());
       displayNewLine();
       displayPrompt();
       return;
@@ -392,7 +397,7 @@ namespace cliService
   {
     if (!args.empty())
     {
-      _ioStream.putString(NO_ARGUMENTS_MESSAGE);
+      _ioStream.putString(_messages.getNoArgumentsMessage());
       displayNewLine();
       displayPrompt();
       return;
@@ -401,7 +406,7 @@ namespace cliService
     _currentState = CLIState::LoggedOut;
     _currentUser = std::nullopt;
     resetToRoot();
-    _ioStream.putString(LOGGED_OUT_MESSAGE);
+    _ioStream.putString(_messages.getLoggedOutMessage());
     displayNewLine();
     displayPrompt();
   }
@@ -410,7 +415,7 @@ namespace cliService
   {
     if (!args.empty())
     {
-      _ioStream.putString(NO_ARGUMENTS_MESSAGE);
+      _ioStream.putString(_messages.getNoArgumentsMessage());
       displayNewLine();
       displayPrompt();
       return;
@@ -427,7 +432,7 @@ namespace cliService
   {
     if (!args.empty())
     {
-      _ioStream.putString(NO_ARGUMENTS_MESSAGE);
+      _ioStream.putString(_messages.getNoArgumentsMessage());
       displayNewLine();
       displayPrompt();
       return;
@@ -436,7 +441,7 @@ namespace cliService
     _currentState = CLIState::Inactive;
     _currentUser = std::nullopt;
     resetToRoot();
-    _ioStream.putString(EXIT_MESSAGE);
+    _ioStream.putString(_messages.getExitMessage());
     displayNewLine();
   }
 

@@ -21,10 +21,7 @@ namespace cliService
 
     CLIState getState() const { return _currentState; }
 
-    // Used by tests
-    static std::string_view getWelcomeMessage() { return WELCOME_MESSAGE; }
-    static std::string_view getLoggedOutMessage() { return LOGGED_OUT_MESSAGE; }
-    static std::string_view getNoArgumentsMessage() { return NO_ARGUMENTS_MESSAGE; }
+    const CLIMessages _messages;
 
   protected:
     // Path operations
@@ -67,11 +64,6 @@ namespace cliService
 
     using GlobalCommandHandler = void (CLIService::*)(const std::vector<std::string>&);
     static const std::unordered_map<std::string_view, GlobalCommandHandler> GLOBAL_COMMAND_HANDLERS;
-
-    static constexpr std::string_view WELCOME_MESSAGE = "Welcome to CLI Service.";
-    static constexpr std::string_view LOGGED_OUT_MESSAGE = "Logged out. Please enter <username>:<password>";
-    static constexpr std::string_view EXIT_MESSAGE = "Exiting CLI Service.";
-    static constexpr std::string_view NO_ARGUMENTS_MESSAGE = "Command takes no arguments.";
   };
 
 }

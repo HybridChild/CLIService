@@ -1,5 +1,6 @@
 set(LIB_HEADERS
   include/cliService/cli/ActionRequest.hpp
+  include/cliService/cli/CLIMessages.hpp
   include/cliService/cli/CLIService.hpp
   include/cliService/cli/CLIServiceConfiguration.hpp
   include/cliService/cli/CLIState.hpp
