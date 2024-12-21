@@ -153,6 +153,49 @@ namespace cliService
   }
 
 
+  std::string CLIService::formatNodeInfo(const NodeIf& node, const std::string& indent, bool showCmdDescription) const
+  {
+    std::string nodeStr = "\t" + indent + node.getName();
+
+    if (node.isDirectory()) {
+      nodeStr += "/";
+    }
+    else if (auto* cmd = dynamic_cast<const CommandIf*>(&node)) {
+      if (showCmdDescription && !cmd->getDescription().empty()) {
+        nodeStr += " - " + cmd->getDescription();
+      }
+    }
+
+    return nodeStr;
+  }
+
+
+  void CLIService::displayNodeList(NodeDisplayMode mode, bool showCmdDescription) const
+  {
+    displayNewLine();
+
+    _currentDirectory->traverse([&](const NodeIf& node, size_t depth) {
+      if (mode == NodeDisplayMode::FlatList && depth != 1) {
+        return; // Skip nodes not at depth 1 for flat list
+      }
+
+      if (node.getAccessLevel() <= _currentUser->getAccessLevel()) {
+        std::string indent = "";
+
+        if (mode == NodeDisplayMode::Tree && depth > 0) {
+          indent = std::string(depth * 2, ' ');
+        }
+
+        _ioStream.putString(formatNodeInfo(node, indent, showCmdDescription));
+        displayNewLine();
+      }
+    });
+
+    displayNewLine();
+    displayPrompt();
+  }
+
+
   void CLIService::handleInvalidLoginRequest()
   {
     displayMessage(_messages.getInvalidLoginMessage());
@@ -341,19 +384,7 @@ namespace cliService
       return;
     }
 
-    displayNewLine();
-
-    _currentDirectory->traverse([&](const NodeIf& node, size_t depth) {
-      if (node.getAccessLevel() <= _currentUser->getAccessLevel()) {
-        std::string indent(depth * 2, ' ');
-        std::string treeStr = indent + node.getName() + (node.isDirectory() ? "/" : "");
-        _ioStream.putString(treeStr);
-        displayNewLine();
-      }
-    });
-
-    displayNewLine();
-    displayPrompt();
+    displayNodeList(NodeDisplayMode::Tree, false);
   }
 
 
@@ -365,33 +396,7 @@ namespace cliService
       return;
     }
 
-    displayNewLine();
-
-    _currentDirectory->traverse([&](const NodeIf& node, size_t depth) {
-      // Only show items in current directory and with appropriate access level
-      if (depth == 1 && node.getAccessLevel() <= _currentUser->getAccessLevel())
-      {
-        std::string indent("  ");
-        std::string entry = indent + node.getName();
-        
-        if (node.isDirectory())
-        {
-          entry += "/";
-        }
-        else if (auto* cmd = dynamic_cast<const CommandIf*>(&node))
-        {
-          if (!cmd->getDescription().empty()) {
-            entry += " - " + cmd->getDescription();
-          }
-        }
-
-        _ioStream.putString(entry);
-        displayNewLine();
-      }
-    });
-
-    displayNewLine();
-    displayPrompt();
+    displayNodeList(NodeDisplayMode::FlatList, true);
   }
 
 

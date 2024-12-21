@@ -24,16 +24,23 @@ namespace cliService
     const CLIMessages _messages;
 
   protected:
-    // Path operations
+  
+    enum class NodeDisplayMode {
+      Tree,       // Show full tree with hierarchical indentation
+      FlatList    // Show only immediate children with fixed indentation
+    };
+
     NodeIf* resolvePath(const Path& path) const;
     bool validatePathAccess(const NodeIf* node) const;
 
-    // State management 
     void resetToRoot();
     void displayMessage(const std::string_view& message) const;
     void displayPrompt() const;
     void displayNewLine(uint32_t number = 1) const;
     void displayNoArgumentsError() const;
+
+    std::string formatNodeInfo(const NodeIf& node, const std::string& indent, bool showCmdDescription) const;
+    void displayNodeList(NodeDisplayMode mode, bool showCmdDescription) const;
 
   private:
     // Request handlers
