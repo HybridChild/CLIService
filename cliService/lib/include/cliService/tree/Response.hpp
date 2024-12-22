@@ -5,7 +5,7 @@
 namespace cliService
 {
 
-  enum class CommandStatus
+  enum class ResponseStatus
   {
     Success,
     Error,
@@ -15,34 +15,34 @@ namespace cliService
   class Response
   {
   public:
-    explicit Response(std::string msg = "", CommandStatus status = CommandStatus::Success)
+    explicit Response(std::string msg = "", ResponseStatus status = ResponseStatus::Success)
       : _message(std::move(msg))
       , _status(status)
       , _showPrompt(true)
     {}
 
-    explicit Response(std::string_view msg = "", CommandStatus status = CommandStatus::Success)
+    explicit Response(std::string_view msg = "", ResponseStatus status = ResponseStatus::Success)
       : _message(msg)
       , _status(status)
       , _showPrompt(true)
     {}
 
     static Response success(const std::string& msg = "") {
-      return Response(msg, CommandStatus::Success);
+      return Response(msg, ResponseStatus::Success);
     }
 
     static Response error(const std::string& msg) {
-      return Response(msg, CommandStatus::Error);
+      return Response(msg, ResponseStatus::Error);
     }
 
     const std::string& getMessage() const { return _message; }
-    CommandStatus getStatus() const { return _status; }
+    ResponseStatus getStatus() const { return _status; }
     bool shouldShowPrompt() const { return _showPrompt; }
     void setShowPrompt(bool show) { _showPrompt = show; }
 
   private:
     std::string _message;
-    CommandStatus _status;
+    ResponseStatus _status;
     bool _showPrompt;
   };
 

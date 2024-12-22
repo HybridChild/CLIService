@@ -345,7 +345,7 @@ namespace cliService
     EXPECT_EQ(cmd.getDescription(), "Test command description");
   }
 
-  TEST_F(TreeTest, CommandStatusResponses)
+  TEST_F(TreeTest, ResponseStatusResponses)
   {
     class StatusTestCommand : public CommandIf
     {
@@ -367,14 +367,14 @@ namespace cliService
     auto& cmd = _root->addDynamicCommand<StatusTestCommand>("test", AccessLevel::User);
 
     auto response = cmd.execute({});
-    EXPECT_EQ(response.getStatus(), CommandStatus::Error);
+    EXPECT_EQ(response.getStatus(), ResponseStatus::Error);
     EXPECT_EQ(response.getMessage(), "No arguments provided");
 
     response = cmd.execute({"invalid"});
-    EXPECT_EQ(response.getStatus(), CommandStatus::InvalidArguments);
+    EXPECT_EQ(response.getStatus(), ResponseStatus::InvalidArguments);
 
     response = cmd.execute({"valid"});
-    EXPECT_EQ(response.getStatus(), CommandStatus::Success);
+    EXPECT_EQ(response.getStatus(), ResponseStatus::Success);
     EXPECT_EQ(response.getMessage(), "Command executed successfully");
   }
 

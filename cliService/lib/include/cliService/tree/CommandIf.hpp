@@ -36,7 +36,7 @@ namespace cliService
 
       response += "\r\n";
       
-      return Response(response, CommandStatus::InvalidArguments);
+      return Response(response, ResponseStatus::InvalidArguments);
     }
 
   private:

@@ -21,13 +21,13 @@ namespace cliService
       }
 
       if (!util::isIntegerString(args[0])) {
-        return Response("\r\n\tInvalid RGB LED ID: " + args[0] + ". Must be integer.\r\n", CommandStatus::InvalidArguments);
+        return Response("\r\n\tInvalid RGB LED ID: " + args[0] + ". Must be integer.\r\n", ResponseStatus::InvalidArguments);
       }
 
       uint32_t rgbLedId = std::stoi(args[0]);
 
       if (rgbLedId < 1 || rgbLedId > 2) {
-        return Response("\r\n\tInvalid ID: " + args[0] + " ... valid IDs: 1 .. 2\r\n", CommandStatus::InvalidArguments);
+        return Response("\r\n\tInvalid ID: " + args[0] + " ... valid IDs: 1 .. 2\r\n", ResponseStatus::InvalidArguments);
       }
 
       std::array<uint8_t, 3> rgbValues;
@@ -35,7 +35,7 @@ namespace cliService
       for (size_t i = 0; i < 3; i++)
       {
         if (!isValidValueString(args[i + 1])) {
-          return Response("\r\n\tInvalid value: " + args[i + 1] + " ... valid values: 0 .. 255\r\n", CommandStatus::InvalidArguments);
+          return Response("\r\n\tInvalid value: " + args[i + 1] + " ... valid values: 0 .. 255\r\n", ResponseStatus::InvalidArguments);
         }
 
         rgbValues[i] = std::stoi(args[i + 1]);
