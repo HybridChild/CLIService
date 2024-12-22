@@ -48,20 +48,47 @@ namespace cliService
 
       if (!elements.empty() || partialPath.isAbsolute())
       {
-        // Create normalized path for resolution
-        Path dirPath = Path(elements, partialPath.isAbsolute()).normalized();
-        
-        auto* node = targetDir->resolvePath(dirPath.toString(), currentDir);
+        // First verify each path component exists before normalization
+        const Directory* currentTarget = targetDir;
+        bool isValid = true;
 
-        if (!node || !node->isDirectory()) {
+        for (const auto& element : elements)
+        {
+          if (element == "..") {
+            if (currentTarget->getParent()) {
+              currentTarget = static_cast<const Directory*>(currentTarget->getParent());
+            }
+            continue;
+          }
+          if (element == ".") {
+            continue;
+          }
+          auto* nextNode = currentTarget->findNode({element});
+          if (!nextNode) {
+            isValid = false;
+            break;
+          }
+          // If this is not the last element, or if we end with a slash,
+          // the node must be a directory
+          if (!nextNode->isDirectory() && 
+              (&element != &elements.back() || endsWithSlash)) {
+            isValid = false;
+            break;
+          }
+          if (nextNode->getAccessLevel() > accessLevel) {
+            isValid = false;
+            break;
+          }
+          if (nextNode->isDirectory()) {
+            currentTarget = static_cast<const Directory*>(nextNode);
+          }
+        }
+
+        if (!isValid) {
           return CompletionResult{};
         }
 
-        if (node->getAccessLevel() > accessLevel) {
-          return CompletionResult{};
-        }
-
-        targetDir = static_cast<const Directory*>(node);
+        targetDir = currentTarget;
       }
 
       // Get completions in the target directory

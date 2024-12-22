@@ -184,17 +184,27 @@ namespace cliService
     Directory* testDir;  // Reference to /folder1/subfolder1
   };
 
-  TEST_F(ParentPathCompletionTest, DISABLED_SimpleParentNavigation)
+  TEST_F(ParentPathCompletionTest, SimpleParentNavigation)
   {
-    // From /folder1/subfolder1, completing "../sub" should match subfolder2
+    // From /folder1/subfolder1, typing "../sub" should match both subfolder1 and subfolder2
     auto result = PathCompleter::complete(*testDir, "../sub", AccessLevel::User);
 
-    EXPECT_EQ(result.matchedNode, "subfolder2");
-    EXPECT_EQ(result.fillCharacters, "folder2");
+    // Should find both subfolders
+    ASSERT_EQ(result.allOptions.size(), 2);
+    EXPECT_EQ(result.allOptions[0], "subfolder1/");
+    EXPECT_EQ(result.allOptions[1], "subfolder2/");
+
+    // Should match their common prefix
+    EXPECT_EQ(result.matchedNode, "subfolder");
+    
+    // Should provide the remaining characters of the common prefix after "sub"
+    EXPECT_EQ(result.fillCharacters, "folder");
+    
+    // Should indicate these are directories
     EXPECT_TRUE(result.isDirectory);
   }
 
-  TEST_F(ParentPathCompletionTest, DISABLED_DoubleParentNavigation)
+  TEST_F(ParentPathCompletionTest, DoubleParentNavigation)
   {
     // From /folder1/subfolder1, completing "../../f" should show both folder1 and folder2
     auto result = PathCompleter::complete(*testDir, "../../f", AccessLevel::User);
@@ -206,7 +216,7 @@ namespace cliService
     EXPECT_EQ(result.fillCharacters, "older");
   }
 
-  TEST_F(ParentPathCompletionTest, DISABLED_ParentWithDeepPath)
+  TEST_F(ParentPathCompletionTest, ParentWithDeepPath)
   {
     // From /folder1/subfolder1, completing "../../folder2/target" should show target1 and target2
     auto result = PathCompleter::complete(*testDir, "../../folder2/target", AccessLevel::User);
@@ -218,7 +228,7 @@ namespace cliService
     EXPECT_TRUE(result.isDirectory);
   }
 
-  TEST_F(ParentPathCompletionTest, DISABLED_MultipleParentsThenDeep)
+  TEST_F(ParentPathCompletionTest, MultipleParentsThenDeep)
   {
     // From /folder1/subfolder1/deep, completing "../../../folder2/target2/i" should show item1 and item2
     auto* deepDir = testDir->findNode({"deep"});
@@ -234,7 +244,7 @@ namespace cliService
     EXPECT_EQ(result.matchedNode, "item");
   }
 
-  TEST_F(ParentPathCompletionTest, DISABLED_ParentPastRoot)
+  TEST_F(ParentPathCompletionTest, ParentPastRoot)
   {
     // Going past root should still work and normalize the path
     auto result = PathCompleter::complete(*testDir, "../../../../../../../folder", AccessLevel::User);
@@ -244,7 +254,7 @@ namespace cliService
     EXPECT_EQ(result.allOptions[1], "folder2/");
   }
 
-  TEST_F(ParentPathCompletionTest, DISABLED_MixedRelativeAndParentPaths)
+  TEST_F(ParentPathCompletionTest, MixedRelativeAndParentPaths)
   {
     // Test a complex path mixing ./ and ../
     auto result = PathCompleter::complete(*testDir, "./../subfolder2/../subfolder1/d", AccessLevel::User);
@@ -254,7 +264,7 @@ namespace cliService
     EXPECT_EQ(result.matchedNode, "deep");
   }
 
-  TEST_F(ParentPathCompletionTest, DISABLED_CompletionAfterExactParentMatch)
+  TEST_F(ParentPathCompletionTest, CompletionAfterExactParentMatch)
   {
     // Test completion when the path up to the last segment is exact
     auto result = PathCompleter::complete(*testDir, "../../folder2/target2/", AccessLevel::User);
@@ -264,16 +274,42 @@ namespace cliService
     EXPECT_EQ(result.allOptions[1], "item2");
   }
 
-  TEST_F(ParentPathCompletionTest, DISABLED_NonexistentParentPath)
+  TEST_F(ParentPathCompletionTest, NonexistentParentPath)
   {
-    // Test completion with a nonexistent path containing parent references
+    // Test Directory Structure:
+    // /
+    // ├── folder1/
+    // │   ├── subfolder1/  <-- We are here (testDir)
+    // │   │   └── deep/
+    // │   └── subfolder2/
+    // └── folder2/
+    
+    // Input path breakdown:
+    // 1. "../"          -> go up to /folder1
+    // 2. "nonexistent/" -> attempt to enter directory that doesn't exist
+    // 3. "../"          -> attempt to go up from nonexistent directory (invalid)
+    // 4. "sub"          -> attempt to complete something starting with "sub"
+    
     auto result = PathCompleter::complete(*testDir, "../nonexistent/../sub", AccessLevel::User);
 
-    EXPECT_TRUE(result.allOptions.empty());
-    EXPECT_TRUE(result.fillCharacters.empty());
+    // Verify the completion result is empty
+    EXPECT_TRUE(result.allOptions.empty()) 
+        << "Expected no completion options when path contains nonexistent directory";
+    
+    // Verify no auto-completion text is suggested
+    EXPECT_TRUE(result.fillCharacters.empty()) 
+        << "Expected no fill characters when path contains nonexistent directory";
+    
+    // Verify other completion result fields are empty/default
+    EXPECT_TRUE(result.fullPath.empty()) 
+        << "Expected empty full path for invalid path completion";
+    EXPECT_TRUE(result.matchedNode.empty()) 
+        << "Expected no matched node for invalid path completion";
+    EXPECT_FALSE(result.isDirectory) 
+        << "Expected isDirectory to be false for invalid path completion";
   }
 
-  TEST_F(ParentPathCompletionTest, DISABLED_ParentNavigationWithSimilarNames)
+  TEST_F(ParentPathCompletionTest, ParentNavigationWithSimilarNames)
   {
     // Add some directories with similar names to test precise matching
     auto& folder1 = static_cast<Directory&>(*root->findNode({"folder1"}));
