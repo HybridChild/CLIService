@@ -95,7 +95,7 @@ namespace cliService
 
     // Set expectation before queueing the command
     EXPECT_CALL(*_adminCmd, execute(testing::_))
-      .WillOnce(testing::Return(CommandResponse::success()));
+      .WillOnce(testing::Return(Response::success()));
 
     // Now try accessing admin directory
     _ioStream.queueInput("admin/config\n");
@@ -115,7 +115,7 @@ namespace cliService
 
     _ioStream.queueInput("public/info invalid args\n");
     EXPECT_CALL(*_publicCmd, execute(testing::_))
-      .WillOnce(testing::Return(CommandResponse(static_cast<std::string>("Invalid arguments"), CommandStatus::InvalidArguments)));
+      .WillOnce(testing::Return(Response(static_cast<std::string>("Invalid arguments"), CommandStatus::InvalidArguments)));
     _service->service();
     EXPECT_THAT(_ioStream.getOutput(), testing::HasSubstr("Invalid arguments"));
   }
@@ -198,7 +198,7 @@ namespace cliService
 
     // Test normalized paths
     EXPECT_CALL(*_nestedCmd, execute(testing::_))
-      .WillOnce(testing::Return(CommandResponse::success()));
+      .WillOnce(testing::Return(Response::success()));
 
     _ioStream.queueInput("/public/nested/./test\n");  // Using . in path
     _service->service();
@@ -206,7 +206,7 @@ namespace cliService
     // Verify double slash handling
     _ioStream.clearOutput();
     EXPECT_CALL(*_nestedCmd, execute(testing::_))
-      .WillOnce(testing::Return(CommandResponse::success()));
+      .WillOnce(testing::Return(Response::success()));
 
     _ioStream.queueInput("public//nested//test\n");  // Double slashes
     _service->service();

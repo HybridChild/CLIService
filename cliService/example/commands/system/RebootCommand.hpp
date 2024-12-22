@@ -12,7 +12,7 @@ namespace cliService
       : CommandIf(std::move(name), level, "Reboot the device")
     {}
 
-    CommandResponse execute(const std::vector<std::string>& args) override
+    Response execute(const std::vector<std::string>& args) override
     {
       if (args.size() != 0) {
         return CommandIf::createInvalidArgumentCountResponse(0);
@@ -20,7 +20,7 @@ namespace cliService
 
       // signal system reboot
 
-      return CommandResponse::success("\r\n\tSystem reboot initiated...\r\n");
+      return Response::success("\r\n\tSystem reboot initiated...\r\n");
     }
   };
 

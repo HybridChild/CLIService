@@ -16,20 +16,20 @@ namespace cliService
       : CommandIf(std::move(name), level, "Get potmeter value - Args: <pot ID>")
     {}
 
-    CommandResponse execute(const std::vector<std::string>& args) override
+    Response execute(const std::vector<std::string>& args) override
     {
       if (args.size() != 1) {
         return CommandIf::createInvalidArgumentCountResponse(1);
       }
 
       if (!util::isIntegerString(args[0])) {
-        return CommandResponse("\r\n\tInvalid potmeter ID: " + args[0] + ". Must be integer.\r\n", CommandStatus::InvalidArguments);
+        return Response("\r\n\tInvalid potmeter ID: " + args[0] + ". Must be integer.\r\n", CommandStatus::InvalidArguments);
       }
 
       uint32_t potId = std::stoi(args[0]);
 
       if (potId < 1 || potId > 4) {
-        return CommandResponse("\r\n\tInvalid potmeter ID: " + args[0] + "\r\n", CommandStatus::InvalidArguments);
+        return Response("\r\n\tInvalid potmeter ID: " + args[0] + "\r\n", CommandStatus::InvalidArguments);
       }
 
       uint32_t potmeterValue = readPotmeter(potId);
@@ -43,7 +43,7 @@ namespace cliService
       response += "Potmeter " + args[0] + " value: " + std::to_string(potmeterValue) + ", " + potPercentStr + "%";
       response += "\r\n";
 
-      return CommandResponse::success(response);
+      return Response::success(response);
     }
 
   private:

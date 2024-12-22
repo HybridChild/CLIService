@@ -1,6 +1,6 @@
 #pragma once
 #include "cliService/tree/NodeIf.hpp"
-#include "cliService/tree/CommandResponse.hpp"
+#include "cliService/tree/Response.hpp"
 #include <vector>
 
 namespace cliService
@@ -16,12 +16,12 @@ namespace cliService
 
     virtual ~CommandIf() = default;
 
-    virtual CommandResponse execute(const std::vector<std::string>& args) = 0;
+    virtual Response execute(const std::vector<std::string>& args) = 0;
 
     bool isDirectory() const override { return false; }
     const std::string& getDescription() const { return _description; }
 
-    static CommandResponse createInvalidArgumentCountResponse(size_t expected)
+    static Response createInvalidArgumentCountResponse(size_t expected)
     {
       std::string response = "\r\n\t";
 
@@ -36,7 +36,7 @@ namespace cliService
 
       response += "\r\n";
       
-      return CommandResponse(response, CommandStatus::InvalidArguments);
+      return Response(response, CommandStatus::InvalidArguments);
     }
 
   private:

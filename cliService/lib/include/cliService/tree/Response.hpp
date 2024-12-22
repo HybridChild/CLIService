@@ -12,27 +12,27 @@ namespace cliService
     InvalidArguments
   };
 
-  class CommandResponse
+  class Response
   {
   public:
-    explicit CommandResponse(std::string msg = "", CommandStatus status = CommandStatus::Success)
+    explicit Response(std::string msg = "", CommandStatus status = CommandStatus::Success)
       : _message(std::move(msg))
       , _status(status)
       , _showPrompt(true)
     {}
 
-    explicit CommandResponse(std::string_view msg = "", CommandStatus status = CommandStatus::Success)
+    explicit Response(std::string_view msg = "", CommandStatus status = CommandStatus::Success)
       : _message(msg)
       , _status(status)
       , _showPrompt(true)
     {}
 
-    static CommandResponse success(const std::string& msg = "") {
-      return CommandResponse(msg, CommandStatus::Success);
+    static Response success(const std::string& msg = "") {
+      return Response(msg, CommandStatus::Success);
     }
 
-    static CommandResponse error(const std::string& msg) {
-      return CommandResponse(msg, CommandStatus::Error);
+    static Response error(const std::string& msg) {
+      return Response(msg, CommandStatus::Error);
     }
 
     const std::string& getMessage() const { return _message; }

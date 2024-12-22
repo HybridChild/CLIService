@@ -66,7 +66,7 @@ namespace cliService
     _ioStream.queueInput("sub/test arg1 arg2\n");
 
     EXPECT_CALL(*_mockCmd, execute(testing::ElementsAre("arg1", "arg2")))
-      .WillOnce(testing::Return(CommandResponse::success()));
+      .WillOnce(testing::Return(Response::success()));
 
     _service->activate();
     _service->service();  // Handle login

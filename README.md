@@ -40,15 +40,15 @@ public:
     , std::move(description))
   {}
 
-  CommandResponse execute(const std::vector<std::string>& args) override
+  Response execute(const std::vector<std::string>& args) override
   {
     if (args.size() > 0) {
-      return CommandResponse("Command takes no arguments.", CommandStatus::InvalidArguments);
+      return Response("Command takes no arguments.", CommandStatus::InvalidArguments);
     }
 
     // Perform command logic here
 
-    return CommandResponse::success("Command executed successfully.");
+    return Response::success("Command executed successfully.");
   }
 };
 

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include "cliService/tree/Directory.hpp"
-#include "cliService/tree/CommandResponse.hpp"
+#include "cliService/tree/Response.hpp"
 
 namespace cliService
 {
@@ -20,11 +20,11 @@ namespace cliService
       , _lastArgs()
     {}
 
-    CommandResponse execute(const std::vector<std::string>& args) override
+    Response execute(const std::vector<std::string>& args) override
     {
       _wasExecuted = true;
       _lastArgs = args;
-      return CommandResponse::success();
+      return Response::success();
     }
 
     bool wasExecuted() const { return _wasExecuted; }
@@ -352,15 +352,15 @@ namespace cliService
     public:
       using CommandIf::CommandIf;
       
-      CommandResponse execute(const std::vector<std::string>& args) override
+      Response execute(const std::vector<std::string>& args) override
       {
         if (args.empty()) {
-          return CommandResponse::error("No arguments provided");
+          return Response::error("No arguments provided");
         }
         if (args[0] == "invalid") {
           return CommandIf::createInvalidArgumentCountResponse(2);
         }
-        return CommandResponse::success("Command executed successfully");
+        return Response::success("Command executed successfully");
       }
     };
 

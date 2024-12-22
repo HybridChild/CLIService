@@ -287,7 +287,7 @@ namespace cliService
     else
     {
       auto* cmd = static_cast<CommandIf*>(node);
-      CommandResponse response = cmd->execute(request.getArgs());
+      Response response = cmd->execute(request.getArgs());
 
       if (!response.getMessage().empty()) {
         _ioStream.putString(response.getMessage());
