@@ -62,7 +62,7 @@ namespace cliService
     void handleGlobalClear(const std::vector<std::string>& args);
 
     CharIOStreamIf& _ioStream;
-    InputParser _parser;
+    InputParser _inputParser;
 
     std::vector<User> _users;
     std::optional<User> _currentUser;

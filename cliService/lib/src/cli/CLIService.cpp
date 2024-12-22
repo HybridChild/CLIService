@@ -24,7 +24,7 @@ namespace cliService
   CLIService::CLIService(CLIServiceConfiguration config)
     : _messages(std::move(config._messages))
     , _ioStream(config._ioStream)
-    , _parser(_ioStream, _currentState, config._inputTimeout_ms, config._historySize)
+    , _inputParser(_ioStream, _currentState, config._inputTimeout_ms, config._historySize)
     , _users(std::move(config._users))
     , _currentUser(std::nullopt)
     , _rootDirectory(std::move(config._rootDirectory))
@@ -52,7 +52,7 @@ namespace cliService
   {
     if (_currentState == CLIState::Inactive) { return; }
 
-    auto request = _parser.parseNextRequest();
+    auto request = _inputParser.parseNextRequest();
     if (!request) { return; }
 
     // Process state-specific requests
@@ -328,7 +328,7 @@ namespace cliService
 
   void CLIService::handleTabCompletion(const ActionRequest& request)
   {
-    auto currentInput = _parser.getBuffer();
+    auto currentInput = _inputParser.getBuffer();
     
     // Skip directory handling for paths with parent references
     if (currentInput.find("..") == std::string::npos)
@@ -338,7 +338,7 @@ namespace cliService
       if (node && node->isDirectory() && !currentInput.empty() && currentInput.back() != '/')
       {
         _ioStream.putChar('/');
-        _parser.appendToBuffer("/");
+        _inputParser.appendToBuffer("/");
         return;
       }
     }
@@ -370,7 +370,7 @@ namespace cliService
       if (!result.fillCharacters.empty())
       {
         std::string completion = currentInput + result.fillCharacters;
-        _parser.appendToBuffer(result.fillCharacters);
+        _inputParser.appendToBuffer(result.fillCharacters);
         _ioStream.putString(completion);
       }
       else {
@@ -381,12 +381,12 @@ namespace cliService
     {
       // For single match, just append completion
       _ioStream.putString(result.fillCharacters);
-      _parser.appendToBuffer(result.fillCharacters);
+      _inputParser.appendToBuffer(result.fillCharacters);
       
       if (result.isDirectory)
       {
         _ioStream.putChar('/');
-        _parser.appendToBuffer("/");
+        _inputParser.appendToBuffer("/");
       }
     }
   }

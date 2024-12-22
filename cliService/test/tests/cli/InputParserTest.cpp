@@ -16,12 +16,12 @@ namespace cliService
     void SetUp() override
     {
       _currentState = CLIState::LoggedIn;
-      _parser = std::make_unique<InputParser>(_ioStream, _currentState, INPUT_TIMEOUT_MS, HISTORY_SIZE);
+      _inputParser = std::make_unique<InputParser>(_ioStream, _currentState, INPUT_TIMEOUT_MS, HISTORY_SIZE);
     }
 
     CharIOStreamMock _ioStream;
     CLIState _currentState;
-    std::unique_ptr<InputParser> _parser;
+    std::unique_ptr<InputParser> _inputParser;
 
     // Helper to process all queued input
     std::optional<std::unique_ptr<RequestBase>> processAllInput()
@@ -29,7 +29,7 @@ namespace cliService
       std::optional<std::unique_ptr<RequestBase>> request;
 
       while (_ioStream.available()) {
-        request = _parser->parseNextRequest();
+        request = _inputParser->parseNextRequest();
       }
 
       return request;

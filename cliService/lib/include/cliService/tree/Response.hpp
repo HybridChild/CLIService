@@ -9,7 +9,8 @@ namespace cliService
   {
     Success,
     Error,
-    InvalidArguments
+    InvalidArguments,
+    AccessDenied
   };
 
   class Response
