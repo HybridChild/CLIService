@@ -1,3 +1,24 @@
+# Common test settings
+function(configure_test TEST_NAME)
+  target_link_libraries(${TEST_NAME} 
+    PRIVATE 
+      GTest::GTest 
+      GTest::Main
+  )
+  
+  add_test(
+    NAME ${TEST_NAME}
+    COMMAND ${TEST_NAME}
+    WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  )
+  
+  set_tests_properties(${TEST_NAME} 
+    PROPERTIES 
+    ENVIRONMENT "PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+  )
+endfunction()
+
+
 # ActionRequest tests
 add_executable(${PROJECT_NAME}_ActionRequest_test
   tests/cli/ActionRequestTest.cpp
@@ -170,17 +191,85 @@ target_link_libraries(${PROJECT_NAME}_TabCompletion_test
     GTest::gmock
 )
 
+
+# Configure tests
+configure_test(${PROJECT_NAME}_ActionRequest_test)
+configure_test(${PROJECT_NAME}_LoginRequest_test)
+configure_test(${PROJECT_NAME}_InputParser_test)
+configure_test(${PROJECT_NAME}_Tree_test)
+configure_test(${PROJECT_NAME}_CLIService_test)
+configure_test(${PROJECT_NAME}_Path_test)
+configure_test(${PROJECT_NAME}_PathResolver_test)
+configure_test(${PROJECT_NAME}_PathCompleter_test)
+configure_test(${PROJECT_NAME}_CommandHistory_test)
+configure_test(${PROJECT_NAME}_PathCompleterAdvanced_test)
+configure_test(${PROJECT_NAME}_CLIServiceAdvanced_test)
+configure_test(${PROJECT_NAME}_PathResolverNavigation_test)
+configure_test(${PROJECT_NAME}_TabCompletion_test)
+
+
 # Discover tests
-gtest_discover_tests(${PROJECT_NAME}_ActionRequest_test)
-gtest_discover_tests(${PROJECT_NAME}_LoginRequest_test)
-gtest_discover_tests(${PROJECT_NAME}_InputParser_test)
-gtest_discover_tests(${PROJECT_NAME}_Tree_test)
-gtest_discover_tests(${PROJECT_NAME}_CLIService_test)
-gtest_discover_tests(${PROJECT_NAME}_Path_test)
-gtest_discover_tests(${PROJECT_NAME}_PathResolver_test)
-gtest_discover_tests(${PROJECT_NAME}_PathCompleter_test)
-gtest_discover_tests(${PROJECT_NAME}_CommandHistory_test)
-gtest_discover_tests(${PROJECT_NAME}_PathCompleterAdvanced_test)
-gtest_discover_tests(${PROJECT_NAME}_CLIServiceAdvanced_test)
-gtest_discover_tests(${PROJECT_NAME}_PathResolverNavigation_test)
-gtest_discover_tests(${PROJECT_NAME}_TabCompletion_test)
+gtest_discover_tests(${PROJECT_NAME}_ActionRequest_test
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  PROPERTIES TIMEOUT 10
+)
+
+gtest_discover_tests(${PROJECT_NAME}_LoginRequest_test
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  PROPERTIES TIMEOUT 10
+)
+
+gtest_discover_tests(${PROJECT_NAME}_InputParser_test
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  PROPERTIES TIMEOUT 10
+)
+
+gtest_discover_tests(${PROJECT_NAME}_Tree_test
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  PROPERTIES TIMEOUT 10
+)
+
+gtest_discover_tests(${PROJECT_NAME}_CLIService_test
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  PROPERTIES TIMEOUT 10
+)
+
+gtest_discover_tests(${PROJECT_NAME}_Path_test
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  PROPERTIES TIMEOUT 10
+)
+
+gtest_discover_tests(${PROJECT_NAME}_PathResolver_test
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  PROPERTIES TIMEOUT 10
+)
+
+gtest_discover_tests(${PROJECT_NAME}_PathCompleter_test
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  PROPERTIES TIMEOUT 10
+)
+
+gtest_discover_tests(${PROJECT_NAME}_CommandHistory_test
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  PROPERTIES TIMEOUT 10
+)
+
+gtest_discover_tests(${PROJECT_NAME}_PathCompleterAdvanced_test
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  PROPERTIES TIMEOUT 10
+)
+
+gtest_discover_tests(${PROJECT_NAME}_CLIServiceAdvanced_test
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  PROPERTIES TIMEOUT 10
+)
+
+gtest_discover_tests(${PROJECT_NAME}_PathResolverNavigation_test
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  PROPERTIES TIMEOUT 10
+)
+
+gtest_discover_tests(${PROJECT_NAME}_TabCompletion_test
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  PROPERTIES TIMEOUT 10
+)
