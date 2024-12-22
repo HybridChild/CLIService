@@ -29,7 +29,7 @@ namespace cliService
       std::optional<std::unique_ptr<RequestBase>> request;
 
       while (_ioStream.available()) {
-        request = _inputParser->parseNextRequest();
+        request = _inputParser->getNextRequest();
       }
 
       return request;

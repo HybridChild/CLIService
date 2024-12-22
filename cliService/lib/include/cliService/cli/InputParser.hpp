@@ -25,7 +25,7 @@ namespace cliService
 
     InputParser(CharIOStreamIf& ioStream, const CLIState& currentState, uint32_t inputTimeout_ms, size_t historySize);
 
-    std::optional<std::unique_ptr<RequestBase>> parseNextRequest();
+    std::optional<std::unique_ptr<RequestBase>> getNextRequest();
 
     std::string getBuffer() const { return _buffer; }
     void appendToBuffer(const std::string& str) { _buffer += str; }

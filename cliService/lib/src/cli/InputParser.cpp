@@ -15,7 +15,7 @@ namespace cliService
   {}
 
 
-  std::optional<std::unique_ptr<RequestBase>> InputParser::parseNextRequest()
+  std::optional<std::unique_ptr<RequestBase>> InputParser::getNextRequest()
   {
     while (_ioStream.available())
     {
