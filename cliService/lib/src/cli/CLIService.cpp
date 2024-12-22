@@ -329,7 +329,7 @@ namespace cliService
   void CLIService::handleTabCompletion(const ActionRequest& request)
   {
     auto currentInput = _parser.getBuffer();
-
+    
     // Skip directory handling for paths with parent references
     if (currentInput.find("..") == std::string::npos)
     {
@@ -343,33 +343,51 @@ namespace cliService
       }
     }
 
-    auto result = PathCompleter::complete(*_currentDirectory, currentInput, _currentUser->getAccessLevel());
+    PathCompleter::CompletionResult result{};
 
-    // First append any fill characters
-    if (!result.fillCharacters.empty())
+    if (request.getPath().isAbsolute()) {
+      result = PathCompleter::complete(*getRootPtr(), currentInput, _currentUser->getAccessLevel());
+    }
+    else {
+      result = PathCompleter::complete(*_currentDirectory, currentInput, _currentUser->getAccessLevel());
+    }
+
+    //auto result = PathCompleter::complete(*_currentDirectory, currentInput, _currentUser->getAccessLevel());
+
+    if (result.allOptions.size() > 1)
     {
+      // Just display newline (we don't need to show original input since it's already shown)
+      displayNewLine();
+
+      // Show all options
+      for (const auto& opt : result.allOptions) {
+          _ioStream.putString(opt + "   ");
+      }
+
+      displayNewLine();
+      displayPrompt();  // Show prompt with common prefix
+      
+      if (!result.fillCharacters.empty())
+      {
+        std::string completion = currentInput + result.fillCharacters;
+        _parser.appendToBuffer(result.fillCharacters);
+        _ioStream.putString(completion);
+      }
+      else {
+        _ioStream.putString(currentInput);
+      }
+    }
+    else if (!result.fillCharacters.empty())
+    {
+      // For single match, just append completion
       _ioStream.putString(result.fillCharacters);
       _parser.appendToBuffer(result.fillCharacters);
-
+      
       if (result.isDirectory)
       {
         _ioStream.putChar('/');
         _parser.appendToBuffer("/");
       }
-    }
-
-    // If there are multiple options, always show them
-    if (result.allOptions.size() > 1)
-    {
-      displayNewLine();
-
-      for (const auto& opt : result.allOptions) {
-        _ioStream.putString(opt + "   ");
-      }
-
-      displayNewLine();
-      displayPrompt();
-      _ioStream.putString(_parser.getBuffer());
     }
   }
 
