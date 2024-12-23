@@ -1,218 +1,49 @@
-# Common test settings
-function(configure_test TEST_NAME)
-  target_link_libraries(${TEST_NAME} 
-    PRIVATE 
-      GTest::GTest 
-      GTest::Main
-  )
+# List of tests (just source file)
+set(cli_tests
+  Tree_test:tests/tree/TreeTest.cpp
+  Path_test:tests/tree/PathTest.cpp
+  PathResolver_test:tests/tree/PathResolverTest.cpp
+  PathCompleter_test:tests/tree/PathCompleterTest.cpp
+  CommandHistory_test:tests/cli/CommandHistoryTest.cpp
+  PathCompleterAdvanced_test:tests/tree/PathCompleterAdvancedTest.cpp
+  PathResolverNavigation_test:tests/tree/PathResolverNavigationTest.cpp
+  CLIService_test:tests/cli/CLIServiceTest.cpp
+  TabCompletion_test:tests/cli/TabCompletionTest.cpp
+  InputParser_test:tests/cli/InputParserTest.cpp
+)
+
+# Configure tests with both mocks
+foreach(test_info IN LISTS cli_tests)
+  string(REPLACE ":" ";" test_parts "${test_info}")
+  list(GET test_parts 0 test_name)
+  list(GET test_parts 1 test_source)
   
+  add_executable(${PROJECT_NAME}_${test_name} 
+    ${test_source}
+    mock/io/CharIOStreamMock.cpp
+    mock/command/CommandMock.hpp
+  )
+  target_include_directories(${PROJECT_NAME}_${test_name}
+    PUBLIC
+      ${CMAKE_CURRENT_SOURCE_DIR}
+  )
+  target_link_libraries(${PROJECT_NAME}_${test_name} 
+    PRIVATE 
+      ${PROJECT_NAME}_lib
+      GTest::gtest_main
+      GTest::gmock
+  )
   add_test(
-    NAME ${TEST_NAME}
-    COMMAND ${TEST_NAME}
+    NAME ${PROJECT_NAME}_${test_name}
+    COMMAND ${PROJECT_NAME}_${test_name}
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   )
-  
-  set_tests_properties(${TEST_NAME} 
+  set_tests_properties(${PROJECT_NAME}_${test_name}
     PROPERTIES 
     ENVIRONMENT "PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
   )
-endfunction()
-
-
-# InputParser tests
-add_executable(${PROJECT_NAME}_InputParser_test
-  tests/cli/InputParserTest.cpp
-  mock/io/CharIOStreamMock.cpp
-)
-
-target_include_directories(${PROJECT_NAME}_InputParser_test
-  PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
-target_link_libraries(${PROJECT_NAME}_InputParser_test
-  PRIVATE
-    ${PROJECT_NAME}_lib
-    GTest::gtest_main
-)
-
-# Tree tests
-add_executable(${PROJECT_NAME}_Tree_test
-  tests/tree/TreeTest.cpp
-)
-
-target_link_libraries(${PROJECT_NAME}_Tree_test
-  PRIVATE
-    ${PROJECT_NAME}_lib
-    GTest::gtest_main
-)
-
-# CLIService tests
-add_executable(${PROJECT_NAME}_CLIService_test
-  tests/cli/CLIServiceTest.cpp
-  mock/io/CharIOStreamMock.cpp
-  mock/command/CommandMock.hpp
-)
-
-target_include_directories(${PROJECT_NAME}_CLIService_test
-  PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
-target_link_libraries(${PROJECT_NAME}_CLIService_test
-  PRIVATE
-    ${PROJECT_NAME}_lib
-    GTest::gtest_main
-    GTest::gmock
-)
-
-# Path tests
-add_executable(${PROJECT_NAME}_Path_test
-  tests/tree/PathTest.cpp
-)
-
-target_link_libraries(${PROJECT_NAME}_Path_test
-  PRIVATE
-    ${PROJECT_NAME}_lib
-    GTest::gtest_main
-)
-
-# PathResolver tests
-add_executable(${PROJECT_NAME}_PathResolver_test
-  tests/tree/PathResolverTest.cpp
-)
-
-target_link_libraries(${PROJECT_NAME}_PathResolver_test
-  PRIVATE
-    ${PROJECT_NAME}_lib
-    GTest::gtest_main
-)
-
-# PathCompleter tests
-add_executable(${PROJECT_NAME}_PathCompleter_test
-  tests/tree/PathCompleterTest.cpp
-)
-
-target_link_libraries(${PROJECT_NAME}_PathCompleter_test
-  PRIVATE
-    ${PROJECT_NAME}_lib
-    GTest::gtest_main
-)
-
-# CommandHistory tests
-add_executable(${PROJECT_NAME}_CommandHistory_test
-  tests/cli/CommandHistoryTest.cpp
-)
-
-target_link_libraries(${PROJECT_NAME}_CommandHistory_test
-  PRIVATE
-    ${PROJECT_NAME}_lib
-    GTest::gtest_main
-)
-
-# PathCompleter Advanced tests
-add_executable(${PROJECT_NAME}_PathCompleterAdvanced_test
-  tests/tree/PathCompleterAdvancedTest.cpp
-)
-
-target_link_libraries(${PROJECT_NAME}_PathCompleterAdvanced_test
-  PRIVATE
-    ${PROJECT_NAME}_lib
-    GTest::gtest_main
-)
-
-
-# PathResolver Navigation tests
-add_executable(${PROJECT_NAME}_PathResolverNavigation_test
-  tests/tree/PathResolverNavigationTest.cpp
-)
-
-target_link_libraries(${PROJECT_NAME}_PathResolverNavigation_test
-  PRIVATE
-    ${PROJECT_NAME}_lib
-    GTest::gtest_main
-)
-
-# TabCompletion tests
-add_executable(${PROJECT_NAME}_TabCompletion_test
-  tests/cli/TabCompletionTest.cpp
-  mock/io/CharIOStreamMock.cpp
-  mock/command/CommandMock.hpp
-)
-
-target_include_directories(${PROJECT_NAME}_TabCompletion_test
-  PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
-target_link_libraries(${PROJECT_NAME}_TabCompletion_test
-  PRIVATE
-    ${PROJECT_NAME}_lib
-    GTest::gtest_main
-    GTest::gmock
-)
-
-
-# Configure tests
-configure_test(${PROJECT_NAME}_InputParser_test)
-configure_test(${PROJECT_NAME}_Tree_test)
-configure_test(${PROJECT_NAME}_CLIService_test)
-configure_test(${PROJECT_NAME}_Path_test)
-configure_test(${PROJECT_NAME}_PathResolver_test)
-configure_test(${PROJECT_NAME}_PathCompleter_test)
-configure_test(${PROJECT_NAME}_CommandHistory_test)
-configure_test(${PROJECT_NAME}_PathCompleterAdvanced_test)
-configure_test(${PROJECT_NAME}_PathResolverNavigation_test)
-configure_test(${PROJECT_NAME}_TabCompletion_test)
-
-
-# Discover tests
-gtest_discover_tests(${PROJECT_NAME}_InputParser_test
-  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  PROPERTIES TIMEOUT 10
-)
-
-gtest_discover_tests(${PROJECT_NAME}_Tree_test
-  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  PROPERTIES TIMEOUT 10
-)
-
-gtest_discover_tests(${PROJECT_NAME}_CLIService_test
-  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  PROPERTIES TIMEOUT 10
-)
-
-gtest_discover_tests(${PROJECT_NAME}_Path_test
-  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  PROPERTIES TIMEOUT 10
-)
-
-gtest_discover_tests(${PROJECT_NAME}_PathResolver_test
-  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  PROPERTIES TIMEOUT 10
-)
-
-gtest_discover_tests(${PROJECT_NAME}_PathCompleter_test
-  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  PROPERTIES TIMEOUT 10
-)
-
-gtest_discover_tests(${PROJECT_NAME}_CommandHistory_test
-  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  PROPERTIES TIMEOUT 10
-)
-
-gtest_discover_tests(${PROJECT_NAME}_PathCompleterAdvanced_test
-  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  PROPERTIES TIMEOUT 10
-)
-
-gtest_discover_tests(${PROJECT_NAME}_PathResolverNavigation_test
-  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  PROPERTIES TIMEOUT 10
-)
-
-gtest_discover_tests(${PROJECT_NAME}_TabCompletion_test
-  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  PROPERTIES TIMEOUT 10
-)
+  gtest_discover_tests(${PROJECT_NAME}_${test_name}
+    WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    PROPERTIES TIMEOUT 10
+  )
+endforeach()
