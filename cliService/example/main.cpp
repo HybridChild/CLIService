@@ -30,8 +30,8 @@ public:
     , _rebootCmd("reboot", AccessLevel::Admin)
     , _heapCmd("heap", AccessLevel::Admin)
     , _potmeterCmd("get", AccessLevel::User)
-    , _toggleSwitchCmd("get", AccessLevel::User)
     , _rgbLedCmd("set", AccessLevel::Admin)
+    , _toggleSwitchCmd("get", AccessLevel::User)
   {
     // Build tree with static references
     _rootDir.addStaticDirectory(_sysDir);
@@ -41,10 +41,10 @@ public:
     _rootDir.addStaticDirectory(_hwDir);
       _hwDir.addStaticDirectory(_hwPotDir);
         _hwPotDir.addStaticCommand(_potmeterCmd);
-      _hwDir.addStaticDirectory(_hwToggleDir);
-        _hwToggleDir.addStaticCommand(_toggleSwitchCmd);
       _hwDir.addStaticDirectory(_hwRgbDir);
         _hwRgbDir.addStaticCommand(_rgbLedCmd);
+      _hwDir.addStaticDirectory(_hwToggleDir);
+        _hwToggleDir.addStaticCommand(_toggleSwitchCmd);
   }
 
   Directory& getRoot() { return _rootDir; }

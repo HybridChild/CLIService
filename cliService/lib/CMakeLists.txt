@@ -1,5 +1,5 @@
 set(LIB_HEADERS
-  include/cliService/cli/ActionRequest.hpp
+  include/cliService/cli/CommandRequest.hpp
   include/cliService/cli/CLIMessages.hpp
   include/cliService/cli/CLIService.hpp
   include/cliService/cli/CLIServiceConfiguration.hpp
@@ -9,6 +9,7 @@ set(LIB_HEADERS
   include/cliService/cli/LoginRequest.hpp
   include/cliService/cli/RequestBase.hpp
   include/cliService/cli/CharIOStreamIf.hpp
+  include/cliService/cli/TabCompletionRequest.hpp
   include/cliService/cli/User.hpp
   include/cliService/tree/CommandIf.hpp
   include/cliService/tree/Response.hpp
@@ -20,7 +21,6 @@ set(LIB_HEADERS
 )
 
 set(LIB_SOURCES
-  src/cli/ActionRequest.cpp
   src/cli/CLIService.cpp
   src/cli/CommandHistory.cpp
   src/cli/InputParser.cpp

@@ -19,6 +19,8 @@ namespace cliService
     void setAccessDeniedMessage(std::string msg) { _accessDeniedMessage = std::move(msg); }
     void setInvalidPathMessage(std::string msg) { _invalidPathMessage = std::move(msg); }
     void setInvalidLoginMessage(std::string msg) { _invalidLoginMessage = std::move(msg); }
+    void setIndentation(std::string msg) { _indentation = std::move(msg); }
+    void setNewLine(std::string msg) { _newLine = std::move(msg); }
 
     // Getters that return string_view to avoid copies
     std::string_view getWelcomeMessage() const { return _welcomeMessage; }
@@ -29,19 +31,34 @@ namespace cliService
     std::string_view getAccessDeniedMessage() const { return _accessDeniedMessage; }
     std::string_view getInvalidPathMessage() const { return _invalidPathMessage; }
     std::string_view getInvalidLoginMessage() const { return _invalidLoginMessage; }
+    std::string_view getIndentation() const { return _indentation; }
+
+    std::string getNewLine(uint32_t count = 1) const
+    {
+      std::string newLines;
+      newLines.reserve(count * _newLine.size());
+      
+      for (uint32_t i = 0; i < count; ++i) {
+        newLines += _newLine;
+      }
+
+      return newLines;
+    }
 
     // Static method to get default messages
     static CLIMessages getDefaults()
     {
       CLIMessages messages;
-      messages.setWelcomeMessage("\tWelcome to CLI Service. Please login.");
-      messages.setLoggedInMessage("\tLogged in. Type 'help' for help.");
-      messages.setLoggedOutMessage("\tLogged out.");
-      messages.setExitMessage("\tExiting CLI Service.");
-      messages.setNoArgumentsMessage("\tCommand takes no arguments.");
-      messages.setAccessDeniedMessage("\tAccess denied");
-      messages.setInvalidPathMessage("\tInvalid path");
-      messages.setInvalidLoginMessage("\tInvalid login attempt. Please enter <username>:<password>");
+      messages.setWelcomeMessage("Welcome to CLI Service. Please login.");
+      messages.setLoggedInMessage("Logged in. Type 'help' for help.");
+      messages.setLoggedOutMessage("Logged out.");
+      messages.setExitMessage("Exiting CLI Service.");
+      messages.setNoArgumentsMessage("Command takes no arguments.");
+      messages.setAccessDeniedMessage("Access denied");
+      messages.setInvalidPathMessage("Invalid path");
+      messages.setInvalidLoginMessage("Invalid login attempt. Please enter <username>:<password>");
+      messages.setIndentation("  ");
+      messages.setNewLine("\r\n");
       return messages;
     }
 
@@ -54,6 +71,8 @@ namespace cliService
     std::string _accessDeniedMessage;
     std::string _invalidPathMessage;
     std::string _invalidLoginMessage;
+    std::string _indentation;
+    std::string _newLine;
   };
 
 }

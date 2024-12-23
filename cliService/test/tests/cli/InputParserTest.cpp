@@ -178,26 +178,6 @@ namespace cliService
     actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
     ASSERT_NE(actionRequest, nullptr);
     EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::ArrowDown);
-
-    // Test LEFT arrow
-    _ioStream.clearOutput();
-    _ioStream.queueInput({0x1B, '[', 'D'});  // ESC [ D
-    request = processAllInput();
-
-    ASSERT_TRUE(request.has_value());
-    actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
-    ASSERT_NE(actionRequest, nullptr);
-    EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::ArrowLeft);
-
-    // Test RIGHT arrow
-    _ioStream.clearOutput();
-    _ioStream.queueInput({0x1B, '[', 'C'});  // ESC [ C
-    request = processAllInput();
-
-    ASSERT_TRUE(request.has_value());
-    actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
-    ASSERT_NE(actionRequest, nullptr);
-    EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::ArrowRight);
   }
 
   TEST_F(InputParserTest, TabKey)

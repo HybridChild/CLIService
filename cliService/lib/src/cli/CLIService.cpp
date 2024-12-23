@@ -1,6 +1,7 @@
 #include "cliService/cli/CLIService.hpp"
-#include "cliService/cli/ActionRequest.hpp"
+#include "cliService/cli/CommandRequest.hpp"
 #include "cliService/cli/LoginRequest.hpp"
+#include "cliService/cli/TabCompletionRequest.hpp"
 #include "cliService/cli/CharIOStreamIf.hpp"
 #include "cliService/cli/User.hpp"
 #include "cliService/tree/CommandIf.hpp"
@@ -43,8 +44,10 @@ namespace cliService
     assert(_currentState == CLIState::Inactive && "Service must be inactive to activate");
 
     _currentState = CLIState::LoggedOut;
-    displayMessage(_messages.getWelcomeMessage());
-    displayPrompt();
+    _ioStream.putString(_messages.getNewLine());
+    _ioStream.putString(std::string(_messages.getIndentation()) + std::string(_messages.getWelcomeMessage()));
+    _ioStream.putString(_messages.getNewLine(2));
+    _ioStream.putString(getPromptString());
   }
 
 
@@ -52,31 +55,37 @@ namespace cliService
   {
     if (_currentState == CLIState::Inactive) { return; }
 
-    auto request = _inputParser.getNextRequest();
-    if (!request) { return; }
+    // Get next request from parser
+    auto requestPtr = _inputParser.getNextRequest();
+    if (!requestPtr || !*requestPtr) { return; }
 
-    // Process state-specific requests
-    switch (_currentState)
-    {
-    case CLIState::LoggedOut:
-      if (auto* loginRequest = dynamic_cast<LoginRequest*>(request->get())) {
-        handleLoginRequest(*loginRequest);
-      }
-      else if (dynamic_cast<InvalidLoginRequest*>(request->get())) {
-        handleInvalidLoginRequest();
-      }
-      break;
+    // Get response from appropriate handler
+    Response response = handleRequest(**requestPtr);
+    
+    // Handle output
+    handleOutput(response);
+  }
 
-    case CLIState::LoggedIn:
-      if (auto* actionRequest = dynamic_cast<ActionRequest*>(request->get())) {
-        handleActionRequest(*actionRequest);
-      }
-      break;
 
-    default:
-      assert(false && "Invalid state in service");
-      break;
+  Response CLIService::handleRequest(const RequestBase& request)
+  {
+    if (const auto* commandRequest = dynamic_cast<const CommandRequest*>(&request)) {
+      return handleRequest(*commandRequest);
     }
+
+    if (const auto* tabRequest = dynamic_cast<const TabCompletionRequest*>(&request)) {
+      return handleRequest(*tabRequest);
+    }
+
+    if (const auto* loginRequest = dynamic_cast<const LoginRequest*>(&request)) {
+      return handleRequest(*loginRequest);
+    }
+
+    if (const auto* invalidLoginRequest = dynamic_cast<const InvalidLoginRequest*>(&request)) {
+      return handleRequest(*invalidLoginRequest);
+    }
+
+    return Response(static_cast<std::string>("Unknown request type"), ResponseStatus::Error);
   }
 
 
@@ -114,48 +123,24 @@ namespace cliService
   }
 
 
-  void CLIService::displayMessage(const std::string_view& message) const
+  std::string CLIService::getPromptString() const
   {
-    displayNewLine();
-    _ioStream.putString(message);
-    displayNewLine(2);
-  }
+    std::string prompt = "";
 
-
-  void CLIService::displayPrompt() const
-  {
     if (_currentState == CLIState::LoggedIn && _currentUser)
     {
-      _ioStream.putString(_currentUser->getUsername());
-      _ioStream.putString("@");
-      std::string pathStr = _pathResolver.getAbsolutePath(*_currentDirectory).toString();
-      _ioStream.putString(pathStr);
+      prompt += _currentUser->getUsername() + "@";
+      prompt += _pathResolver.getAbsolutePath(*_currentDirectory).toString();
     }
 
-    _ioStream.putString(" > ");
-  }
-
-
-  void CLIService::displayNewLine(uint32_t number) const
-  {
-    for (uint32_t i = 0; i < number; ++i)
-    {
-      _ioStream.putChar('\r');
-      _ioStream.putChar('\n');
-    }
-  }
-
-
-  void CLIService::displayNoArgumentsError() const
-  {
-    displayMessage(_messages.getNoArgumentsMessage());
-    displayPrompt();
+    prompt += "> ";
+    return prompt;
   }
 
 
   std::string CLIService::formatNodeInfo(const NodeIf& node, const std::string& indent, bool showCmdDescription) const
   {
-    std::string nodeStr = "\t" + indent + node.getName();
+    std::string nodeStr = indent + node.getName();
 
     if (node.isDirectory()) {
       nodeStr += "/";
@@ -170,9 +155,9 @@ namespace cliService
   }
 
 
-  void CLIService::displayNodeList(NodeDisplayMode mode, bool showCmdDescription) const
+  std::string CLIService::getNodeListDisplay(NodeDisplayMode mode, bool showCmdDescription) const
   {
-    displayNewLine();
+    std::string nodeList = "";
 
     _currentDirectory->traverse([&](const NodeIf& node, size_t depth) {
       if (mode == NodeDisplayMode::FlatList && depth != 1) {
@@ -186,13 +171,12 @@ namespace cliService
           indent = std::string(depth * 2, ' ');
         }
 
-        _ioStream.putString(formatNodeInfo(node, indent, showCmdDescription));
-        displayNewLine();
+        nodeList += formatNodeInfo(node, indent, showCmdDescription);
+        nodeList += _messages.getNewLine();
       }
     });
 
-    displayNewLine();
-    displayPrompt();
+    return nodeList;
   }
 
 
@@ -206,14 +190,13 @@ namespace cliService
   }
 
 
-  void CLIService::handleInvalidLoginRequest()
-  {
-    displayMessage(_messages.getInvalidLoginMessage());
-    displayPrompt();
+  Response CLIService::handleRequest(const InvalidLoginRequest& request) {
+    (void)request;
+    return Response::error(_messages.getInvalidLoginMessage());
   }
 
 
-  void CLIService::handleLoginRequest(const LoginRequest& request)
+  Response CLIService::handleRequest(const LoginRequest& request)
   {
     const auto& username = request.getUsername();
     const auto& password = request.getPassword();
@@ -223,30 +206,26 @@ namespace cliService
         return user.getUsername() == username && user.getPassword() == password;
       });
 
+    Response response = Response::success();
+
     if (userIt != _users.end())
     {
       _currentUser = *userIt;
       _currentState = CLIState::LoggedIn;
-      displayMessage(_messages.getLoggedInMessage());
+      response.appendToMessage(_messages.getLoggedInMessage());
     }
     else {
-      displayMessage(_messages.getInvalidLoginMessage());
+      response.appendToMessage(_messages.getInvalidLoginMessage());
+      response.setStatus(ResponseStatus::Error);
     }
 
-    displayPrompt();
+    return response;
   }
 
 
-  void CLIService::handleActionRequest(const ActionRequest& request) 
+  Response CLIService::handleRequest(const CommandRequest& request) 
   {
     assert(_currentUser && "No user logged in");
-
-    // Handle special keys
-    if (request.getTrigger() != ActionRequest::Trigger::Enter)
-    {
-      handleSpecialKey(request);
-      return;
-    }
 
     const auto& path = request.getPath();
     
@@ -254,80 +233,66 @@ namespace cliService
     {
       const auto& command = path.elements().front();
 
-      if (GLOBAL_COMMAND_HANDLERS.find(command) != GLOBAL_COMMAND_HANDLERS.end())
-      {
-        handleGlobalCommand(command, request.getArgs());
-        return;
+      if (GLOBAL_COMMAND_HANDLERS.find(command) != GLOBAL_COMMAND_HANDLERS.end()) {
+        return handleGlobalCommand(command, request.getArgs());
       }
     }
 
-    // Resolve and validate path
+    Response response = Response::success();
     NodeIf* node = resolvePath(path);
 
     if (!node)
     {
-      displayMessage(_messages.getInvalidPathMessage());
-      displayPrompt();
-      return;
+      response.appendToMessage(_messages.getInvalidPathMessage());
+      response.setStatus(ResponseStatus::InvalidPath);
+      return response;
     }
 
     if (!validatePathAccess(node))
     {
-      displayMessage(_messages.getAccessDeniedMessage());
-      displayPrompt();
-      return;
+      response.appendToMessage(_messages.getAccessDeniedMessage());
+      response.setStatus(ResponseStatus::AccessDenied);
+      return response;
     }
 
     // Handle directory navigation or command execution
     if (node->isDirectory())
     {
       _currentDirectory = static_cast<Directory*>(node);
-      displayPrompt();
+      response.setPrefixNewLine(false);
+      response.setPostfixNewLine(false);
     }
     else
     {
       auto* cmd = static_cast<CommandIf*>(node);
-      Response response = cmd->execute(request.getArgs());
-
-      if (!response.getMessage().empty()) {
-        _ioStream.putString(response.getMessage());
-        displayNewLine();
-      }
-
-      if (response.shouldShowPrompt()) {
-        displayPrompt();
-      }
+      response = cmd->execute(request.getArgs());
     }
+
+    return response;
   }
 
 
-  void CLIService::handleGlobalCommand(const std::string_view& command, const std::vector<std::string>& args)
+  Response CLIService::handleGlobalCommand(const std::string_view& command, const std::vector<std::string>& args)
   {
     auto it = GLOBAL_COMMAND_HANDLERS.find(command);
 
     if (it != GLOBAL_COMMAND_HANDLERS.end()) {
-      (this->*(it->second))(args);
+      return (this->*(it->second))(args);
     }
+
+    return Response("Unknown command: " + std::string(command), ResponseStatus::Error);
   }
 
 
-  void CLIService::handleSpecialKey(const ActionRequest& request)
+  Response CLIService::handleRequest(const TabCompletionRequest& request)
   {
-    switch (request.getTrigger())
-    {
-    case ActionRequest::Trigger::Tab:
-      handleTabCompletion(request);
-      break;
-    case ActionRequest::Trigger::ArrowLeft:
-    case ActionRequest::Trigger::ArrowRight:
-    default:
-      break;
-    };
-  }
+    Response response = Response::success();
+    response.setShowPrompt(false);
+    response.setIndentMessage(false);
+    response.setInlineMessage(true);
+    response.setPrefixNewLine(false);
+    response.setPostfixNewLine(false);
 
-
-  void CLIService::handleTabCompletion(const ActionRequest& request)
-  {
     auto currentInput = _inputParser.getBuffer();
     
     // Skip directory handling for paths with parent references
@@ -337,9 +302,9 @@ namespace cliService
 
       if (node && node->isDirectory() && !currentInput.empty() && currentInput.back() != '/')
       {
-        _ioStream.putChar('/');
         _inputParser.appendToBuffer("/");
-        return;
+        response.appendToMessage(std::string("/"));
+        return response;
       }
     }
 
@@ -352,132 +317,224 @@ namespace cliService
       result = PathCompleter::complete(*_currentDirectory, currentInput, _currentUser->getAccessLevel());
     }
 
-    //auto result = PathCompleter::complete(*_currentDirectory, currentInput, _currentUser->getAccessLevel());
-
     if (result.allOptions.size() > 1)
     {
       // Just display newline (we don't need to show original input since it's already shown)
-      displayNewLine();
+      response.appendToMessage(_messages.getNewLine());
 
       // Show all options
       for (const auto& opt : result.allOptions) {
-          _ioStream.putString(opt + "   ");
+        response.appendToMessage("   " + opt);
       }
 
-      displayNewLine();
-      displayPrompt();  // Show prompt with common prefix
+      response.appendToMessage(_messages.getNewLine());
+      response.appendToMessage(getPromptString()); // Show prompt with common prefix
+      response.setShowPrompt(false);
       
       if (!result.fillCharacters.empty())
       {
-        std::string completion = currentInput + result.fillCharacters;
         _inputParser.appendToBuffer(result.fillCharacters);
-        _ioStream.putString(completion);
+        response.appendToMessage(currentInput + result.fillCharacters);
       }
       else {
-        _ioStream.putString(currentInput);
+        response.appendToMessage(currentInput);
       }
     }
     else if (!result.fillCharacters.empty())
     {
       // For single match, just append completion
-      _ioStream.putString(result.fillCharacters);
       _inputParser.appendToBuffer(result.fillCharacters);
+      response.appendToMessage(result.fillCharacters);
       
       if (result.isDirectory)
       {
-        _ioStream.putChar('/');
         _inputParser.appendToBuffer("/");
+        response.appendToMessage(std::string("/"));
       }
     }
+
+    return response;
   }
 
 
-  void CLIService::handleGlobalHelp(const std::vector<std::string>& args)
+  Response CLIService::handleGlobalHelp(const std::vector<std::string>& args)
   {
+    Response response = Response::success();
+
     if (!args.empty())
     {
-      displayNoArgumentsError();
-      return;
+      response.setStatus(ResponseStatus::InvalidArguments);
+      response.appendToMessage(std::string(_messages.getNoArgumentsMessage()));
+    }
+    else
+    {
+      response.appendToMessage("help   - List global commands" + std::string(_messages.getNewLine()));
+      response.appendToMessage("tree   - Print directory tree" + std::string(_messages.getNewLine()));
+      response.appendToMessage("?      - Detail items in current directory" + std::string(_messages.getNewLine()));
+      response.appendToMessage("logout - Exit current session" + std::string(_messages.getNewLine()));
+      response.appendToMessage("clear  - Clear screen" + std::string(_messages.getNewLine()));
+      response.appendToMessage("exit   - Exit the CLI" + std::string(_messages.getNewLine(0)));
     }
 
-    std::string helpMessage = "";
-    helpMessage += "\thelp   - List global commands\r\n";
-    helpMessage += "\ttree   - Print directory tree\r\n";
-    helpMessage += "\t?      - Detail items in current directory\r\n";
-    helpMessage += "\tlogout - Exit current session\r\n";
-    helpMessage += "\tclear  - Clear screen\r\n";
-    helpMessage += "\texit   - Exit the CLI";
-
-    displayMessage(helpMessage);
-    displayPrompt();
+    return response;
   }
 
-  void CLIService::handleGlobalTree(const std::vector<std::string>& args)
+  Response CLIService::handleGlobalTree(const std::vector<std::string>& args)
   {
+    Response response = Response::success();
+
     if (!args.empty())
     {
-      displayNoArgumentsError();
-      return;
+      response.setStatus(ResponseStatus::InvalidArguments);
+      response.appendToMessage(std::string(_messages.getNoArgumentsMessage()));
     }
-
-    displayNodeList(NodeDisplayMode::Tree, false);
-  }
-
-
-  void CLIService::handleGlobalQuestionMark(const std::vector<std::string>& args)
-  {
-    if (!args.empty())
+    else
     {
-      displayNoArgumentsError();
-      return;
+      std::string nodeList = getNodeListDisplay(NodeDisplayMode::Tree, false);
+      response.appendToMessage(nodeList);
+      response.setPostfixNewLine(false);
     }
 
-    displayNodeList(NodeDisplayMode::FlatList, true);
-  }
-
-
-  void CLIService::handleGlobalLogout(const std::vector<std::string>& args)
-  {
-    if (!args.empty())
-    {
-      displayNoArgumentsError();
-      return;
-    }
-
-    _currentState = CLIState::LoggedOut;
-    _currentUser = std::nullopt;
-    resetToRoot();
-    displayMessage(_messages.getLoggedOutMessage());
-    displayPrompt();
-  }
-
-  void CLIService::handleGlobalClear(const std::vector<std::string>& args)
-  {
-    if (!args.empty())
-    {
-      displayNoArgumentsError();
-      return;
-    }
-
-    // Send ANSI escape sequence to clear screen and move cursor to home position
-    _ioStream.putString("\033[2J");
-    _ioStream.putString("\033[H");
-    displayPrompt();
+    return response;
   }
 
 
-  void CLIService::handleGlobalExit(const std::vector<std::string>& args)
+  Response CLIService::handleGlobalQuestionMark(const std::vector<std::string>& args)
   {
+    Response response = Response::success();
+
     if (!args.empty())
     {
-      displayNoArgumentsError();
-      return;
+      response.setStatus(ResponseStatus::InvalidArguments);
+      response.appendToMessage(std::string(_messages.getNoArgumentsMessage()));
+    }
+    else
+    {
+      std::string nodeList = getNodeListDisplay(NodeDisplayMode::FlatList, true);
+      response.appendToMessage(nodeList);
+      response.setPostfixNewLine(false);
     }
 
-    _currentState = CLIState::Inactive;
-    _currentUser = std::nullopt;
-    resetToRoot();
-    displayMessage(_messages.getExitMessage());
+    return response;
+  }
+
+
+  Response CLIService::handleGlobalLogout(const std::vector<std::string>& args)
+  {
+    Response response = Response::success();
+
+    if (!args.empty())
+    {
+      response.setStatus(ResponseStatus::InvalidArguments);
+      response.appendToMessage(std::string(_messages.getNoArgumentsMessage()));
+    }
+    else
+    {
+      _currentState = CLIState::LoggedOut;
+      _currentUser = std::nullopt;
+      resetToRoot();
+      response.appendToMessage(_messages.getLoggedOutMessage());
+    }
+
+    return response;
+  }
+
+
+  Response CLIService::handleGlobalClear(const std::vector<std::string>& args)
+  {
+    Response response = Response::success();
+
+    if (!args.empty())
+    {
+      response.setStatus(ResponseStatus::InvalidArguments);
+      response.appendToMessage(std::string(_messages.getNoArgumentsMessage()));
+    }
+    else
+    {
+      // Send ANSI escape sequence to clear screen and move cursor to home position
+      response.appendToMessage(std::string("\033[2J"));
+      response.appendToMessage(std::string("\033[H"));
+      response.setPrefixNewLine(false);
+      response.setPostfixNewLine(false);
+    }
+
+    return response;
+  }
+
+
+  Response CLIService::handleGlobalExit(const std::vector<std::string>& args)
+  {
+    Response response = Response::success();
+
+    if (!args.empty())
+    {
+      response.setStatus(ResponseStatus::InvalidArguments);
+      response.appendToMessage(std::string(_messages.getNoArgumentsMessage()));
+    }
+    else
+    {
+      _currentState = CLIState::Inactive;
+      _currentUser = std::nullopt;
+      resetToRoot();
+      response.appendToMessage(std::string(_messages.getExitMessage()));
+      response.setShowPrompt(false);
+    }
+
+    return response;
+  }
+
+
+  void CLIService::handleOutput(const Response& response)
+  {
+    if (response.prefixNewLine()) {
+      _ioStream.putString(_messages.getNewLine());
+    }
+
+    auto lineList = splitString(response.getMessage(), std::string(_messages.getNewLine()));
+
+    for (uint32_t idx = 0; idx < lineList.size(); ++idx)
+    {
+      if (response.indentMessage()) {
+        _ioStream.putString(std::string(_messages.getIndentation()));
+      }
+
+      _ioStream.putString(lineList[idx]);
+
+      if (idx < lineList.size() - 1 || !response.inlineMessage()) {
+        _ioStream.putString(_messages.getNewLine());
+      }
+    }
+
+    if (response.postfixNewLine()) {
+      _ioStream.putString(_messages.getNewLine());
+    }
+
+    if (response.showPrompt()) {
+      _ioStream.putString(getPromptString());
+    }
+  }
+
+
+  std::vector<std::string> CLIService::splitString(const std::string& str, const std::string& delimiter)
+  {
+    std::vector<std::string> substrings;
+    if (str.empty()) { return substrings; }
+
+    assert(!delimiter.empty() && "Delimiter cannot be empty");
+    
+    size_t start = 0;
+    size_t end = str.find(delimiter);
+    
+    while (end != std::string::npos)
+    {
+      substrings.push_back(str.substr(start, end - start));
+      start = end + delimiter.length();
+      end = str.find(delimiter, start);
+    }
+    
+    substrings.push_back(str.substr(start));
+    
+    return substrings;
   }
 
 }

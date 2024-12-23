@@ -10,7 +10,9 @@ namespace cliService
   public:
     RebootCommand(std::string name, AccessLevel level, std::string description = "")
       : CommandIf(std::move(name), level, "Reboot the device")
-    {}
+    {
+      (void)description;
+    }
 
     Response execute(const std::vector<std::string>& args) override
     {
@@ -20,7 +22,7 @@ namespace cliService
 
       // signal system reboot
 
-      return Response::success("\r\n\tSystem reboot initiated...\r\n");
+      return Response::success(std::string("System reboot initiated..."));
     }
   };
 

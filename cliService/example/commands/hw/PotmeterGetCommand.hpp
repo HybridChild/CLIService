@@ -14,7 +14,9 @@ namespace cliService
   public:
     PotmeterGetCommand(std::string name, AccessLevel level, std::string description = "")
       : CommandIf(std::move(name), level, "Get potmeter value - Args: <pot ID>")
-    {}
+    {
+      (void)description;
+    }
 
     Response execute(const std::vector<std::string>& args) override
     {
@@ -23,13 +25,13 @@ namespace cliService
       }
 
       if (!util::isIntegerString(args[0])) {
-        return Response("\r\n\tInvalid potmeter ID: " + args[0] + ". Must be integer.\r\n", ResponseStatus::InvalidArguments);
+        return Response("Invalid potmeter ID: " + args[0] + ". Must be integer.", ResponseStatus::InvalidArguments);
       }
 
       uint32_t potId = std::stoi(args[0]);
 
       if (potId < 1 || potId > 4) {
-        return Response("\r\n\tInvalid potmeter ID: " + args[0] + "\r\n", ResponseStatus::InvalidArguments);
+        return Response("Invalid potmeter ID: " + args[0], ResponseStatus::InvalidArguments);
       }
 
       uint32_t potmeterValue = readPotmeter(potId);
@@ -39,9 +41,8 @@ namespace cliService
       ss << std::fixed << std::setprecision(2) << potmeterPercentage;
       std::string potPercentStr = ss.str();
 
-      std::string response = "\r\n\t";
+      std::string response = "";
       response += "Potmeter " + args[0] + " value: " + std::to_string(potmeterValue) + ", " + potPercentStr + "%";
-      response += "\r\n";
 
       return Response::success(response);
     }

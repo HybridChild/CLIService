@@ -79,7 +79,7 @@ namespace cliService
       if (!_buffer.empty())
       {
         _ioStream.putString("\r\n");  // Echo newline
-        _lastTrigger = ActionRequest::Trigger::Enter;
+        _lastTrigger = ActionTrigger::Enter;
         return true;
       }
 
@@ -118,7 +118,7 @@ namespace cliService
       case TAB:
         if (_currentState == CLIState::LoggedIn)
         {
-          _lastTrigger = ActionRequest::Trigger::Tab;
+          _lastTrigger = ActionTrigger::Tab;
           return true;
         }
         break;
@@ -166,7 +166,7 @@ namespace cliService
           _buffer = prevCmd;
           _ioStream.putString(prevCmd);
           
-          _lastTrigger = ActionRequest::Trigger::ArrowUp;
+          _lastTrigger = ActionTrigger::ArrowUp;
           return true;
         }
         break;
@@ -193,23 +193,7 @@ namespace cliService
           _buffer = nextCmd;
           _ioStream.putString(nextCmd);
           
-          _lastTrigger = ActionRequest::Trigger::ArrowDown;
-          return true;
-        }
-        break;
-
-      case 'C': // Right arrow
-        if (_currentState == CLIState::LoggedIn)
-        {
-          _lastTrigger = ActionRequest::Trigger::ArrowRight;
-          return true;
-        }
-        break;
-
-      case 'D': // Left arrow
-        if (_currentState == CLIState::LoggedIn)
-        {
-          _lastTrigger = ActionRequest::Trigger::ArrowLeft;
+          _lastTrigger = ActionTrigger::ArrowDown;
           return true;
         }
         break;
@@ -250,17 +234,15 @@ namespace cliService
   }
 
 
-  std::unique_ptr<RequestBase> InputParser::createRequest()
+  std::optional<std::unique_ptr<RequestBase>> InputParser::createRequest()
   {
     switch (_currentState)
     {
       case CLIState::LoggedOut:
       {
-        if (_buffer.empty()) {
-          return nullptr;
-        }
+        if (_buffer.empty()) { return std::nullopt; }
 
-        auto loginRequest = LoginRequest::create(_buffer);
+        auto loginRequest = parseToLoginRequest(_buffer);
         _buffer.clear();
 
         if (!loginRequest) {
@@ -272,17 +254,27 @@ namespace cliService
 
       case CLIState::LoggedIn:
       {
-        auto request = std::make_unique<ActionRequest>(_buffer, _lastTrigger);
-        
-        if (_lastTrigger == ActionRequest::Trigger::Enter && !_buffer.empty())
+        if (_lastTrigger == ActionTrigger::Enter)
         {
+          if (_buffer.empty()) { return std::nullopt; }
+          
           _history.addCommand(_buffer);
           _history.resetNavigation();
           _savedBuffer.clear();
+          auto request = parseToCommandRequest(_buffer);
           _buffer.clear();
+          return request;
         }
-        
-        return request;
+
+        if(_lastTrigger == ActionTrigger::Tab)
+        {
+          auto request = parseToTabCompletionRequest(_buffer);
+          return request;
+        }
+
+        if (_lastTrigger == ActionTrigger::ArrowUp || _lastTrigger == ActionTrigger::ArrowDown) {
+          return std::nullopt;
+        }
       }
 
       case CLIState::Inactive:
@@ -293,8 +285,64 @@ namespace cliService
       }
     }
 
-    assert(false && "Invalid CLI state");
-    return nullptr;
+    return std::nullopt;
+  }
+
+  InputParser::ParsedPathAndArgs InputParser::parseToPathAndArgs(std::string_view input)
+  {
+    Path path;
+    std::vector<std::string> args;
+
+    // Split input into path and args
+    std::string_view pathStr, argsStr;
+
+    // Find first space that separates path from args
+    size_t spacePos = input.find(' ');
+
+    if (spacePos == std::string_view::npos)
+    {
+      // No args, entire input is path
+      pathStr = input;
+      argsStr = std::string_view();
+    }
+    else
+    {
+      // Split into path and args
+      pathStr = input.substr(0, spacePos);
+      
+      // Skip spaces between path and args
+      size_t argsStart = spacePos + 1;
+      while (argsStart < input.length() && input[argsStart] == ' ') {
+        argsStart++;
+      }
+
+      argsStr = input.substr(argsStart);
+
+      // If we have arguments and path ends with slashes, trim them
+      if (!argsStr.empty() && !pathStr.empty())
+      {
+        while (!pathStr.empty() && pathStr.back() == '/') {
+          pathStr = pathStr.substr(0, pathStr.length() - 1);
+        }
+      }
+    }
+
+    // Create path object
+    path = Path(pathStr);
+
+    // Parse args if present
+    if (!argsStr.empty())
+    {
+      // Fix for most vexing parse - use brace initialization
+      std::istringstream argStream{std::string(argsStr)};
+      std::string arg;
+
+      while (argStream >> arg) {
+        args.push_back(std::move(arg));
+      }
+    }
+
+    return ParsedPathAndArgs{std::move(path), std::move(args)};
   }
 
 }

@@ -19,6 +19,7 @@ namespace cliService
     void activate();
     void service();
 
+    Response handleRequest(const RequestBase& request);
     CLIState getState() const { return _currentState; }
 
     const CLIMessages _messages;
@@ -34,32 +35,32 @@ namespace cliService
     bool validatePathAccess(const NodeIf* node) const;
 
     void resetToRoot();
-    void displayMessage(const std::string_view& message) const;
-    void displayPrompt() const;
-    void displayNewLine(uint32_t number = 1) const;
-    void displayNoArgumentsError() const;
+
+    std::string getPromptString() const;
 
     std::string formatNodeInfo(const NodeIf& node, const std::string& indent, bool showCmdDescription) const;
-    void displayNodeList(NodeDisplayMode mode, bool showCmdDescription) const;
+    std::string getNodeListDisplay(NodeDisplayMode mode, bool showCmdDescription) const;
 
   private:
     Directory* getRootPtr() const;
 
     // Request handlers
-    void handleInvalidLoginRequest();
-    void handleLoginRequest(const LoginRequest& request);
-    void handleActionRequest(const ActionRequest& request);
-    void handleGlobalCommand(const std::string_view& command, const std::vector<std::string>& args);
-    void handleSpecialKey(const ActionRequest& request);
-    void handleTabCompletion(const ActionRequest& request);
+    Response handleRequest(const InvalidLoginRequest& request);
+    Response handleRequest(const LoginRequest& request);
+    Response handleRequest(const CommandRequest& request);
+    Response handleRequest(const TabCompletionRequest& request);
 
     // Global command handlers
-    void handleGlobalLogout(const std::vector<std::string>& args);
-    void handleGlobalExit(const std::vector<std::string>& args);
-    void handleGlobalTree(const std::vector<std::string>& args);
-    void handleGlobalHelp(const std::vector<std::string>& args);
-    void handleGlobalQuestionMark(const std::vector<std::string>& args);
-    void handleGlobalClear(const std::vector<std::string>& args);
+    Response handleGlobalCommand(const std::string_view& command, const std::vector<std::string>& args);
+    Response handleGlobalLogout(const std::vector<std::string>& args);
+    Response handleGlobalExit(const std::vector<std::string>& args);
+    Response handleGlobalTree(const std::vector<std::string>& args);
+    Response handleGlobalHelp(const std::vector<std::string>& args);
+    Response handleGlobalQuestionMark(const std::vector<std::string>& args);
+    Response handleGlobalClear(const std::vector<std::string>& args);
+
+    void handleOutput(const Response& response);
+    std::vector<std::string> splitString(const std::string& str, const std::string& delimiter);
 
     CharIOStreamIf& _ioStream;
     InputParser _inputParser;
@@ -73,7 +74,7 @@ namespace cliService
 
     CLIState _currentState;
 
-    using GlobalCommandHandler = void (CLIService::*)(const std::vector<std::string>&);
+    using GlobalCommandHandler = Response (CLIService::*)(const std::vector<std::string>&);
     static const std::unordered_map<std::string_view, GlobalCommandHandler> GLOBAL_COMMAND_HANDLERS;
   };
 

@@ -12,7 +12,9 @@ namespace cliService
   public:
     RgbLedSetCommand(std::string name, AccessLevel level, std::string description = "")
       : CommandIf(std::move(name), level, "Set RGB LED color - Args: <rgbLED ID> <R> <G> <B>")
-    {}
+    {
+      (void)description;
+    }
 
     Response execute(const std::vector<std::string>& args) override
     {
@@ -21,13 +23,13 @@ namespace cliService
       }
 
       if (!util::isIntegerString(args[0])) {
-        return Response("\r\n\tInvalid RGB LED ID: " + args[0] + ". Must be integer.\r\n", ResponseStatus::InvalidArguments);
+        return Response("Invalid RGB LED ID: " + args[0] + ". Must be integer.", ResponseStatus::InvalidArguments);
       }
 
       uint32_t rgbLedId = std::stoi(args[0]);
 
       if (rgbLedId < 1 || rgbLedId > 2) {
-        return Response("\r\n\tInvalid ID: " + args[0] + " ... valid IDs: 1 .. 2\r\n", ResponseStatus::InvalidArguments);
+        return Response("Invalid ID: " + args[0] + " ... valid IDs: 1 .. 2", ResponseStatus::InvalidArguments);
       }
 
       std::array<uint8_t, 3> rgbValues;
@@ -35,7 +37,7 @@ namespace cliService
       for (size_t i = 0; i < 3; i++)
       {
         if (!isValidValueString(args[i + 1])) {
-          return Response("\r\n\tInvalid value: " + args[i + 1] + " ... valid values: 0 .. 255\r\n", ResponseStatus::InvalidArguments);
+          return Response("Invalid value: " + args[i + 1] + " ... valid values: 0 .. 255", ResponseStatus::InvalidArguments);
         }
 
         rgbValues[i] = std::stoi(args[i + 1]);
@@ -43,7 +45,7 @@ namespace cliService
 
       setRgbLed(rgbLedId, rgbValues);
 
-      return Response::success("\r\n\tRGB LED " + args[0] + " set to: " + args[1] + " " + args[2] + " " + args[3] + "\r\n");
+      return Response::success("RGB LED " + args[0] + " set to: " + args[1] + " " + args[2] + " " + args[3]);
     }
 
   private:

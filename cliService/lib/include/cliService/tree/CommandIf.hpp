@@ -23,7 +23,7 @@ namespace cliService
 
     static Response createInvalidArgumentCountResponse(size_t expected)
     {
-      std::string response = "\r\n\t";
+      std::string response;
 
       if (expected == 0) {
         response += "Command takes no arguments. Try again.";
@@ -33,8 +33,6 @@ namespace cliService
         std::string argStr = expected == 1 ? "argument" : "arguments";
         response += "Expected " + std::to_string(expected) + " " + argStr + ". Try again.";
       }
-
-      response += "\r\n";
       
       return Response(response, ResponseStatus::InvalidArguments);
     }

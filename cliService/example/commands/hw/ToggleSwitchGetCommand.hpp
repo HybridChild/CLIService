@@ -18,7 +18,9 @@ namespace cliService
   public:
     ToggleSwitchGetCommand(std::string name, AccessLevel level, std::string description = "")
       : CommandIf(std::move(name), level, "Get toggle switch position - Args: <toggleSwitch ID>")
-    {}
+    {
+      (void)description;
+    }
 
     Response execute(const std::vector<std::string>& args) override
     {
@@ -27,17 +29,17 @@ namespace cliService
       }
 
       if (!util::isIntegerString(args[0])) {
-        return Response("\r\n\tInvalid toggle switch ID: " + args[0] + ". Must be integer.\r\n", ResponseStatus::InvalidArguments);
+        return Response("Invalid toggle switch ID: " + args[0] + ". Must be integer.", ResponseStatus::InvalidArguments);
       }
 
       uint32_t potId = std::stoi(args[0]);
 
       if (potId < 1 || potId > 2) {
-        return Response("\r\n\tInvalid toggle switch ID: " + args[0] + ". Must be 1 .. 2\r\n", ResponseStatus::InvalidArguments);
+        return Response("Invalid toggle switch ID: " + args[0] + ". Must be 1 .. 2", ResponseStatus::InvalidArguments);
       }
 
       ToggleSwitchPosition togglePos = readToggleSwitchPosition(potId);
-      return Response::success("\r\n\tToggle switch " + args[0] + " is in position: " + posToString(togglePos) + "\r\n");
+      return Response::success("Toggle switch " + args[0] + " is in position: " + posToString(togglePos));
     }
 
   private:
