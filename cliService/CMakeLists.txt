@@ -19,7 +19,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # Options
-#option(BUILD_TESTING "Build the testing tree" ON)
+option(BUILD_TESTING "Build the testing tree" ON)
 
 # Compiler flags
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")

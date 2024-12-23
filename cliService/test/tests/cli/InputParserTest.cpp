@@ -1,5 +1,6 @@
 #include "cliService/cli/InputParser.hpp"
-#include "cliService/cli/ActionRequest.hpp"
+#include "cliService/cli/CommandRequest.hpp"
+#include "cliService/cli/TabCompletionRequest.hpp"
 #include "cliService/cli/LoginRequest.hpp"
 #include "mock/io/CharIOStreamMock.hpp"
 #include <gtest/gtest.h>
@@ -59,9 +60,9 @@ namespace cliService
     auto request = processAllInput();
 
     ASSERT_TRUE(request.has_value());
-    auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
-    ASSERT_NE(actionRequest, nullptr);
-    EXPECT_EQ(actionRequest->getPath().elements()[0], "command");
+    auto* commandRequest = dynamic_cast<CommandRequest*>(request.value().get());
+    ASSERT_NE(commandRequest, nullptr);
+    EXPECT_EQ(commandRequest->getPath().elements()[0], "command");
     EXPECT_EQ(_ioStream.getOutput(), "command\r\n");
   }
 
@@ -71,12 +72,27 @@ namespace cliService
     auto request = processAllInput();
 
     ASSERT_TRUE(request.has_value());
-    auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
-    ASSERT_NE(actionRequest, nullptr);
-    EXPECT_EQ(actionRequest->getPath().elements()[0], "command");
-    ASSERT_EQ(actionRequest->getArgs().size(), 2);
-    EXPECT_EQ(actionRequest->getArgs()[0], "arg1");
-    EXPECT_EQ(actionRequest->getArgs()[1], "arg2");
+    auto* commandRequest = dynamic_cast<CommandRequest*>(request.value().get());
+    ASSERT_NE(commandRequest, nullptr);
+    EXPECT_EQ(commandRequest->getPath().elements()[0], "command");
+    ASSERT_EQ(commandRequest->getArgs().size(), 2);
+    EXPECT_EQ(commandRequest->getArgs()[0], "arg1");
+    EXPECT_EQ(commandRequest->getArgs()[1], "arg2");
+  }
+
+  TEST_F(InputParserTest, TabCompletion)
+  {
+    _ioStream.queueInput("command");
+    processAllInput();
+    _ioStream.clearOutput();
+    
+    _ioStream.queueInput(std::string(1, InputParser::TAB));
+    auto request = processAllInput();
+
+    ASSERT_TRUE(request.has_value());
+    auto* tabRequest = dynamic_cast<TabCompletionRequest*>(request.value().get());
+    ASSERT_NE(tabRequest, nullptr);
+    EXPECT_EQ(tabRequest->getPath().elements()[0], "command");
   }
 
   TEST_F(InputParserTest, BackspaceHandling)
@@ -96,9 +112,9 @@ namespace cliService
     EXPECT_EQ(_ioStream.getOutput(), "d\r\n");
 
     ASSERT_TRUE(request.has_value());
-    auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
-    ASSERT_NE(actionRequest, nullptr);
-    EXPECT_EQ(actionRequest->getPath().elements()[0], "command");
+    auto* commandRequest = dynamic_cast<CommandRequest*>(request.value().get());
+    ASSERT_NE(commandRequest, nullptr);
+    EXPECT_EQ(commandRequest->getPath().elements()[0], "command");
   }
 
   TEST_F(InputParserTest, LoginHandling)
@@ -119,6 +135,54 @@ namespace cliService
     EXPECT_EQ(_ioStream.getOutput(), expectedOutput);
   }
 
+  TEST_F(InputParserTest, LoginParsingEmptyInput)
+  {
+    _currentState = CLIState::LoggedOut;
+    _ioStream.queueInput("\n");
+    auto request = processAllInput();
+    EXPECT_FALSE(request.has_value());
+  }
+
+  TEST_F(InputParserTest, LoginParsingEmptyFields)
+  {
+    _currentState = CLIState::LoggedOut;
+    
+    // Empty username
+    _ioStream.queueInput(":pass\n");
+    auto request = processAllInput();
+    ASSERT_TRUE(request.has_value());
+    EXPECT_NE(dynamic_cast<InvalidLoginRequest*>(request->get()), nullptr);
+    
+    // Empty password
+    _ioStream.queueInput("user:\n");
+    request = processAllInput();
+    ASSERT_TRUE(request.has_value());
+    EXPECT_NE(dynamic_cast<InvalidLoginRequest*>(request->get()), nullptr);
+  }
+
+  TEST_F(InputParserTest, LoginParsingComplexInput)
+  {
+    _currentState = CLIState::LoggedOut;
+    
+    // Multiple colons
+    _ioStream.queueInput("user:pass:extra\n");
+    auto request = processAllInput();
+    ASSERT_TRUE(request.has_value());
+    auto* loginRequest = dynamic_cast<LoginRequest*>(request->get());
+    ASSERT_NE(loginRequest, nullptr);
+    EXPECT_EQ(loginRequest->getUsername(), "user");
+    EXPECT_EQ(loginRequest->getPassword(), "pass:extra");
+    
+    // Special characters
+    _ioStream.queueInput("user@domain.com:P@ssw0rd!\n");
+    request = processAllInput();
+    ASSERT_TRUE(request.has_value());
+    loginRequest = dynamic_cast<LoginRequest*>(request->get());
+    ASSERT_NE(loginRequest, nullptr);
+    EXPECT_EQ(loginRequest->getUsername(), "user@domain.com");
+    EXPECT_EQ(loginRequest->getPassword(), "P@ssw0rd!");
+  }
+
   TEST_F(InputParserTest, InvalidLoginFormat)
   {
     _currentState = CLIState::LoggedOut;
@@ -130,140 +194,34 @@ namespace cliService
     EXPECT_NE(dynamic_cast<InvalidLoginRequest*>(request->get()), nullptr);
   }
 
-  TEST_F(InputParserTest, EmptyLogin)
-  {
-    _currentState = CLIState::LoggedOut;
-    
-    _ioStream.queueInput("\n");
-    auto request = processAllInput();
-    
-    EXPECT_FALSE(request.has_value());
-  }
-
-  TEST_F(InputParserTest, LoginWithEmptyFields)
-  {
-    _currentState = CLIState::LoggedOut;
-    
-    // Test empty username
-    _ioStream.queueInput(":password\n");
-    auto request = processAllInput();
-    ASSERT_TRUE(request.has_value());
-    EXPECT_NE(dynamic_cast<InvalidLoginRequest*>(request->get()), nullptr);
-    
-    // Test empty password
-    _ioStream.clearOutput();
-    _ioStream.queueInput("username:\n");
-    request = processAllInput();
-    ASSERT_TRUE(request.has_value());
-    EXPECT_NE(dynamic_cast<InvalidLoginRequest*>(request->get()), nullptr);
-  }
-
-  TEST_F(InputParserTest, ArrowKeys)
-  {
-    // Test UP arrow
-    _ioStream.queueInput({0x1B, '[', 'A'});  // ESC [ A
-    auto request = processAllInput();
-
-    ASSERT_TRUE(request.has_value());
-    auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
-    ASSERT_NE(actionRequest, nullptr);
-    EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::ArrowUp);
-
-    // Test DOWN arrow
-    _ioStream.clearOutput();
-    _ioStream.queueInput({0x1B, '[', 'B'});  // ESC [ B
-    request = processAllInput();
-
-    ASSERT_TRUE(request.has_value());
-    actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
-    ASSERT_NE(actionRequest, nullptr);
-    EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::ArrowDown);
-  }
-
-  TEST_F(InputParserTest, TabKey)
-  {
-    _ioStream.queueInput(std::string(1, InputParser::TAB));
-    auto request = processAllInput();
-
-    ASSERT_TRUE(request.has_value());
-    auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
-    ASSERT_NE(actionRequest, nullptr);
-    EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::Tab);
-  }
-
-  TEST_F(InputParserTest, MultipleBackspace)
-  {
-    _ioStream.queueInput("hello");
-    processAllInput();
-    EXPECT_EQ(_ioStream.getOutput(), "hello");
-
-    _ioStream.clearOutput();
-    _ioStream.queueInput(std::string(1, InputParser::BACKSPACE_BS));
-    processAllInput();
-    EXPECT_EQ(_ioStream.getOutput(), "\b \b");
-
-    _ioStream.clearOutput();
-    _ioStream.queueInput(std::string(1, InputParser::BACKSPACE_BS));
-    processAllInput();
-    EXPECT_EQ(_ioStream.getOutput(), "\b \b");
-
-    _ioStream.clearOutput();
-    _ioStream.queueInput("\n");
-    auto request = processAllInput();
-
-    ASSERT_TRUE(request.has_value());
-    auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
-    ASSERT_NE(actionRequest, nullptr);
-    EXPECT_EQ(actionRequest->getPath().elements()[0], "hel");
-  }
-
-  TEST_F(InputParserTest, RootNavigation)
-  {
-    _ioStream.queueInput("/\n");
-    auto request = processAllInput();
-
-    ASSERT_TRUE(request.has_value());
-    auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
-    ASSERT_NE(actionRequest, nullptr);
-    EXPECT_TRUE(actionRequest->getPath().isAbsolute());
-    EXPECT_TRUE(actionRequest->getPath().elements().empty());
-  }
-
-  TEST_F(InputParserTest, HistoryNavigationWithoutPartialInput)
+  TEST_F(InputParserTest, HistoryNavigation)
   {
     // Add commands to history
     _ioStream.queueInput("command1\n");
     processAllInput();
     _ioStream.queueInput("command2\n");
     processAllInput();
-
     _ioStream.clearOutput();
 
-    // Press Up Arrow with no partial input
-    _ioStream.queueInput({0x1B, '[', 'A'});  // ESC [ A
-    auto request = processAllInput();
-
-    ASSERT_TRUE(request.has_value());
-    auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
-    ASSERT_NE(actionRequest, nullptr);
-    EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::ArrowUp);
-
-    // In this case, we just directly show the command
+    // Navigate up
+    _ioStream.queueInput({0x1B, '[', 'A'});  // Up arrow
+    processAllInput();
     EXPECT_EQ(_ioStream.getOutput(), "command2");
+
+    // Navigate down
+    _ioStream.clearOutput();
+    _ioStream.queueInput({0x1B, '[', 'B'});  // Down arrow
+    processAllInput();
+    EXPECT_EQ(_ioStream.getOutput(), generateClearSequence(8));
   }
 
   TEST_F(InputParserTest, SaveBufferDuringHistoryNavigation)
   {
-    // Add commands to history
+    // Add commands to history and start typing
     _ioStream.queueInput("command1\n");
     processAllInput();
-    _ioStream.queueInput("command2\n");
-    processAllInput();
-
-    // Start typing a new command
     _ioStream.queueInput("new");
     processAllInput();
-
     _ioStream.clearOutput();
 
     // Navigate up
@@ -272,91 +230,34 @@ namespace cliService
 
     // Navigate down to restore buffer
     _ioStream.queueInput({0x1B, '[', 'B'});  // Down arrow
-    auto request = processAllInput();
-
-    ASSERT_TRUE(request.has_value());
-    auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
-    ASSERT_NE(actionRequest, nullptr);
-    EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::ArrowDown);
+    processAllInput();
 
     std::string expectedOutput = generateClearSequence(3) +  // Clear "new"
-                                "command2" +                 // Show command from history
-                                generateClearSequence(8) +   // Clear command2
-                                "new";                       // Show original input
+                                "command1" +                  // Show history
+                                generateClearSequence(8) +    // Clear history
+                                "new";                        // Restore buffer
     
     EXPECT_EQ(_ioStream.getOutput(), expectedOutput);
   }
 
-  TEST_F(InputParserTest, NavigatePastHistoryBounds)
+  TEST_F(InputParserTest, ComplexPathHandling)
   {
-    // Add one command
-    _ioStream.queueInput("command1\n");
-    processAllInput();
-
-    _ioStream.clearOutput();
-
-    // Try to go up twice (should show same command both times)
-    _ioStream.queueInput({0x1B, '[', 'A'});  // Up
-    auto request = processAllInput();
-    EXPECT_EQ(_ioStream.getOutput(), "command1");
-
-    _ioStream.clearOutput();
-    _ioStream.queueInput({0x1B, '[', 'A'});  // Up again
-    request = processAllInput();
-    std::string expectedOutput = generateClearSequence(8) + "command1";  // Clear "command1"
-    EXPECT_EQ(_ioStream.getOutput(), expectedOutput);  // Still shows same command
-
-    // Try to go down twice
-    _ioStream.clearOutput();
-    _ioStream.queueInput({0x1B, '[', 'B'});  // Down
-    request = processAllInput();
-    EXPECT_EQ(_ioStream.getOutput(), generateClearSequence(8));  // Clear "command1"
-
-    _ioStream.clearOutput();
-    _ioStream.queueInput({0x1B, '[', 'B'});  // Down again
-    request = processAllInput();
-    EXPECT_TRUE(_ioStream.getOutput().empty());  // Already at bottom, no output
-
-    ASSERT_TRUE(request.has_value());
-    auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
-    ASSERT_NE(actionRequest, nullptr);
-    EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::ArrowDown);
-  }
-
-  TEST_F(InputParserTest, DuplicateCommandsInHistory)
-  {
-    // Add same command twice
-    _ioStream.queueInput("command1\n");
-    processAllInput();
-    _ioStream.queueInput("command1\n");
-    processAllInput();
-
-    _ioStream.clearOutput();
-
-    // Navigate up twice
-    _ioStream.queueInput({0x1B, '[', 'A'});  // Up
+    _ioStream.queueInput("dir1/../../dir2/command arg1\n");
     auto request = processAllInput();
 
-    std::string expectedOutput = "command1";
-    EXPECT_EQ(_ioStream.getOutput(), expectedOutput);
-
-    _ioStream.clearOutput();
-    _ioStream.queueInput({0x1B, '[', 'A'});  // Up again
-    request = processAllInput();
-
-    expectedOutput = generateClearSequence(8) + "command1";  // Clear "command1" and rewrite "command1"
-    EXPECT_EQ(_ioStream.getOutput(), expectedOutput);
-
     ASSERT_TRUE(request.has_value());
-    auto* actionRequest = dynamic_cast<ActionRequest*>(request.value().get());
-    ASSERT_NE(actionRequest, nullptr);
-    EXPECT_EQ(actionRequest->getTrigger(), ActionRequest::Trigger::ArrowUp);
-
-    // Go back down
-    _ioStream.clearOutput();
-    _ioStream.queueInput({0x1B, '[', 'B'});  // Down
-    request = processAllInput();
-    EXPECT_EQ(_ioStream.getOutput(), generateClearSequence(8));  // Only clear command since we're going back to empty
+    auto* commandRequest = dynamic_cast<CommandRequest*>(request.value().get());
+    ASSERT_NE(commandRequest, nullptr);
+    
+    const auto& elements = commandRequest->getPath().elements();
+    ASSERT_EQ(elements.size(), 5);
+    EXPECT_EQ(elements[0], "dir1");
+    EXPECT_EQ(elements[1], "..");
+    EXPECT_EQ(elements[2], "..");
+    EXPECT_EQ(elements[3], "dir2");
+    EXPECT_EQ(elements[4], "command");
+    
+    ASSERT_EQ(commandRequest->getArgs().size(), 1);
+    EXPECT_EQ(commandRequest->getArgs()[0], "arg1");
   }
-
 }

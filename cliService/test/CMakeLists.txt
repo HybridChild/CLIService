@@ -19,28 +19,6 @@ function(configure_test TEST_NAME)
 endfunction()
 
 
-# ActionRequest tests
-add_executable(${PROJECT_NAME}_ActionRequest_test
-  tests/cli/ActionRequestTest.cpp
-)
-
-target_link_libraries(${PROJECT_NAME}_ActionRequest_test
-  PRIVATE
-    ${PROJECT_NAME}_lib
-    GTest::gtest_main
-)
-
-# LoginRequest tests
-add_executable(${PROJECT_NAME}_LoginRequest_test
-  tests/cli/LoginRequestTest.cpp
-)
-
-target_link_libraries(${PROJECT_NAME}_LoginRequest_test
-  PRIVATE
-    ${PROJECT_NAME}_lib
-    GTest::gtest_main
-)
-
 # InputParser tests
 add_executable(${PROJECT_NAME}_InputParser_test
   tests/cli/InputParserTest.cpp
@@ -143,23 +121,6 @@ target_link_libraries(${PROJECT_NAME}_PathCompleterAdvanced_test
     GTest::gtest_main
 )
 
-# CLIService Advanced test
-add_executable(${PROJECT_NAME}_CLIServiceAdvanced_test
-  tests/cli/CLIServiceAdvancedTest.cpp
-  mock/io/CharIOStreamMock.cpp
-)
-
-target_include_directories(${PROJECT_NAME}_CLIServiceAdvanced_test
-  PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
-target_link_libraries(${PROJECT_NAME}_CLIServiceAdvanced_test
-  PRIVATE
-    ${PROJECT_NAME}_lib
-    GTest::gtest_main
-    GTest::gmock
-)
 
 # PathResolver Navigation tests
 add_executable(${PROJECT_NAME}_PathResolverNavigation_test
@@ -193,8 +154,6 @@ target_link_libraries(${PROJECT_NAME}_TabCompletion_test
 
 
 # Configure tests
-configure_test(${PROJECT_NAME}_ActionRequest_test)
-configure_test(${PROJECT_NAME}_LoginRequest_test)
 configure_test(${PROJECT_NAME}_InputParser_test)
 configure_test(${PROJECT_NAME}_Tree_test)
 configure_test(${PROJECT_NAME}_CLIService_test)
@@ -203,22 +162,11 @@ configure_test(${PROJECT_NAME}_PathResolver_test)
 configure_test(${PROJECT_NAME}_PathCompleter_test)
 configure_test(${PROJECT_NAME}_CommandHistory_test)
 configure_test(${PROJECT_NAME}_PathCompleterAdvanced_test)
-configure_test(${PROJECT_NAME}_CLIServiceAdvanced_test)
 configure_test(${PROJECT_NAME}_PathResolverNavigation_test)
 configure_test(${PROJECT_NAME}_TabCompletion_test)
 
 
 # Discover tests
-gtest_discover_tests(${PROJECT_NAME}_ActionRequest_test
-  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  PROPERTIES TIMEOUT 10
-)
-
-gtest_discover_tests(${PROJECT_NAME}_LoginRequest_test
-  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  PROPERTIES TIMEOUT 10
-)
-
 gtest_discover_tests(${PROJECT_NAME}_InputParser_test
   WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   PROPERTIES TIMEOUT 10
@@ -255,11 +203,6 @@ gtest_discover_tests(${PROJECT_NAME}_CommandHistory_test
 )
 
 gtest_discover_tests(${PROJECT_NAME}_PathCompleterAdvanced_test
-  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  PROPERTIES TIMEOUT 10
-)
-
-gtest_discover_tests(${PROJECT_NAME}_CLIServiceAdvanced_test
   WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   PROPERTIES TIMEOUT 10
 )

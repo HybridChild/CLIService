@@ -355,12 +355,12 @@ namespace cliService
       Response execute(const std::vector<std::string>& args) override
       {
         if (args.empty()) {
-          return Response::error("No arguments provided");
+          return Response::error(std::string("No arguments provided"));
         }
         if (args[0] == "invalid") {
           return CommandIf::createInvalidArgumentCountResponse(2);
         }
-        return Response::success("Command executed successfully");
+        return Response::success(std::string("Command executed successfully"));
       }
     };
 

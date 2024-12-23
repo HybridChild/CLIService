@@ -286,10 +286,10 @@ namespace cliService
       
       // Verify login sequence messages
       std::string output = _ioStream.getOutput();
-      EXPECT_TRUE(output.find("\tWelcome to CLI Service. Please login.") != std::string::npos);
-      EXPECT_TRUE(output.find("\tLogged in. Type 'help' for help.") != std::string::npos);
-      EXPECT_TRUE(stringEndsWith(output, "user@/ > "))
-        << "Expected output to end with 'user@/ > '";
+      EXPECT_TRUE(output.find("Welcome to CLI Service. Please login.") != std::string::npos);
+      EXPECT_TRUE(output.find("Logged in. Type 'help' for help.") != std::string::npos);
+      EXPECT_TRUE(stringEndsWith(output, "user@/> "))
+        << "Expected output to end with 'user@/> '";
     }
 
     void navigateTo(const std::string& path)
@@ -327,8 +327,8 @@ namespace cliService
     
     // Full output should end with completed path
     std::string fullOutput = initialOutput + completionOutput;
-    EXPECT_TRUE(stringEndsWith(fullOutput, "user@/ > folder1/"))
-      << "Final output should end with 'user@/ > folder1/'";
+    EXPECT_TRUE(stringEndsWith(fullOutput, "user@/> folder1/"))
+      << "Final output should end with 'user@/> folder1/'";
   }
 
   TEST_F(TabCompletionStreamTest, MultipleMatchesShowsAllOptions)
@@ -349,24 +349,24 @@ namespace cliService
         << "Output should start with original input 'f' followed by newline";
       
     // 2. Should show options with proper spacing
-    size_t optionsPos = completionOutput.find("folder1/   folder2/   ");
+    size_t optionsPos = completionOutput.find("   folder1/   folder2/");
     EXPECT_NE(optionsPos, std::string::npos)
         << "Should show all matches with consistent spacing";
       
     // 3. Should show another newline after options
-    size_t afterOptionsPos = optionsPos + strlen("folder1/   folder2/   ");
+    size_t afterOptionsPos = optionsPos + strlen("   folder1/   folder2/");
     EXPECT_NE(completionOutput.find("\r\n", afterOptionsPos), std::string::npos)
         << "Should show newline after options";
       
     // 4. Should show prompt with common prefix completed
-    EXPECT_TRUE(stringEndsWith(completionOutput, "user@/ > folder"))
+    EXPECT_TRUE(stringEndsWith(completionOutput, "user@/> folder"))
         << "Output should end with prompt and completed common prefix 'folder'";
 
     // 5. Verify the complete sequence
     std::string expectedSequence = 
         "f\r\n"                    // Original input
-        "folder1/   folder2/   \r\n"  // Options
-        "user@/ > folder";         // New prompt with completion
+        "   folder1/   folder2/\r\n"  // Options
+        "user@/> folder";         // New prompt with completion
     
     // Remove any trailing whitespace from completionOutput for exact comparison
     std::string trimmedOutput = completionOutput;
@@ -395,16 +395,16 @@ namespace cliService
     EXPECT_TRUE(completionOutput.find("sub\r\n") == 0)
       << "Output should start with newline";
       
-    EXPECT_TRUE(completionOutput.find("subfolder1/   subfolder2/   ") != std::string::npos)
+    EXPECT_TRUE(completionOutput.find("   subfolder1/   subfolder2/") != std::string::npos)
       << "Should show matching subfolders with consistent spacing";
       
-    size_t optionsPos = completionOutput.find("subfolder1/   subfolder2/   ");
-    size_t afterOptionsPos = optionsPos + strlen("subfolder1/   subfolder2/   ");
+    size_t optionsPos = completionOutput.find("   subfolder1/   subfolder2/");
+    size_t afterOptionsPos = optionsPos + strlen("   subfolder1/   subfolder2/");
     EXPECT_TRUE(completionOutput.find("\r\n", afterOptionsPos) != std::string::npos)
       << "Should show newline after options";
       
-    EXPECT_TRUE(stringEndsWith(completionOutput, "user@/folder1 > subfolder"))
-      << "Output should end with 'user@/folder1 > subfolder'";
+    EXPECT_TRUE(stringEndsWith(completionOutput, "user@/folder1> subfolder"))
+      << "Output should end with 'user@/folder1> subfolder'";
   }
 
   TEST_F(TabCompletionStreamTest, CommandCompletion)
@@ -424,16 +424,16 @@ namespace cliService
     EXPECT_TRUE(completionOutput.find("c\r\n") == 0)
       << "Output should start with newline";
       
-    EXPECT_TRUE(completionOutput.find("cmd1   cmd2   common   ") != std::string::npos)
+    EXPECT_TRUE(completionOutput.find("   cmd1   cmd2   common") != std::string::npos)
       << "Should show commands without slashes and with consistent spacing";
       
-    size_t optionsPos = completionOutput.find("cmd1   cmd2   common   ");
-    size_t afterOptionsPos = optionsPos + strlen("cmd1   cmd2   common   ");
+    size_t optionsPos = completionOutput.find("   cmd1   cmd2   common");
+    size_t afterOptionsPos = optionsPos + strlen("   cmd1   cmd2   common");
     EXPECT_TRUE(completionOutput.find("\r\n", afterOptionsPos) != std::string::npos)
       << "Should show newline after options";
       
-    EXPECT_TRUE(stringEndsWith(completionOutput, "user@/commands > c"))
-      << "Output should end with 'user@/commands > c'";
+    EXPECT_TRUE(stringEndsWith(completionOutput, "user@/commands> c"))
+      << "Output should end with 'user@/commands> c'";
   }
 
   TEST_F(TabCompletionStreamTest, ParentDirectoryNavigationFormatting)
@@ -453,15 +453,15 @@ namespace cliService
     EXPECT_TRUE(completionOutput.find("../../sub\r\n") == 0)
       << "Output should start with newline";
       
-    EXPECT_TRUE(completionOutput.find("subfolder1/   subfolder2/   ") != std::string::npos)
+    EXPECT_TRUE(completionOutput.find("   subfolder1/   subfolder2/") != std::string::npos)
       << "Should show all valid targets with consistent spacing";
       
-    size_t optionsPos = completionOutput.find("subfolder1/   subfolder2/   ");
-    size_t afterOptionsPos = optionsPos + strlen("subfolder1/   subfolder2/   ");
+    size_t optionsPos = completionOutput.find("   subfolder1/   subfolder2/");
+    size_t afterOptionsPos = optionsPos + strlen("   subfolder1/   subfolder2/");
     EXPECT_TRUE(completionOutput.find("\r\n", afterOptionsPos) != std::string::npos)
       << "Should show newline after options";
       
-    EXPECT_TRUE(stringEndsWith(completionOutput, "user@/folder1/subfolder1/deep > ../../subfolder"))
+    EXPECT_TRUE(stringEndsWith(completionOutput, "user@/folder1/subfolder1/deep> ../../subfolder"))
       << "Output should end with original path and input";
   }
 
@@ -482,15 +482,15 @@ namespace cliService
     EXPECT_TRUE(completionOutput.find("/folder2/t\r\n") == 0)
       << "Output should start with newline";
       
-    EXPECT_TRUE(completionOutput.find("target1/   target2/   ") != std::string::npos)
+    EXPECT_TRUE(completionOutput.find("   target1/   target2/") != std::string::npos)
       << "Should show targets with consistent spacing";
       
-    size_t optionsPos = completionOutput.find("target1/   target2/   ");
-    size_t afterOptionsPos = optionsPos + strlen("target1/   target2/   ");
+    size_t optionsPos = completionOutput.find("   target1/   target2/");
+    size_t afterOptionsPos = optionsPos + strlen("   target1/   target2/");
     EXPECT_TRUE(completionOutput.find("\r\n", afterOptionsPos) != std::string::npos)
       << "Should show newline after options";
       
-    EXPECT_TRUE(stringEndsWith(completionOutput, "user@/folder1/subfolder1 > /folder2/target"))
+    EXPECT_TRUE(stringEndsWith(completionOutput, "user@/folder1/subfolder1> /folder2/target"))
       << "Output should end with current directory and absolute path input";
   }
 
@@ -513,7 +513,7 @@ namespace cliService
       << "Output should start with completion 'ested/'";
       
     std::string fullOutput = initialOutput + completionOutput;
-    EXPECT_TRUE(stringEndsWith(fullOutput, "user@/folder1/subfolder1 > deep/nested/"))
+    EXPECT_TRUE(stringEndsWith(fullOutput, "user@/folder1/subfolder1> deep/nested/"))
       << "Final output should show complete nested path";
   }
 
@@ -532,7 +532,7 @@ namespace cliService
       << "Output should only show the original input";
       
     std::string fullOutput = initialOutput + completionOutput;
-    EXPECT_TRUE(stringEndsWith(fullOutput, "user@/ > nonexistent"))
+    EXPECT_TRUE(stringEndsWith(fullOutput, "user@/> nonexistent"))
       << "Final output should show unchanged input";
   }
 
@@ -557,15 +557,15 @@ namespace cliService
     EXPECT_TRUE(completionOutput.find("\r\n") != std::string::npos)
       << "Should show newline after prefix completion";
       
-    EXPECT_TRUE(completionOutput.find("cmd1   cmd2   ") != std::string::npos)
+    EXPECT_TRUE(completionOutput.find("   cmd1   cmd2") != std::string::npos)
       << "Should show remaining options with consistent spacing";
       
-    size_t optionsPos = completionOutput.find("cmd1   cmd2   ");
-    size_t afterOptionsPos = optionsPos + strlen("cmd1   cmd2   ");
+    size_t optionsPos = completionOutput.find("   cmd1   cmd2");
+    size_t afterOptionsPos = optionsPos + strlen("   cmd1   cmd2");
     EXPECT_TRUE(completionOutput.find("\r\n", afterOptionsPos) != std::string::npos)
       << "Should show newline after options";
       
-    EXPECT_TRUE(stringEndsWith(completionOutput, "user@/commands > cmd"))
+    EXPECT_TRUE(stringEndsWith(completionOutput, "user@/commands> cmd"))
       << "Output should end with completed prefix";
   }
 
