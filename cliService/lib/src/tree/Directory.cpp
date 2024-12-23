@@ -57,7 +57,7 @@ namespace cliService
     while (rootNode->getParent() != nullptr) {
       rootNode = rootNode->getParent();
     }
-    
+
     // First remove const, then cast to Directory*
     Directory* rootDir = const_cast<Directory*>(static_cast<const Directory*>(rootNode));
     PathResolver resolver(*rootDir);
@@ -79,7 +79,7 @@ namespace cliService
       [&name, this](const auto& child) {
         return getNodePtr(child)->getName() == name;
       });
-    
+
     assert(it == _children.end() && "Name collision in directory");
   }
 

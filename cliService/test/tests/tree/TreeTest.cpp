@@ -105,6 +105,7 @@ namespace cliService
   TEST_F(TreeTest, FindWithInvalidPath)
   {
     auto& cmd = _root->addDynamicCommand<TestCommand>("test", AccessLevel::Admin);
+    (void)cmd;
 
     // Trying to traverse through a command
     NodeIf* found = _root->findNode({"test", "subpath"});
@@ -114,6 +115,7 @@ namespace cliService
   TEST_F(TreeTest, CommandExecution)
   {
     auto& cmd = _root->addDynamicCommand<TestCommand>("test", AccessLevel::Admin);
+    (void)cmd;
     
     std::vector<std::string> args = {"arg1", "arg2"};
     NodeIf* found = _root->findNode({"test"});
@@ -129,6 +131,7 @@ namespace cliService
   {
     std::vector<std::string> visited;
     _root->traverse([&visited](const NodeIf& node, size_t depth) {
+      (void)depth;
       visited.push_back(node.getName());
     });
 
@@ -303,6 +306,7 @@ namespace cliService
     // Count only Admin level nodes
     int adminCount = 0;
     _root->traverse([&adminCount](const NodeIf& node, size_t depth) {
+      (void)depth;
       if (node.getAccessLevel() == AccessLevel::Admin) {
         adminCount++;
       }
@@ -321,6 +325,7 @@ namespace cliService
     // Count nodes at different depths
     std::vector<int> nodesAtDepth(5, 0);
     _root->traverse([&nodesAtDepth](const NodeIf& node, size_t depth) {
+      (void)node;
       if (depth < nodesAtDepth.size()) {
         nodesAtDepth[depth]++;
       }
@@ -465,6 +470,7 @@ protected:
     // Add dynamic directory to static directory
     auto& dynamicDir = staticDir.addDynamicDirectory("dynamic", AccessLevel::User);
     auto& dynamicCmd = dynamicDir.addDynamicCommand<TestCommand>("test", AccessLevel::Admin);
+    (void)dynamicCmd;
     
     // Verify structure
     EXPECT_NE(_root->findNode({"static"}), nullptr);

@@ -22,9 +22,9 @@ namespace cliService
     {"clear"  , &CLIService::handleGlobalClear}
   };
 
+
   CLIService::CLIService(CLIServiceConfiguration config)
-    : _messages(std::move(config._messages))
-    , _ioStream(config._ioStream)
+    : _ioStream(config._ioStream)
     , _inputParser(_ioStream, _currentState, config._inputTimeout_ms, config._historySize)
     , _users(std::move(config._users))
     , _currentUser(std::nullopt)
@@ -32,6 +32,7 @@ namespace cliService
     , _currentDirectory(getRootPtr())
     , _pathResolver(*getRootPtr())
     , _currentState(CLIState::Inactive)
+    , _messages(std::move(config._messages))
   {
     assert(!_users.empty() && "User list cannot be empty");
     assert(getRootPtr() != nullptr && "Root directory cannot be null");
@@ -61,7 +62,7 @@ namespace cliService
 
     // Get response from appropriate handler
     Response response = handleRequest(**requestPtr);
-    
+
     // Handle output
     handleOutput(response);
   }
@@ -97,10 +98,8 @@ namespace cliService
   bool CLIService::validatePathAccess(const NodeIf* node) const
   {
     assert(_currentUser && "No user logged in");
-    
-    if (!node) {
-      return false;
-    }
+
+    if (!node) { return false; }
 
     // Check access levels up the tree
     const NodeIf* current = node;
@@ -113,7 +112,7 @@ namespace cliService
 
       current = current->getParent();
     }
-    
+
     return true;
   }
 
@@ -145,7 +144,8 @@ namespace cliService
     if (node.isDirectory()) {
       nodeStr += "/";
     }
-    else if (auto* cmd = dynamic_cast<const CommandIf*>(&node)) {
+    else if (auto* cmd = dynamic_cast<const CommandIf*>(&node))
+    {
       if (showCmdDescription && !cmd->getDescription().empty()) {
         nodeStr += " - " + cmd->getDescription();
       }
@@ -190,7 +190,8 @@ namespace cliService
   }
 
 
-  Response CLIService::handleRequest(const InvalidLoginRequest& request) {
+  Response CLIService::handleRequest(const InvalidLoginRequest& request)
+  {
     (void)request;
     return Response::error(_messages.getInvalidLoginMessage());
   }
@@ -294,7 +295,7 @@ namespace cliService
     response.setPostfixNewLine(false);
 
     auto currentInput = _inputParser.getBuffer();
-    
+
     // Skip directory handling for paths with parent references
     if (currentInput.find("..") == std::string::npos)
     {
@@ -521,19 +522,19 @@ namespace cliService
     if (str.empty()) { return substrings; }
 
     assert(!delimiter.empty() && "Delimiter cannot be empty");
-    
+
     size_t start = 0;
     size_t end = str.find(delimiter);
-    
+
     while (end != std::string::npos)
     {
       substrings.push_back(str.substr(start, end - start));
       start = end + delimiter.length();
       end = str.find(delimiter, start);
     }
-    
+
     substrings.push_back(str.substr(start));
-    
+
     return substrings;
   }
 

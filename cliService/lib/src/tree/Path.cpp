@@ -27,8 +27,9 @@ namespace cliService
   std::vector<std::string> Path::parseElements(std::string_view pathStr, bool& isAbsolute)
   {
     std::vector<std::string> elements;
-    
-    if (pathStr.empty()) {
+
+    if (pathStr.empty())
+    {
       isAbsolute = false;
       return elements;
     }
@@ -47,7 +48,7 @@ namespace cliService
           if (i > start) {
             elements.push_back(std::string(pathStr.substr(start, i - start)));
           }
-          
+
           inElement = false;
         }
       }
@@ -148,7 +149,7 @@ namespace cliService
     
     // Build relative path
     std::vector<std::string> relativeElements;
-    
+
     // Add ".." for each element in base after common prefix
     for (size_t i = commonPrefix; i < base._elements.size(); i++) {
       relativeElements.push_back("..");
@@ -156,7 +157,7 @@ namespace cliService
 
     // Add remaining elements from this path
     relativeElements.insert(relativeElements.end(), _elements.begin() + commonPrefix, _elements.end());
-        
+
     return Path(std::move(relativeElements), false);
   }
 

@@ -21,7 +21,7 @@ namespace cliService
 
     const std::string& getName() const { return _name; };
     AccessLevel getAccessLevel() const { return _accessLevel; }
-    
+
     NodeIf* getParent() const { return _parent; }
     void setParent(NodeIf* parent) { _parent = parent; }
 

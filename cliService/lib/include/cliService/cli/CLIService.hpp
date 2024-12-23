@@ -22,10 +22,8 @@ namespace cliService
     Response handleRequest(const RequestBase& request);
     CLIState getState() const { return _currentState; }
 
-    const CLIMessages _messages;
-
   protected:
-  
+
     enum class NodeDisplayMode {
       Tree,       // Show full tree with hierarchical indentation
       FlatList    // Show only immediate children with fixed indentation
@@ -73,6 +71,7 @@ namespace cliService
     PathResolver _pathResolver;
 
     CLIState _currentState;
+    const CLIMessages _messages;
 
     using GlobalCommandHandler = Response (CLIService::*)(const std::vector<std::string>&);
     static const std::unordered_map<std::string_view, GlobalCommandHandler> GLOBAL_COMMAND_HANDLERS;

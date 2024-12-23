@@ -13,8 +13,7 @@ namespace cliService
 
   class CommandRequest : public RequestBase
   {
-  public: 
-
+  public:
     explicit CommandRequest(Path path, std::vector<std::string> args)
       : _path(std::move(path))
       , _args(std::move(args))

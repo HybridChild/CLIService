@@ -5,10 +5,10 @@ namespace cliService
 {
 
   InputParser::InputParser(CharIOStreamIf& ioStream, const CLIState& currentState, uint32_t inputTimeout_ms, size_t historySize)
-    : _ioStream(ioStream)
+    : _currentState(currentState)
+    , _ioStream(ioStream)
     , _inputTimeout_ms(inputTimeout_ms)
     , _history(historySize)
-    , _currentState(currentState)
     , _inEscapeSequence(false)
     , _escapeBuffer(MAX_ESCAPE_LENGTH)
     , _escapeIndex(0)
@@ -23,8 +23,39 @@ namespace cliService
         return createRequest();
       }
     }
-    
+
     return std::nullopt;
+  }
+
+
+  std::optional<LoginRequest> InputParser::parseToLoginRequest(const std::string& input)
+  {
+    size_t delimPos = input.find(':');
+    
+    if (delimPos == std::string::npos) {
+      return std::nullopt;
+    }
+
+    std::string username = input.substr(0, delimPos);
+    std::string password = input.substr(delimPos + 1);
+
+    if (username.empty() || password.empty()) {
+      return std::nullopt;
+    }
+
+    return LoginRequest(std::move(username), std::move(password));
+  }
+
+  std::unique_ptr<CommandRequest> InputParser::parseToCommandRequest(std::string_view input)
+  {
+    ParsedPathAndArgs parsedPath = parseToPathAndArgs(input);
+    return std::make_unique<CommandRequest>(parsedPath.path, std::move(parsedPath.args));
+  }
+
+  std::unique_ptr<TabCompletionRequest> InputParser::parseToTabCompletionRequest(std::string_view input)
+  {
+    ParsedPathAndArgs parsedPath = parseToPathAndArgs(input);
+    return std::make_unique<TabCompletionRequest>(parsedPath.path);
   }
 
 
@@ -79,7 +110,7 @@ namespace cliService
       if (!_buffer.empty())
       {
         _ioStream.putString("\r\n");  // Echo newline
-        _lastTrigger = ActionTrigger::Enter;
+        _trigger = ActionTrigger::Enter;
         return true;
       }
 
@@ -118,7 +149,7 @@ namespace cliService
       case TAB:
         if (_currentState == CLIState::LoggedIn)
         {
-          _lastTrigger = ActionTrigger::Tab;
+          _trigger = ActionTrigger::Tab;
           return true;
         }
         break;
@@ -154,7 +185,7 @@ namespace cliService
           if (_history.getCurrentIndex() == _history.size()) {
             _savedBuffer = _buffer;
           }
-          
+
           // Clear current line
           while (!_buffer.empty()) {
             _ioStream.putString("\b \b");
@@ -165,12 +196,12 @@ namespace cliService
           std::string prevCmd = _history.getPreviousCommand();
           _buffer = prevCmd;
           _ioStream.putString(prevCmd);
-          
-          _lastTrigger = ActionTrigger::ArrowUp;
+
+          _trigger = ActionTrigger::ArrowUp;
           return true;
         }
         break;
-      
+
       case 'B': // Down arrow
         if (_currentState == CLIState::LoggedIn)
         {
@@ -189,11 +220,11 @@ namespace cliService
             nextCmd = _savedBuffer;
             _savedBuffer.clear();
           }
-          
+
           _buffer = nextCmd;
           _ioStream.putString(nextCmd);
-          
-          _lastTrigger = ActionTrigger::ArrowDown;
+
+          _trigger = ActionTrigger::ArrowDown;
           return true;
         }
         break;
@@ -218,7 +249,7 @@ namespace cliService
     if (_currentState == CLIState::LoggedOut)
     {
       size_t colonPos = _buffer.find(':');
-      
+
       // If we've found a colon and this character is after it, mask it
       if (colonPos != std::string::npos && _buffer.length() > colonPos + 1) {
         _ioStream.putChar('*');
@@ -227,8 +258,7 @@ namespace cliService
         _ioStream.putChar(c);
       }
     }
-    else
-    {
+    else {
       _ioStream.putChar(c);
     }
   }
@@ -254,10 +284,10 @@ namespace cliService
 
       case CLIState::LoggedIn:
       {
-        if (_lastTrigger == ActionTrigger::Enter)
+        if (_trigger == ActionTrigger::Enter)
         {
           if (_buffer.empty()) { return std::nullopt; }
-          
+
           _history.addCommand(_buffer);
           _history.resetNavigation();
           _savedBuffer.clear();
@@ -266,13 +296,13 @@ namespace cliService
           return request;
         }
 
-        if(_lastTrigger == ActionTrigger::Tab)
+        if(_trigger == ActionTrigger::Tab)
         {
           auto request = parseToTabCompletionRequest(_buffer);
           return request;
         }
 
-        if (_lastTrigger == ActionTrigger::ArrowUp || _lastTrigger == ActionTrigger::ArrowDown) {
+        if (_trigger == ActionTrigger::ArrowUp || _trigger == ActionTrigger::ArrowDown) {
           return std::nullopt;
         }
       }
@@ -312,6 +342,7 @@ namespace cliService
       
       // Skip spaces between path and args
       size_t argsStart = spacePos + 1;
+
       while (argsStart < input.length() && input[argsStart] == ' ') {
         argsStart++;
       }

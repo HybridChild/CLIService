@@ -22,7 +22,7 @@ namespace cliService
     {
       // Get the absolute path of current directory
       Path currentPath = getAbsolutePath(currentDir);
-      
+
       // Join the paths and normalize
       Path absolutePath = currentPath.join(path).normalized();
       return resolveAbsolute(absolutePath);

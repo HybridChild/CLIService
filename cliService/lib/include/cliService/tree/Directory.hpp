@@ -49,18 +49,18 @@ namespace cliService
       _children.emplace_back(std::move(dir));
       return *dirPtr;
     }
-    
+
     template<typename T>
     T& addDynamicCommand(std::string name, AccessLevel level, std::string description = "")
     {
       static_assert(std::is_base_of_v<CommandIf, T>, "T must derive from CommandIf");
-      
+
       checkNameCollision(name);
       auto cmd = std::make_unique<T>(std::move(name), level, std::move(description));
       T* cmdPtr = cmd.get();
       cmdPtr->setParent(this);
       _children.emplace_back(std::move(cmd));
-      
+
       return *cmdPtr;
     }
 

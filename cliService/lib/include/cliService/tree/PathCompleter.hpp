@@ -54,20 +54,27 @@ namespace cliService
 
         for (const auto& element : elements)
         {
-          if (element == "..") {
+          if (element == "..")
+          {
             if (currentTarget->getParent()) {
               currentTarget = static_cast<const Directory*>(currentTarget->getParent());
             }
+
             continue;
           }
+
           if (element == ".") {
             continue;
           }
+
           auto* nextNode = currentTarget->findNode({element});
-          if (!nextNode) {
+
+          if (!nextNode)
+          {
             isValid = false;
             break;
           }
+
           // If this is not the last element, or if we end with a slash,
           // the node must be a directory
           if (!nextNode->isDirectory() && 
@@ -75,10 +82,12 @@ namespace cliService
             isValid = false;
             break;
           }
+
           if (nextNode->getAccessLevel() > accessLevel) {
             isValid = false;
             break;
           }
+
           if (nextNode->isDirectory()) {
             currentTarget = static_cast<const Directory*>(nextNode);
           }

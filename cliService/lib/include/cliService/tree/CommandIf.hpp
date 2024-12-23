@@ -33,7 +33,7 @@ namespace cliService
         std::string argStr = expected == 1 ? "argument" : "arguments";
         response += "Expected " + std::to_string(expected) + " " + argStr + ". Try again.";
       }
-      
+
       return Response(response, ResponseStatus::InvalidArguments);
     }
 
