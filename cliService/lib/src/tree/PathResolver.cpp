@@ -48,16 +48,13 @@ namespace cliService
     // Process each element of the normalized path
     for (const auto& element : path.elements())
     {
-      if (!current->isDirectory()) { 
-        return nullptr; 
-      }
+      if (!current->isDirectory()) { return nullptr; }
 
       auto* dir = static_cast<Directory*>(current);
 
       current = dir->findNode({element});
-      if (!current) { 
-        return nullptr;
-      }
+      
+      if (!current) { return nullptr; }
     }
 
     return current;
