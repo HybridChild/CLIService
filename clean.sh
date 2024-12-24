@@ -1,2 +1,5 @@
 #!/bin/bash
-rm -rf out
+
+if [ -d "out" ]; then
+    rm -rf out || exit 1
+fi

@@ -1,2 +1,9 @@
 @echo off
-.\out\build\bin\cliService_example.exe
+setlocal
+if "%1"=="" (
+    set CONFIG=Debug
+) else (
+    set CONFIG=%1
+)
+.\out\build\bin\%CONFIG%\cliService_example.exe
+endlocal
