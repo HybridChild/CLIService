@@ -25,7 +25,8 @@ namespace cliService
 
   CLIService::CLIService(CLIServiceConfiguration config)
     : _ioStream(config._ioStream)
-    , _inputParser(_ioStream, _currentState, config._inputTimeout_ms, config._historySize)
+    , _inputParser(_ioStream, _currentState, config._inputTimeout_ms)
+    , _commandHistory(config._historySize)
     , _users(std::move(config._users))
     , _currentUser(std::nullopt)
     , _rootDirectory(std::move(config._rootDirectory))
@@ -84,6 +85,10 @@ namespace cliService
 
     if (const auto* invalidLoginRequest = dynamic_cast<const InvalidLoginRequest*>(&request)) {
       return handleRequest(*invalidLoginRequest);
+    }
+
+    if (const auto* historyRequest = dynamic_cast<const HistoryNavigationRequest*>(&request)) {
+      return handleRequest(*historyRequest);
     }
 
     return Response(static_cast<std::string>("Unknown request type"), ResponseStatus::Error);
@@ -269,6 +274,10 @@ namespace cliService
       response = cmd->execute(request.getArgs());
     }
 
+    if (!request.getPath().isEmpty()) {
+      _commandHistory.addCommand(request.getOriginalInput());
+    }
+
     return response;
   }
 
@@ -303,7 +312,7 @@ namespace cliService
 
       if (node && node->isDirectory() && !currentInput.empty() && currentInput.back() != '/')
       {
-        _inputParser.appendToBuffer("/");
+        _inputParser.appendToBuffer("/", false);
         response.appendToMessage(std::string("/"));
         return response;
       }
@@ -334,7 +343,7 @@ namespace cliService
       
       if (!result.fillCharacters.empty())
       {
-        _inputParser.appendToBuffer(result.fillCharacters);
+        _inputParser.appendToBuffer(result.fillCharacters, false);
         response.appendToMessage(currentInput + result.fillCharacters);
       }
       else {
@@ -344,16 +353,53 @@ namespace cliService
     else if (!result.fillCharacters.empty())
     {
       // For single match, just append completion
-      _inputParser.appendToBuffer(result.fillCharacters);
+      _inputParser.appendToBuffer(result.fillCharacters, false);
       response.appendToMessage(result.fillCharacters);
       
       if (result.isDirectory)
       {
-        _inputParser.appendToBuffer("/");
+        _inputParser.appendToBuffer("/", false);
         response.appendToMessage(std::string("/"));
       }
     }
 
+    return response;
+  }
+
+
+  Response CLIService::handleRequest(const HistoryNavigationRequest& request)
+  {
+    // First time pressing up, save current buffer
+    if (request.getDirection() == HistoryNavigationRequest::Direction::Previous &&
+        _commandHistory.getCurrentIndex() == _commandHistory.size())
+    {
+      _savedBuffer = request.getCurrentBuffer();
+    }
+
+    std::string historyCommand;
+
+    if (request.getDirection() == HistoryNavigationRequest::Direction::Previous) {
+      historyCommand = _commandHistory.getPreviousCommand();
+    }
+    else
+    {
+      historyCommand = _commandHistory.getNextCommand();
+
+      if (historyCommand.empty() && !_savedBuffer.empty())
+      {
+        historyCommand = _savedBuffer;
+        _savedBuffer.clear();
+      }
+    }
+
+    _inputParser.replaceBuffer(historyCommand);
+
+    Response response = Response::success();
+    response.setShowPrompt(false);
+    response.setIndentMessage(false);
+    response.setPrefixNewLine(false);
+    response.setPostfixNewLine(false);
+    response.setInlineMessage(true);
     return response;
   }
 

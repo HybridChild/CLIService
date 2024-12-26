@@ -4,11 +4,10 @@
 namespace cliService
 {
 
-  InputParser::InputParser(CharIOStreamIf& ioStream, const CLIState& currentState, uint32_t inputTimeout_ms, size_t historySize)
+  InputParser::InputParser(CharIOStreamIf& ioStream, const CLIState& currentState, uint32_t inputTimeout_ms)
     : _currentState(currentState)
     , _ioStream(ioStream)
     , _inputTimeout_ms(inputTimeout_ms)
-    , _history(historySize)
     , _inEscapeSequence(false)
     , _escapeBuffer(MAX_ESCAPE_LENGTH)
     , _escapeIndex(0)
@@ -25,6 +24,28 @@ namespace cliService
     }
 
     return std::nullopt;
+  }
+
+
+  void InputParser::replaceBuffer(const std::string& newContent, bool display)
+  {
+    if (display)
+    {
+      clearDisplayedBuffer();
+      _ioStream.putString(newContent);
+    }
+
+    _buffer = newContent;
+  }
+
+
+  void InputParser::appendToBuffer(const std::string& newContent, bool display)
+  {
+    if (display) {
+      _ioStream.putString(newContent);
+    }
+
+    _buffer += newContent;
   }
 
 
@@ -46,16 +67,41 @@ namespace cliService
     return LoginRequest(std::move(username), std::move(password));
   }
 
+
   std::unique_ptr<CommandRequest> InputParser::parseToCommandRequest(std::string_view input)
   {
     ParsedPathAndArgs parsedPath = parseToPathAndArgs(input);
-    return std::make_unique<CommandRequest>(parsedPath.path, std::move(parsedPath.args));
+    return std::make_unique<CommandRequest>(parsedPath.path, std::move(parsedPath.args), input);
   }
+
 
   std::unique_ptr<TabCompletionRequest> InputParser::parseToTabCompletionRequest(std::string_view input)
   {
     ParsedPathAndArgs parsedPath = parseToPathAndArgs(input);
     return std::make_unique<TabCompletionRequest>(parsedPath.path);
+  }
+
+
+  std::unique_ptr<HistoryNavigationRequest> InputParser::parseToHistoryNavigationRequest(std::string_view input, ActionTrigger trigger)
+  {
+    HistoryNavigationRequest::Direction direction;
+
+    switch (trigger)
+    {
+    case ActionTrigger::ArrowUp:
+      direction = HistoryNavigationRequest::Direction::Previous;
+      break;
+    case ActionTrigger::ArrowDown:
+      direction = HistoryNavigationRequest::Direction::Next;
+      break;
+    case ActionTrigger::Enter:
+    case ActionTrigger::Tab:
+    default:
+      assert(false);
+      break;
+    }
+
+    return std::make_unique<HistoryNavigationRequest>(direction, input);
   }
 
 
@@ -181,22 +227,6 @@ namespace cliService
       case 'A': // Up arrow
         if (_currentState == CLIState::LoggedIn)
         {
-          // Save current buffer first time we press up
-          if (_history.getCurrentIndex() == _history.size()) {
-            _savedBuffer = _buffer;
-          }
-
-          // Clear current line
-          while (!_buffer.empty()) {
-            _ioStream.putString("\b \b");
-            _buffer.pop_back();
-          }
-
-          // Show previous command
-          std::string prevCmd = _history.getPreviousCommand();
-          _buffer = prevCmd;
-          _ioStream.putString(prevCmd);
-
           _trigger = ActionTrigger::ArrowUp;
           return true;
         }
@@ -205,25 +235,6 @@ namespace cliService
       case 'B': // Down arrow
         if (_currentState == CLIState::LoggedIn)
         {
-          // Clear current line
-          while (!_buffer.empty())
-          {
-            _ioStream.putString("\b \b");
-            _buffer.pop_back();
-          }
-
-          // Show next command or restore saved buffer
-          std::string nextCmd = _history.getNextCommand();
-
-          if (nextCmd.empty() && !_savedBuffer.empty())
-          {
-            nextCmd = _savedBuffer;
-            _savedBuffer.clear();
-          }
-
-          _buffer = nextCmd;
-          _ioStream.putString(nextCmd);
-
           _trigger = ActionTrigger::ArrowDown;
           return true;
         }
@@ -264,6 +275,14 @@ namespace cliService
   }
 
 
+  void InputParser::clearDisplayedBuffer()
+  {
+    for (size_t i = 0; i < _buffer.length(); ++i) {
+      _ioStream.putString("\b \b");
+    }
+  }
+
+
   std::optional<std::unique_ptr<RequestBase>> InputParser::createRequest()
   {
     switch (_currentState)
@@ -288,9 +307,6 @@ namespace cliService
         {
           if (_buffer.empty()) { return std::nullopt; }
 
-          _history.addCommand(_buffer);
-          _history.resetNavigation();
-          _savedBuffer.clear();
           auto request = parseToCommandRequest(_buffer);
           _buffer.clear();
           return request;
@@ -303,7 +319,7 @@ namespace cliService
         }
 
         if (_trigger == ActionTrigger::ArrowUp || _trigger == ActionTrigger::ArrowDown) {
-          return std::nullopt;
+          return parseToHistoryNavigationRequest(_buffer, _trigger);
         }
       }
 

@@ -17,7 +17,7 @@ namespace cliService
     void SetUp() override
     {
       _currentState = CLIState::LoggedIn;
-      _inputParser = std::make_unique<InputParser>(_ioStream, _currentState, INPUT_TIMEOUT_MS, HISTORY_SIZE);
+      _inputParser = std::make_unique<InputParser>(_ioStream, _currentState, INPUT_TIMEOUT_MS);
     }
 
     CharIOStreamMock _ioStream;
@@ -194,52 +194,6 @@ namespace cliService
     EXPECT_NE(dynamic_cast<InvalidLoginRequest*>(request->get()), nullptr);
   }
 
-  TEST_F(InputParserTest, HistoryNavigation)
-  {
-    // Add commands to history
-    _ioStream.queueInput("command1\n");
-    processAllInput();
-    _ioStream.queueInput("command2\n");
-    processAllInput();
-    _ioStream.clearOutput();
-
-    // Navigate up
-    _ioStream.queueInput({0x1B, '[', 'A'});  // Up arrow
-    processAllInput();
-    EXPECT_EQ(_ioStream.getOutput(), "command2");
-
-    // Navigate down
-    _ioStream.clearOutput();
-    _ioStream.queueInput({0x1B, '[', 'B'});  // Down arrow
-    processAllInput();
-    EXPECT_EQ(_ioStream.getOutput(), generateClearSequence(8));
-  }
-
-  TEST_F(InputParserTest, SaveBufferDuringHistoryNavigation)
-  {
-    // Add commands to history and start typing
-    _ioStream.queueInput("command1\n");
-    processAllInput();
-    _ioStream.queueInput("new");
-    processAllInput();
-    _ioStream.clearOutput();
-
-    // Navigate up
-    _ioStream.queueInput({0x1B, '[', 'A'});  // Up arrow
-    processAllInput();
-
-    // Navigate down to restore buffer
-    _ioStream.queueInput({0x1B, '[', 'B'});  // Down arrow
-    processAllInput();
-
-    std::string expectedOutput = generateClearSequence(3) +  // Clear "new"
-                                "command1" +                  // Show history
-                                generateClearSequence(8) +    // Clear history
-                                "new";                        // Restore buffer
-    
-    EXPECT_EQ(_ioStream.getOutput(), expectedOutput);
-  }
-
   TEST_F(InputParserTest, ComplexPathHandling)
   {
     _ioStream.queueInput("dir1/../../dir2/command arg1\n");
@@ -260,4 +214,40 @@ namespace cliService
     ASSERT_EQ(commandRequest->getArgs().size(), 1);
     EXPECT_EQ(commandRequest->getArgs()[0], "arg1");
   }
+
+  TEST_F(InputParserTest, BufferManagementBasic)
+  {
+    _inputParser->replaceBuffer("test");
+    EXPECT_EQ(_inputParser->getBuffer(), "test");
+    EXPECT_EQ(_ioStream.getOutput(), "test");
+
+    _ioStream.clearOutput();
+    _inputParser->replaceBuffer("new");
+    // Verify both buffer clear and new content
+    EXPECT_EQ(_ioStream.getOutput(), "\b \b\b \b\b \b\b \bnew");
+    EXPECT_EQ(_inputParser->getBuffer(), "new");
+  }
+
+  TEST_F(InputParserTest, BufferAppending)
+  {
+    _inputParser->replaceBuffer("base");
+    _ioStream.clearOutput();
+    
+    _inputParser->appendToBuffer(" extra");
+    EXPECT_EQ(_inputParser->getBuffer(), "base extra");
+    EXPECT_EQ(_ioStream.getOutput(), " extra");
+  }
+
+  TEST_F(InputParserTest, HistoryNavigationRequestGeneration)
+  {
+    _ioStream.queueInput({0x1B, '[', 'A'}); // Up arrow
+    auto request = processAllInput();
+    
+    ASSERT_TRUE(request.has_value());
+    auto* historyRequest = dynamic_cast<HistoryNavigationRequest*>(request.value().get());
+    ASSERT_NE(historyRequest, nullptr);
+    EXPECT_EQ(historyRequest->getDirection(), HistoryNavigationRequest::Direction::Previous);
+    EXPECT_EQ(historyRequest->getCurrentBuffer(), "");
+  }
+
 }

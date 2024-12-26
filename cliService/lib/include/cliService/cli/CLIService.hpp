@@ -1,6 +1,7 @@
 #pragma once
 #include "cliService/cli/CLIServiceConfiguration.hpp"
 #include "cliService/cli/CLIState.hpp"
+#include "cliService/cli/CommandHistory.hpp"
 #include "cliService/cli/InputParser.hpp"
 #include "cliService/tree/Directory.hpp"
 #include "cliService/tree/Path.hpp"
@@ -47,6 +48,7 @@ namespace cliService
     Response handleRequest(const LoginRequest& request);
     Response handleRequest(const CommandRequest& request);
     Response handleRequest(const TabCompletionRequest& request);
+    Response handleRequest(const HistoryNavigationRequest& request);
 
     // Global command handlers
     Response handleGlobalCommand(const std::string_view& command, const std::vector<std::string>& args);
@@ -62,6 +64,9 @@ namespace cliService
 
     CharIOStreamIf& _ioStream;
     InputParser _inputParser;
+
+    CommandHistory _commandHistory;
+    std::string _savedBuffer;  // For saving current input during history navigation
 
     std::vector<User> _users;
     std::optional<User> _currentUser;

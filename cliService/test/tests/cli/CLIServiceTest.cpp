@@ -310,4 +310,108 @@ namespace cliService
     EXPECT_THAT(adminOutput, testing::HasSubstr("admin/"));
   }
 
+  TEST_F(CLIServiceTest, CommandHistoryBasic)
+  {
+    _service->activate();
+    _ioStream.queueInput("admin:admin123\n");
+    _service->service();
+    _ioStream.clearOutput();
+
+    EXPECT_CALL(*_publicCmd, execute(testing::ElementsAre("first")))
+      .WillOnce(testing::Return(Response::success(std::string("Command executed"))));
+
+    // Execute first command
+    _ioStream.queueInput("public/info first\n");
+    _service->service();
+
+    EXPECT_CALL(*_publicCmd, execute(testing::ElementsAre("second")))
+      .WillOnce(testing::Return(Response::success(std::string("Command executed"))));
+    
+    // Execute second command
+    _ioStream.queueInput("public/info second\n");
+    _service->service();
+    _ioStream.clearOutput();
+
+    // Navigate up
+    _ioStream.queueInput({0x1B, '[', 'A'}); // Up arrow
+    _service->service();
+    
+    // Should show most recent command
+    EXPECT_THAT(_ioStream.getOutput(), testing::HasSubstr("public/info second"));
+  }
+
+  TEST_F(CLIServiceTest, CommandHistoryWithPartialInput)
+  {
+    _service->activate();
+    _ioStream.queueInput("admin:admin123\n");
+    _service->service();
+
+    EXPECT_CALL(*_publicCmd, execute(testing::ElementsAre("test")))
+      .WillOnce(testing::Return(Response::success(std::string("Command executed"))));
+
+    // Add command to history
+    _ioStream.queueInput("public/info test\n");
+    _service->service();
+    _ioStream.clearOutput();
+
+    // Start typing new command
+    _ioStream.queueInput("pub");
+    _service->service();
+    _ioStream.clearOutput();
+
+    // Navigate up - should save current input
+    _ioStream.queueInput({0x1B, '[', 'A'});
+    _service->service();
+    
+    // Should show history and clear current input
+    std::string output = _ioStream.getOutput();
+    EXPECT_THAT(output, testing::HasSubstr("\b \b\b \b\b \b")); // Clear "pub"
+    EXPECT_THAT(output, testing::HasSubstr("public/info test")); // Show history
+
+    // Navigate down - should restore original input
+    _ioStream.clearOutput();
+    _ioStream.queueInput({0x1B, '[', 'B'});
+    _service->service();
+    
+    EXPECT_THAT(_ioStream.getOutput(), testing::HasSubstr("pub"));
+  }
+
+  TEST_F(CLIServiceTest, CommandHistoryEdgeCases)
+  {
+    _service->activate();
+    _ioStream.queueInput("admin:admin123\n");
+    _service->service();
+    _ioStream.clearOutput();
+
+    // Try navigating history when empty
+    _ioStream.queueInput({0x1B, '[', 'A'});
+    _service->service();
+    EXPECT_EQ(_ioStream.getOutput(), "");
+
+    EXPECT_CALL(*_publicCmd, execute(testing::ElementsAre("test")))
+      .WillOnce(testing::Return(Response::success(std::string("Command executed"))));
+
+    // Navigate past history boundaries
+    _ioStream.queueInput("public/info test\n");
+    _service->service();
+    _ioStream.clearOutput();
+
+    // Up arrow multiple times
+    for (int i = 0; i < 3; i++) {
+        _ioStream.queueInput({0x1B, '[', 'A'});
+        _service->service();
+    }
+
+    // Should stay at oldest command
+    EXPECT_THAT(_ioStream.getOutput(), testing::HasSubstr("public/info test"));
+
+    // Down arrow past newest
+    _ioStream.queueInput({0x1B, '[', 'B'});
+    _ioStream.queueInput({0x1B, '[', 'B'});
+    _service->service();
+
+    // Should clear input
+    EXPECT_THAT(_ioStream.getOutput(), testing::HasSubstr("\b \b"));
+  }
+
 }

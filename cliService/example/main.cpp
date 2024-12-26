@@ -79,7 +79,10 @@ std::unique_ptr<Directory> createMixedMenuTree()
     
   // Add dynamic hardware directory with dynamic command
   auto& hwDir = dirRoot->addDynamicDirectory("hw", AccessLevel::User);
-  hwDir.addDynamicCommand<RgbLedSetCommand>("set", AccessLevel::Admin);
+  hwDir.addDynamicCommand<RgbLedSetCommand>("setRgb", AccessLevel::Admin);
+
+  dirRoot->addDynamicDirectory("folder1", AccessLevel::User);
+  dirRoot->addDynamicDirectory("folder2", AccessLevel::User);
     
   return dirRoot;
 }
@@ -112,7 +115,7 @@ int main()
   };
 
   // Create service with static configuration
-  CLIService cli(std::move(staticConfig));
+  CLIService cli(std::move(mixedConfig));
   
   cli.activate();
 
