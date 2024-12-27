@@ -4,8 +4,8 @@
 namespace cliService
 {
 
-  InputParser::InputParser(CharIOStreamIf& ioStream, const CLIState& currentState, uint32_t inputTimeout_ms)
-    : _currentState(currentState)
+  InputParser::InputParser(CharIOStreamIf& ioStream, const CLIState& cliState, uint32_t inputTimeout_ms)
+    : _currentCLIState(cliState)
     , _ioStream(ioStream)
     , _inputTimeout_ms(inputTimeout_ms)
     , _inEscapeSequence(false)
@@ -193,7 +193,7 @@ namespace cliService
         break;
 
       case TAB:
-        if (_currentState == CLIState::LoggedIn)
+        if (_currentCLIState == CLIState::LoggedIn)
         {
           _trigger = ActionTrigger::Tab;
           return true;
@@ -225,7 +225,7 @@ namespace cliService
     switch (_escapeBuffer[1])
     {
       case 'A': // Up arrow
-        if (_currentState == CLIState::LoggedIn)
+        if (_currentCLIState == CLIState::LoggedIn)
         {
           _trigger = ActionTrigger::ArrowUp;
           return true;
@@ -233,7 +233,7 @@ namespace cliService
         break;
 
       case 'B': // Down arrow
-        if (_currentState == CLIState::LoggedIn)
+        if (_currentCLIState == CLIState::LoggedIn)
         {
           _trigger = ActionTrigger::ArrowDown;
           return true;
@@ -257,7 +257,7 @@ namespace cliService
 
   void InputParser::echoCharacter(char c)
   {
-    if (_currentState == CLIState::LoggedOut)
+    if (_currentCLIState == CLIState::LoggedOut)
     {
       size_t colonPos = _buffer.find(':');
 
@@ -285,7 +285,7 @@ namespace cliService
 
   std::optional<std::unique_ptr<RequestBase>> InputParser::createRequest()
   {
-    switch (_currentState)
+    switch (_currentCLIState)
     {
       case CLIState::LoggedOut:
       {

@@ -70,9 +70,9 @@ namespace cliService
 
   TEST_F(CLIServiceTest, InitialState)
   {
-    EXPECT_EQ(_service->getState(), CLIState::Inactive);
+    EXPECT_EQ(_service->getCLIState(), CLIState::Inactive);
     _service->activate();
-    EXPECT_EQ(_service->getState(), CLIState::LoggedOut);
+    EXPECT_EQ(_service->getCLIState(), CLIState::LoggedOut);
     EXPECT_THAT(_ioStream.getOutput(), testing::HasSubstr("Welcome Test"));
   }
 
@@ -84,7 +84,7 @@ namespace cliService
     _ioStream.queueInput("admin:admin123\n");
     _service->service();
     
-    EXPECT_EQ(_service->getState(), CLIState::LoggedIn);
+    EXPECT_EQ(_service->getCLIState(), CLIState::LoggedIn);
     EXPECT_THAT(_ioStream.getOutput(), testing::HasSubstr("Login Success"));
     EXPECT_THAT(_ioStream.getOutput(), testing::EndsWith("admin@/> "));
   }
@@ -106,7 +106,7 @@ namespace cliService
       _ioStream.queueInput(login);
       _service->service();
       
-      EXPECT_EQ(_service->getState(), CLIState::LoggedOut);
+      EXPECT_EQ(_service->getCLIState(), CLIState::LoggedOut);
       EXPECT_THAT(_ioStream.getOutput(), testing::HasSubstr("Invalid Login Test"));
     }
   }
@@ -223,7 +223,7 @@ namespace cliService
     _ioStream.clearOutput();
     _ioStream.queueInput("logout\n");
     _service->service();
-    EXPECT_EQ(_service->getState(), CLIState::LoggedOut);
+    EXPECT_EQ(_service->getCLIState(), CLIState::LoggedOut);
     EXPECT_THAT(_ioStream.getOutput(), testing::HasSubstr("Logout Success"));
 
     // Test exit command
@@ -232,7 +232,7 @@ namespace cliService
     _ioStream.clearOutput();
     _ioStream.queueInput("exit\n");
     _service->service();
-    EXPECT_EQ(_service->getState(), CLIState::Inactive);
+    EXPECT_EQ(_service->getCLIState(), CLIState::Inactive);
     EXPECT_THAT(_ioStream.getOutput(), testing::HasSubstr("Exit Success"));
   }
 

@@ -21,7 +21,7 @@ namespace cliService
     void service();
 
     Response handleRequest(const RequestBase& request);
-    CLIState getState() const { return _currentState; }
+    CLIState getCLIState() const { return _currentCLIState; }
 
   protected:
 
@@ -75,7 +75,7 @@ namespace cliService
     Directory* _currentDirectory;
     PathResolver _pathResolver;
 
-    CLIState _currentState;
+    CLIState _currentCLIState;
     const CLIMessages _messages;
 
     using GlobalCommandHandler = Response (CLIService::*)(const std::vector<std::string>&);

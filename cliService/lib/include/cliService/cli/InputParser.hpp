@@ -38,7 +38,7 @@ namespace cliService
       std::vector<std::string> args;
     };
 
-    InputParser(CharIOStreamIf& ioStream, const CLIState& currentState, uint32_t inputTimeout_ms);
+    InputParser(CharIOStreamIf& ioStream, const CLIState& cliState, uint32_t inputTimeout_ms);
 
     std::optional<std::unique_ptr<RequestBase>> getNextRequest();
 
@@ -62,7 +62,7 @@ namespace cliService
     void echoCharacter(char c);
     void clearDisplayedBuffer();
 
-    const CLIState& _currentState;  // Reference to state of CLIService
+    const CLIState& _currentCLIState;  // Reference to state of CLIService
     
     CharIOStreamIf& _ioStream;
     std::string _buffer;

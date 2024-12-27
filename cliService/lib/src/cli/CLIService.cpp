@@ -25,14 +25,14 @@ namespace cliService
 
   CLIService::CLIService(CLIServiceConfiguration config)
     : _ioStream(config._ioStream)
-    , _inputParser(_ioStream, _currentState, config._inputTimeout_ms)
+    , _inputParser(_ioStream, _currentCLIState, config._inputTimeout_ms)
     , _commandHistory(config._historySize)
     , _users(std::move(config._users))
     , _currentUser(std::nullopt)
     , _rootDirectory(std::move(config._rootDirectory))
     , _currentDirectory(getRootPtr())
     , _pathResolver(*getRootPtr())
-    , _currentState(CLIState::Inactive)
+    , _currentCLIState(CLIState::Inactive)
     , _messages(std::move(config._messages))
   {
     assert(!_users.empty() && "User list cannot be empty");
@@ -43,9 +43,9 @@ namespace cliService
 
   void CLIService::activate()
   {
-    assert(_currentState == CLIState::Inactive && "Service must be inactive to activate");
+    assert(_currentCLIState == CLIState::Inactive && "Service must be inactive to activate");
 
-    _currentState = CLIState::LoggedOut;
+    _currentCLIState = CLIState::LoggedOut;
     _ioStream.putString(_messages.getNewLine());
     _ioStream.putString(std::string(_messages.getIndentation()) + std::string(_messages.getWelcomeMessage()));
     _ioStream.putString(_messages.getNewLine(2));
@@ -55,7 +55,7 @@ namespace cliService
 
   void CLIService::service()
   {
-    if (_currentState == CLIState::Inactive) { return; }
+    if (_currentCLIState == CLIState::Inactive) { return; }
 
     // Get next request from parser
     auto requestPtr = _inputParser.getNextRequest();
@@ -131,7 +131,7 @@ namespace cliService
   {
     std::string prompt = "";
 
-    if (_currentState == CLIState::LoggedIn && _currentUser)
+    if (_currentCLIState == CLIState::LoggedIn && _currentUser)
     {
       prompt += _currentUser->getUsername() + "@";
       prompt += _pathResolver.getAbsolutePath(*_currentDirectory).toString();
@@ -217,7 +217,7 @@ namespace cliService
     if (userIt != _users.end())
     {
       _currentUser = *userIt;
-      _currentState = CLIState::LoggedIn;
+      _currentCLIState = CLIState::LoggedIn;
       response.appendToMessage(_messages.getLoggedInMessage());
     }
     else {
@@ -477,7 +477,7 @@ namespace cliService
     }
     else
     {
-      _currentState = CLIState::LoggedOut;
+      _currentCLIState = CLIState::LoggedOut;
       _currentUser = std::nullopt;
       resetToRoot();
       response.appendToMessage(_messages.getLoggedOutMessage());
@@ -520,7 +520,7 @@ namespace cliService
     }
     else
     {
-      _currentState = CLIState::Inactive;
+      _currentCLIState = CLIState::Inactive;
       _currentUser = std::nullopt;
       resetToRoot();
       response.appendToMessage(std::string(_messages.getExitMessage()));

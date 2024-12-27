@@ -16,12 +16,12 @@ namespace cliService
   protected:
     void SetUp() override
     {
-      _currentState = CLIState::LoggedIn;
-      _inputParser = std::make_unique<InputParser>(_ioStream, _currentState, INPUT_TIMEOUT_MS);
+      _currentCLIState = CLIState::LoggedIn;
+      _inputParser = std::make_unique<InputParser>(_ioStream, _currentCLIState, INPUT_TIMEOUT_MS);
     }
 
     CharIOStreamMock _ioStream;
-    CLIState _currentState;
+    CLIState _currentCLIState;
     std::unique_ptr<InputParser> _inputParser;
 
     // Helper to process all queued input
@@ -119,7 +119,7 @@ namespace cliService
 
   TEST_F(InputParserTest, LoginHandling)
   {
-    _currentState = CLIState::LoggedOut;
+    _currentCLIState = CLIState::LoggedOut;
 
     _ioStream.queueInput("user:pass\n");
     auto request = processAllInput();
@@ -137,7 +137,7 @@ namespace cliService
 
   TEST_F(InputParserTest, LoginParsingEmptyInput)
   {
-    _currentState = CLIState::LoggedOut;
+    _currentCLIState = CLIState::LoggedOut;
     _ioStream.queueInput("\n");
     auto request = processAllInput();
     EXPECT_FALSE(request.has_value());
@@ -145,7 +145,7 @@ namespace cliService
 
   TEST_F(InputParserTest, LoginParsingEmptyFields)
   {
-    _currentState = CLIState::LoggedOut;
+    _currentCLIState = CLIState::LoggedOut;
     
     // Empty username
     _ioStream.queueInput(":pass\n");
@@ -162,7 +162,7 @@ namespace cliService
 
   TEST_F(InputParserTest, LoginParsingComplexInput)
   {
-    _currentState = CLIState::LoggedOut;
+    _currentCLIState = CLIState::LoggedOut;
     
     // Multiple colons
     _ioStream.queueInput("user:pass:extra\n");
@@ -185,7 +185,7 @@ namespace cliService
 
   TEST_F(InputParserTest, InvalidLoginFormat)
   {
-    _currentState = CLIState::LoggedOut;
+    _currentCLIState = CLIState::LoggedOut;
     
     _ioStream.queueInput("invalidformat\n");
     auto request = processAllInput();
