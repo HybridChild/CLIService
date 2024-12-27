@@ -8,10 +8,17 @@ A lightweight C++ library for adding a flexible command-line interface to embedd
 - Composite tree structure of directories and commands
 - User authentication with password protection (Password masking during login)
 - Assign access levels to directories and commands
+- Allows for both static and dynamic allocation of directories and commands
 - Minimal dependencies
 
 ## Quick Start
 ```cpp
+// First define your access levels (in a header file)
+enum class AccessLevel {
+  User,
+  Admin
+};
+
 // Provide platform specific implementation of the CharIOStream interface
 class MyCharIOStream : public CharIOStreamIf
 {
@@ -31,57 +38,75 @@ public:
 class MyCommand : public CommandIf
 {
 public:
-  MyCommand(
-    std::string name,
-    AccessLevel level,
-    std::string description = "Reboot the device")
-    : CommandIf(std::move(name)
-    , level
-    , std::move(description))
+  MyCommand(std::string name, AccessLevel level, std::string description = "")
+    : CommandIf(std::move(name), level, std::move(description))
   {}
 
   Response execute(const std::vector<std::string>& args) override
   {
-    if (args.size() > 0) {
-      return Response("Command takes no arguments.", ResponseStatus::InvalidArguments);
+    if (!args.empty()) {
+      return createInvalidArgumentCountResponse(0);
     }
 
     // Perform command logic here
-
     return Response::success("Command executed successfully.");
   }
-};
-
-// Define your access levels
-enum class AccessLevel {
-  User,
-  Admin
 };
 
 // Application entry point
 int main()
 {
-  // Define users for your application and assign passwords and access levels
-  std::vector<User> users = {
-    {"user", "user123", AccessLevel::User},
-    {"admin", "admin123", AccessLevel::Admin}
+  // Create I/O stream
+  MyCharIOStream ioStream{};
+
+  // Define users with access levels
+  std::vector<User> users{
+    {"admin", "admin123", AccessLevel::Admin},
+    {"user", "user123", AccessLevel::User}
   };
 
-  // Create menu structure
-  auto dirRoot = std::make_unique<Directory>("root", AccessLevel::User);
-    auto& dirSystem = dirRoot->addDynamicDirectory("system", AccessLevel::User);
-      dirSystem.addDynamicCommand<RebootCommand>("reboot", AccessLevel::Admin);
-      dirSystem.addDynamicCommand<HeapStatsGetCommand>("heap", AccessLevel::User);
+  // Create menu structure with static and/or dynamic allocation
 
-  // Create and activate CLI service
-  MyCharIOStream ioStream{};
-  CLIServiceConfiguration config{ioStream, std::move(users), std::move(dirRoot)};
+  // Dynamic root
+  auto rootDir = std::make_unique<Directory>("root", AccessLevel::User);
+
+  // Static nodes
+  static Directory sysDir("system", AccessLevel::Admin);
+  static MyCommand rebootCmd("reboot", AccessLevel::Admin, "Reboot the device");
+
+  // Add static directory to dynamic root
+  rootDir->addStaticDirectory(sysDir);
+    
+  // Add static command to static directory
+  sysDir.addStaticCommand(rebootCmd);
+    
+  // Add dynamic command to static directory
+  sysDir.addDynamicCommand<MyCommand>("heap", AccessLevel::User, "Get heap statistics");
+    
+  // Add dynamic hardware directory with dynamic command
+  auto& hwDir = rootDir->addDynamicDirectory("hw", AccessLevel::User);
+  hwDir.addDynamicCommand<MyCommand>("setRgb", AccessLevel::Admin, "Set RGB LED color");
+
+  // Configure and create CLI service
+  constexpr uint32_t inputTimeout_ms = 1000;
+  constexpr size_t historySize = 10;
+
+  CLIServiceConfiguration config {
+    static_cast<CharIOStreamIf&>(ioStream),
+    std::move(users),
+    std::move(rootDir),
+    inputTimeout_ms,
+    historySize
+  };
+
   CLIService cli(std::move(config));
   cli.activate();
 
-  // Periocically service the CLI
-  while (true) {
+  // Service loop
+  while (cli.getState() != CLIState::Inactive)
+  {
     cli.service();
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
   return 0;
@@ -110,35 +135,43 @@ sh runExample.sh
 
 ## Example Session
 ```
-Welcome to CLI Service.
-Logged out. Please enter <username>:<password>
- > admin:********
-admin@/ > help
 
-Global commands:
+  Welcome to CLI Service. Please login.
+
+> admin:********
+
+  Logged in. Type 'help' for help.
+
+admin@/> help
+
   help   - List global commands
-  tree   - Show directory structure
-  ?      - Show help for available commands in current directory
+  tree   - Print directory tree
+  ?      - Detail items in current directory
   logout - Exit current session
+  clear  - Clear screen
+  exit   - Exit the CLI
 
-admin@/ > tree
+admin@/> tree
 
-root/
-  system/
-    reboot
-    heap
+  root/
+    system/
+      reboot
+      heap
 
 admin@/ > system/
-admin@/system > ?
+admin@/system> ?
 
-Available commands in current directory:
   reboot - Reboot the device
   heap - Get heap statistics
 
-admin@/system > reboot
-System reboot initiated...
+admin@/system> reboot
+
+  System reboot initiated...
+
 admin@/system > ..
-admin@/ > logout
-Logged out. Please enter <username>:<password>
- > 
+admin@/> logout
+
+  Logged out.
+
+> 
 ```
