@@ -120,7 +120,7 @@ namespace cliService
     _service->service();
 
     EXPECT_CALL(*_publicCmd, execute(testing::ElementsAre("arg1", "arg2")))
-      .WillOnce(testing::Return(Response::success(std::string("Command executed"))));
+      .WillOnce(testing::Return(CLIResponse::success(std::string("Command executed"))));
 
     _ioStream.queueInput("public/info arg1 arg2\n");
     _service->service();
@@ -178,14 +178,14 @@ namespace cliService
 
     // Test path with dot - should execute test command
     EXPECT_CALL(*_nestedCmd, execute(testing::ElementsAre()))
-      .WillOnce(testing::Return(Response::success()));
+      .WillOnce(testing::Return(CLIResponse::success()));
     _ioStream.clearOutput();
     _ioStream.queueInput("/public/nested/./test\n");
     _service->service();
 
     // Test double slashes - should also execute test command
     EXPECT_CALL(*_nestedCmd, execute(testing::ElementsAre()))
-      .WillOnce(testing::Return(Response::success()));
+      .WillOnce(testing::Return(CLIResponse::success()));
     _ioStream.clearOutput();
     _ioStream.queueInput("public//nested//test\n");
     _service->service();
@@ -267,7 +267,7 @@ namespace cliService
 
     // Test command with multiple lines of output
     EXPECT_CALL(*_publicCmd, execute(testing::_))
-      .WillOnce(testing::Return(Response(std::string("Line 1\nLine 2\nLine 3"), ResponseStatus::Success)));
+      .WillOnce(testing::Return(CLIResponse(std::string("Line 1\nLine 2\nLine 3"), ResponseStatus::Success)));
 
     _ioStream.clearOutput();
     _ioStream.queueInput("public/info\n");
@@ -318,14 +318,14 @@ namespace cliService
     _ioStream.clearOutput();
 
     EXPECT_CALL(*_publicCmd, execute(testing::ElementsAre("first")))
-      .WillOnce(testing::Return(Response::success(std::string("Command executed"))));
+      .WillOnce(testing::Return(CLIResponse::success(std::string("Command executed"))));
 
     // Execute first command
     _ioStream.queueInput("public/info first\n");
     _service->service();
 
     EXPECT_CALL(*_publicCmd, execute(testing::ElementsAre("second")))
-      .WillOnce(testing::Return(Response::success(std::string("Command executed"))));
+      .WillOnce(testing::Return(CLIResponse::success(std::string("Command executed"))));
     
     // Execute second command
     _ioStream.queueInput("public/info second\n");
@@ -347,7 +347,7 @@ namespace cliService
     _service->service();
 
     EXPECT_CALL(*_publicCmd, execute(testing::ElementsAre("test")))
-      .WillOnce(testing::Return(Response::success(std::string("Command executed"))));
+      .WillOnce(testing::Return(CLIResponse::success(std::string("Command executed"))));
 
     // Add command to history
     _ioStream.queueInput("public/info test\n");
@@ -389,7 +389,7 @@ namespace cliService
     EXPECT_EQ(_ioStream.getOutput(), "");
 
     EXPECT_CALL(*_publicCmd, execute(testing::ElementsAre("test")))
-      .WillOnce(testing::Return(Response::success(std::string("Command executed"))));
+      .WillOnce(testing::Return(CLIResponse::success(std::string("Command executed"))));
 
     // Navigate past history boundaries
     _ioStream.queueInput("public/info test\n");

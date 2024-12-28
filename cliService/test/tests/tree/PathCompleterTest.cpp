@@ -17,8 +17,8 @@ namespace cliService
       : CommandIf(std::move(name), level, std::move(description))
     {}
 
-    Response execute(const std::vector<std::string>&) override {
-      return Response::success();
+    CLIResponse execute(const std::vector<std::string>&) override {
+      return CLIResponse::success();
     }
   };
 

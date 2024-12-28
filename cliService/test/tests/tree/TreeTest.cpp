@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include "cliService/tree/Directory.hpp"
-#include "cliService/tree/Response.hpp"
+#include "cliService/tree/CLIResponse.hpp"
 
 namespace cliService
 {
@@ -20,11 +20,11 @@ namespace cliService
       , _lastArgs()
     {}
 
-    Response execute(const std::vector<std::string>& args) override
+    CLIResponse execute(const std::vector<std::string>& args) override
     {
       _wasExecuted = true;
       _lastArgs = args;
-      return Response::success();
+      return CLIResponse::success();
     }
 
     bool wasExecuted() const { return _wasExecuted; }
@@ -357,15 +357,15 @@ namespace cliService
     public:
       using CommandIf::CommandIf;
       
-      Response execute(const std::vector<std::string>& args) override
+      CLIResponse execute(const std::vector<std::string>& args) override
       {
         if (args.empty()) {
-          return Response::error(std::string("No arguments provided"));
+          return CLIResponse::error(std::string("No arguments provided"));
         }
         if (args[0] == "invalid") {
           return CommandIf::createInvalidArgumentCountResponse(2);
         }
-        return Response::success(std::string("Command executed successfully"));
+        return CLIResponse::success(std::string("Command executed successfully"));
       }
     };
 
@@ -449,7 +449,7 @@ protected:
       visited.push_back({node.getName(), depth});
     });
 
-    ASSERT_EQ(visited.size(), 5);
+    ASSERT_EQ(visited.size(), (size_t)5);
     EXPECT_EQ(visited[0], std::make_pair(std::string("root"), 0));
     EXPECT_EQ(visited[1], std::make_pair(std::string("system"), 1));
     EXPECT_EQ(visited[2], std::make_pair(std::string("reboot"), 2));

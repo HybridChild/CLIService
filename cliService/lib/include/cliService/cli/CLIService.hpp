@@ -20,7 +20,7 @@ namespace cliService
     void activate();
     void service();
 
-    Response handleRequest(const RequestBase& request);
+    CLIResponse handleRequest(const RequestBase& request);
     CLIState getCLIState() const { return _currentCLIState; }
 
   protected:
@@ -44,22 +44,22 @@ namespace cliService
     Directory* getRootPtr() const;
 
     // Request handlers
-    Response handleRequest(const InvalidLoginRequest& request);
-    Response handleRequest(const LoginRequest& request);
-    Response handleRequest(const CommandRequest& request);
-    Response handleRequest(const TabCompletionRequest& request);
-    Response handleRequest(const HistoryNavigationRequest& request);
+    CLIResponse handleRequest(const InvalidLoginRequest& request);
+    CLIResponse handleRequest(const LoginRequest& request);
+    CLIResponse handleRequest(const CommandRequest& request);
+    CLIResponse handleRequest(const TabCompletionRequest& request);
+    CLIResponse handleRequest(const HistoryNavigationRequest& request);
 
     // Global command handlers
-    Response handleGlobalCommand(const std::string_view& command, const std::vector<std::string>& args);
-    Response handleGlobalLogout(const std::vector<std::string>& args);
-    Response handleGlobalExit(const std::vector<std::string>& args);
-    Response handleGlobalTree(const std::vector<std::string>& args);
-    Response handleGlobalHelp(const std::vector<std::string>& args);
-    Response handleGlobalQuestionMark(const std::vector<std::string>& args);
-    Response handleGlobalClear(const std::vector<std::string>& args);
+    CLIResponse handleGlobalCommand(const std::string_view& command, const std::vector<std::string>& args);
+    CLIResponse handleGlobalLogout(const std::vector<std::string>& args);
+    CLIResponse handleGlobalExit(const std::vector<std::string>& args);
+    CLIResponse handleGlobalTree(const std::vector<std::string>& args);
+    CLIResponse handleGlobalHelp(const std::vector<std::string>& args);
+    CLIResponse handleGlobalQuestionMark(const std::vector<std::string>& args);
+    CLIResponse handleGlobalClear(const std::vector<std::string>& args);
 
-    void handleOutput(const Response& response);
+    void handleOutput(const CLIResponse& response);
     std::vector<std::string> splitString(const std::string& str, const std::string& delimiter);
 
     CharIOStreamIf& _ioStream;
@@ -78,7 +78,7 @@ namespace cliService
     CLIState _currentCLIState;
     const CLIMessages _messages;
 
-    using GlobalCommandHandler = Response (CLIService::*)(const std::vector<std::string>&);
+    using GlobalCommandHandler = CLIResponse (CLIService::*)(const std::vector<std::string>&);
     static const std::unordered_map<std::string_view, GlobalCommandHandler> GLOBAL_COMMAND_HANDLERS;
   };
 

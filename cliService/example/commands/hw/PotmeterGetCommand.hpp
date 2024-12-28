@@ -18,20 +18,20 @@ namespace cliService
       (void)description;
     }
 
-    Response execute(const std::vector<std::string>& args) override
+    CLIResponse execute(const std::vector<std::string>& args) override
     {
       if (args.size() != 1) {
         return CommandIf::createInvalidArgumentCountResponse(1);
       }
 
       if (!util::isIntegerString(args[0])) {
-        return Response("Invalid potmeter ID: " + args[0] + ". Must be integer.", ResponseStatus::InvalidArguments);
+        return CLIResponse("Invalid potmeter ID: " + args[0] + ". Must be integer.", ResponseStatus::InvalidArguments);
       }
 
       uint32_t potId = std::stoi(args[0]);
 
       if (potId < 1 || potId > 4) {
-        return Response("Invalid potmeter ID: " + args[0], ResponseStatus::InvalidArguments);
+        return CLIResponse("Invalid potmeter ID: " + args[0], ResponseStatus::InvalidArguments);
       }
 
       uint32_t potmeterValue = readPotmeter(potId);
@@ -44,7 +44,7 @@ namespace cliService
       std::string response = "";
       response += "Potmeter " + args[0] + " value: " + std::to_string(potmeterValue) + ", " + potPercentStr + "%";
 
-      return Response::success(response);
+      return CLIResponse::success(response);
     }
 
   private:

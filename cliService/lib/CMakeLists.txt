@@ -12,7 +12,7 @@ set(LIB_HEADERS
   include/cliService/cli/TabCompletionRequest.hpp
   include/cliService/cli/User.hpp
   include/cliService/tree/CommandIf.hpp
-  include/cliService/tree/Response.hpp
+  include/cliService/tree/CLIResponse.hpp
   include/cliService/tree/Directory.hpp
   include/cliService/tree/NodeIf.hpp
   include/cliService/tree/Path.hpp

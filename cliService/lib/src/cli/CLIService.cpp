@@ -62,14 +62,14 @@ namespace cliService
     if (!requestPtr || !*requestPtr) { return; }
 
     // Get response from appropriate handler
-    Response response = handleRequest(**requestPtr);
+    CLIResponse response = handleRequest(**requestPtr);
 
     // Handle output
     handleOutput(response);
   }
 
 
-  Response CLIService::handleRequest(const RequestBase& request)
+  CLIResponse CLIService::handleRequest(const RequestBase& request)
   {
     if (const auto* commandRequest = dynamic_cast<const CommandRequest*>(&request)) {
       return handleRequest(*commandRequest);
@@ -91,7 +91,7 @@ namespace cliService
       return handleRequest(*historyRequest);
     }
 
-    return Response(static_cast<std::string>("Unknown request type"), ResponseStatus::Error);
+    return CLIResponse(static_cast<std::string>("Unknown request type"), ResponseStatus::Error);
   }
 
 
@@ -195,14 +195,14 @@ namespace cliService
   }
 
 
-  Response CLIService::handleRequest(const InvalidLoginRequest& request)
+  CLIResponse CLIService::handleRequest(const InvalidLoginRequest& request)
   {
     (void)request;
-    return Response::error(_messages.getInvalidLoginMessage());
+    return CLIResponse::error(_messages.getInvalidLoginMessage());
   }
 
 
-  Response CLIService::handleRequest(const LoginRequest& request)
+  CLIResponse CLIService::handleRequest(const LoginRequest& request)
   {
     const auto& username = request.getUsername();
     const auto& password = request.getPassword();
@@ -212,7 +212,7 @@ namespace cliService
         return user.getUsername() == username && user.getPassword() == password;
       });
 
-    Response response = Response::success();
+    CLIResponse response = CLIResponse::success();
 
     if (userIt != _users.end())
     {
@@ -229,7 +229,7 @@ namespace cliService
   }
 
 
-  Response CLIService::handleRequest(const CommandRequest& request) 
+  CLIResponse CLIService::handleRequest(const CommandRequest& request) 
   {
     assert(_currentUser && "No user logged in");
 
@@ -244,7 +244,7 @@ namespace cliService
       }
     }
 
-    Response response = Response::success();
+    CLIResponse response = CLIResponse::success();
     NodeIf* node = resolvePath(path);
 
     if (!node)
@@ -282,7 +282,7 @@ namespace cliService
   }
 
 
-  Response CLIService::handleGlobalCommand(const std::string_view& command, const std::vector<std::string>& args)
+  CLIResponse CLIService::handleGlobalCommand(const std::string_view& command, const std::vector<std::string>& args)
   {
     auto it = GLOBAL_COMMAND_HANDLERS.find(command);
 
@@ -290,13 +290,13 @@ namespace cliService
       return (this->*(it->second))(args);
     }
 
-    return Response("Unknown command: " + std::string(command), ResponseStatus::Error);
+    return CLIResponse("Unknown command: " + std::string(command), ResponseStatus::Error);
   }
 
 
-  Response CLIService::handleRequest(const TabCompletionRequest& request)
+  CLIResponse CLIService::handleRequest(const TabCompletionRequest& request)
   {
-    Response response = Response::success();
+    CLIResponse response = CLIResponse::success();
     response.setShowPrompt(false);
     response.setIndentMessage(false);
     response.setInlineMessage(true);
@@ -367,7 +367,7 @@ namespace cliService
   }
 
 
-  Response CLIService::handleRequest(const HistoryNavigationRequest& request)
+  CLIResponse CLIService::handleRequest(const HistoryNavigationRequest& request)
   {
     // First time pressing up, save current buffer
     if (request.getDirection() == HistoryNavigationRequest::Direction::Previous &&
@@ -394,7 +394,7 @@ namespace cliService
 
     _inputParser.replaceBuffer(historyCommand);
 
-    Response response = Response::success();
+    CLIResponse response = CLIResponse::success();
     response.setShowPrompt(false);
     response.setIndentMessage(false);
     response.setPrefixNewLine(false);
@@ -404,9 +404,9 @@ namespace cliService
   }
 
 
-  Response CLIService::handleGlobalHelp(const std::vector<std::string>& args)
+  CLIResponse CLIService::handleGlobalHelp(const std::vector<std::string>& args)
   {
-    Response response = Response::success();
+    CLIResponse response = CLIResponse::success();
 
     if (!args.empty())
     {
@@ -426,9 +426,9 @@ namespace cliService
     return response;
   }
 
-  Response CLIService::handleGlobalTree(const std::vector<std::string>& args)
+  CLIResponse CLIService::handleGlobalTree(const std::vector<std::string>& args)
   {
-    Response response = Response::success();
+    CLIResponse response = CLIResponse::success();
 
     if (!args.empty())
     {
@@ -446,9 +446,9 @@ namespace cliService
   }
 
 
-  Response CLIService::handleGlobalQuestionMark(const std::vector<std::string>& args)
+  CLIResponse CLIService::handleGlobalQuestionMark(const std::vector<std::string>& args)
   {
-    Response response = Response::success();
+    CLIResponse response = CLIResponse::success();
 
     if (!args.empty())
     {
@@ -466,9 +466,9 @@ namespace cliService
   }
 
 
-  Response CLIService::handleGlobalLogout(const std::vector<std::string>& args)
+  CLIResponse CLIService::handleGlobalLogout(const std::vector<std::string>& args)
   {
-    Response response = Response::success();
+    CLIResponse response = CLIResponse::success();
 
     if (!args.empty())
     {
@@ -487,9 +487,9 @@ namespace cliService
   }
 
 
-  Response CLIService::handleGlobalClear(const std::vector<std::string>& args)
+  CLIResponse CLIService::handleGlobalClear(const std::vector<std::string>& args)
   {
-    Response response = Response::success();
+    CLIResponse response = CLIResponse::success();
 
     if (!args.empty())
     {
@@ -509,9 +509,9 @@ namespace cliService
   }
 
 
-  Response CLIService::handleGlobalExit(const std::vector<std::string>& args)
+  CLIResponse CLIService::handleGlobalExit(const std::vector<std::string>& args)
   {
-    Response response = Response::success();
+    CLIResponse response = CLIResponse::success();
 
     if (!args.empty())
     {
@@ -531,7 +531,7 @@ namespace cliService
   }
 
 
-  void CLIService::handleOutput(const Response& response)
+  void CLIService::handleOutput(const CLIResponse& response)
   {
     if (response.prefixNewLine()) {
       _ioStream.putString(_messages.getNewLine());

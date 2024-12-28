@@ -10,7 +10,6 @@ namespace cliService
 
   class InputParserTest : public ::testing::Test
   {
-    static constexpr size_t HISTORY_SIZE = 10;
     static constexpr uint32_t INPUT_TIMEOUT_MS = 1000;
 
   protected:

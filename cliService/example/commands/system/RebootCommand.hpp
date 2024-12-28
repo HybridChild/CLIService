@@ -14,7 +14,7 @@ namespace cliService
       (void)description;
     }
 
-    Response execute(const std::vector<std::string>& args) override
+    CLIResponse execute(const std::vector<std::string>& args) override
     {
       if (args.size() != 0) {
         return CommandIf::createInvalidArgumentCountResponse(0);
@@ -22,7 +22,7 @@ namespace cliService
 
       // signal system reboot
 
-      return Response::success(std::string("System reboot initiated..."));
+      return CLIResponse::success(std::string("System reboot initiated..."));
     }
   };
 

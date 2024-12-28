@@ -14,7 +14,7 @@ namespace cliService
       (void)description;
     }
 
-    Response execute(const std::vector<std::string>& args) override
+    CLIResponse execute(const std::vector<std::string>& args) override
     {
       if (args.size() != 0) {
         return CommandIf::createInvalidArgumentCountResponse(0);
@@ -28,7 +28,7 @@ namespace cliService
       response += "Minimum Ever Free Bytes Remaining    : " + std::to_string(7700) + "\r\n";
       response += "Number Of Successful Allocations     : " + std::to_string(123456) + "\r\n";
       response += "Number Of Successful Frees           : " + std::to_string(23456);
-      return Response::success(response);
+      return CLIResponse::success(response);
     }
   };
 

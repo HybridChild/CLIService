@@ -42,14 +42,14 @@ public:
     : CommandIf(std::move(name), level, std::move(description))
   {}
 
-  Response execute(const std::vector<std::string>& args) override
+  CLIResponse execute(const std::vector<std::string>& args) override
   {
     if (!args.empty()) {
       return createInvalidArgumentCountResponse(0);
     }
 
     // Perform command logic here
-    return Response::success("Command executed successfully.");
+    return CLIResponse::success("Command executed successfully.");
   }
 };
 

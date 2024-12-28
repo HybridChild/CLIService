@@ -22,24 +22,24 @@ namespace cliService
       (void)description;
     }
 
-    Response execute(const std::vector<std::string>& args) override
+    CLIResponse execute(const std::vector<std::string>& args) override
     {
       if (args.size() != 1) {
         return CommandIf::createInvalidArgumentCountResponse(1);
       }
 
       if (!util::isIntegerString(args[0])) {
-        return Response("Invalid toggle switch ID: " + args[0] + ". Must be integer.", ResponseStatus::InvalidArguments);
+        return CLIResponse("Invalid toggle switch ID: " + args[0] + ". Must be integer.", ResponseStatus::InvalidArguments);
       }
 
       uint32_t potId = std::stoi(args[0]);
 
       if (potId < 1 || potId > 2) {
-        return Response("Invalid toggle switch ID: " + args[0] + ". Must be 1 .. 2", ResponseStatus::InvalidArguments);
+        return CLIResponse("Invalid toggle switch ID: " + args[0] + ". Must be 1 .. 2", ResponseStatus::InvalidArguments);
       }
 
       ToggleSwitchPosition togglePos = readToggleSwitchPosition(potId);
-      return Response::success("Toggle switch " + args[0] + " is in position: " + posToString(togglePos));
+      return CLIResponse::success("Toggle switch " + args[0] + " is in position: " + posToString(togglePos));
     }
 
   private:

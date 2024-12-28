@@ -14,10 +14,10 @@ namespace cliService
     AccessDenied
   };
 
-  class Response
+  class CLIResponse
   {
   public:
-    explicit Response(std::string msg = "", ResponseStatus status = ResponseStatus::Success)
+    explicit CLIResponse(std::string msg = "", ResponseStatus status = ResponseStatus::Success)
       : _message(std::move(msg))
       , _status(status)
       , _showPrompt(true)
@@ -27,7 +27,7 @@ namespace cliService
       , _postfixNewLine(true)
     {}
 
-    explicit Response(std::string_view msg = "", ResponseStatus status = ResponseStatus::Success)
+    explicit CLIResponse(std::string_view msg = "", ResponseStatus status = ResponseStatus::Success)
       : _message(msg)
       , _status(status)
       , _showPrompt(true)
@@ -37,10 +37,10 @@ namespace cliService
       , _postfixNewLine(true)
     {}
 
-    static Response success(const std::string& msg = "") { return Response(msg, ResponseStatus::Success); }
-    static Response success(std::string_view msg) { return Response(msg, ResponseStatus::Success); }
-    static Response error(const std::string& msg) { return Response(msg, ResponseStatus::Error); }
-    static Response error(std::string_view msg) { return Response(msg, ResponseStatus::Error); }
+    static CLIResponse success(const std::string& msg = "") { return CLIResponse(msg, ResponseStatus::Success); }
+    static CLIResponse success(std::string_view msg) { return CLIResponse(msg, ResponseStatus::Success); }
+    static CLIResponse error(const std::string& msg) { return CLIResponse(msg, ResponseStatus::Error); }
+    static CLIResponse error(std::string_view msg) { return CLIResponse(msg, ResponseStatus::Error); }
 
     const std::string& getMessage() const { return _message; }
     void appendToMessage(const std::string& msg) { _message += msg; }
