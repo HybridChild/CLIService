@@ -18,31 +18,39 @@ foreach(test_info IN LISTS cli_tests)
   list(GET test_parts 0 test_name)
   list(GET test_parts 1 test_source)
   
-  add_executable(${PROJECT_NAME}_${test_name} 
+  # Create a consistent test target name
+  set(test_target_name "Test_${test_name}")
+  
+  add_executable(${test_target_name}
     ${test_source}
     mock/io/CharIOStreamMock.cpp
     mock/command/CommandMock.hpp
   )
-  target_include_directories(${PROJECT_NAME}_${test_name}
+  
+  target_include_directories(${test_target_name}
     PUBLIC
       ${CMAKE_CURRENT_SOURCE_DIR}
   )
-  target_link_libraries(${PROJECT_NAME}_${test_name} 
+  
+  target_link_libraries(${test_target_name}
     PRIVATE 
       ${PROJECT_NAME}_lib
       GTest::gtest_main
       GTest::gmock
   )
+  
   add_test(
-    NAME ${PROJECT_NAME}_${test_name}
-    COMMAND ${PROJECT_NAME}_${test_name}
+    NAME ${test_target_name}
+    COMMAND ${test_target_name}
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   )
-  set_tests_properties(${PROJECT_NAME}_${test_name}
+  
+  set_tests_properties(${test_target_name}
     PROPERTIES 
     ENVIRONMENT "PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
   )
-  gtest_discover_tests(${PROJECT_NAME}_${test_name}
+  
+  gtest_discover_tests(${test_target_name}
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     PROPERTIES TIMEOUT 10
   )

@@ -14,14 +14,21 @@ set(EXAMPLE_SOURCES
   io/UnixWinCharIOStream.cpp
 )
 
-add_executable(${PROJECT_NAME}_example ${EXAMPLE_SOURCES})
+# Create a consistent example target name
+set(EXAMPLE_TARGET "Example_CLI")
+add_executable(${EXAMPLE_TARGET} ${EXAMPLE_SOURCES})
 
-target_include_directories(${PROJECT_NAME}_example
+target_include_directories(${EXAMPLE_TARGET}
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-target_link_libraries(${PROJECT_NAME}_example
+target_link_libraries(${EXAMPLE_TARGET}
   PRIVATE
     ${PROJECT_NAME}_lib
+)
+
+# Optionally set the output name if you want it to still be named CLIService_example
+set_target_properties(${EXAMPLE_TARGET} PROPERTIES
+  OUTPUT_NAME "${PROJECT_NAME}_example"
 )
