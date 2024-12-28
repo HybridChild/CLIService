@@ -372,14 +372,14 @@ namespace cliService
     auto& cmd = _root->addDynamicCommand<StatusTestCommand>("test", AccessLevel::User);
 
     auto response = cmd.execute({});
-    EXPECT_EQ(response.getStatus(), ResponseStatus::Error);
+    EXPECT_EQ(response.getStatus(), CLIResponse::Status::Error);
     EXPECT_EQ(response.getMessage(), "No arguments provided");
 
     response = cmd.execute({"invalid"});
-    EXPECT_EQ(response.getStatus(), ResponseStatus::InvalidArguments);
+    EXPECT_EQ(response.getStatus(), CLIResponse::Status::InvalidArguments);
 
     response = cmd.execute({"valid"});
-    EXPECT_EQ(response.getStatus(), ResponseStatus::Success);
+    EXPECT_EQ(response.getStatus(), CLIResponse::Status::Success);
     EXPECT_EQ(response.getMessage(), "Command executed successfully");
   }
 

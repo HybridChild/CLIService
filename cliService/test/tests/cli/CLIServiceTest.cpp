@@ -267,7 +267,7 @@ namespace cliService
 
     // Test command with multiple lines of output
     EXPECT_CALL(*_publicCmd, execute(testing::_))
-      .WillOnce(testing::Return(CLIResponse(std::string("Line 1\nLine 2\nLine 3"), ResponseStatus::Success)));
+      .WillOnce(testing::Return(CLIResponse(std::string("Line 1\nLine 2\nLine 3"), CLIResponse::Status::Success)));
 
     _ioStream.clearOutput();
     _ioStream.queueInput("public/info\n");

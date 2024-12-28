@@ -34,7 +34,7 @@ namespace cliService
         response += "Expected " + std::to_string(expected) + " " + argStr + ". Try again.";
       }
 
-      return CLIResponse(response, ResponseStatus::InvalidArguments);
+      return CLIResponse(response, CLIResponse::Status::InvalidArguments);
     }
 
   private:

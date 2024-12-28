@@ -91,7 +91,7 @@ namespace cliService
       return handleRequest(*historyRequest);
     }
 
-    return CLIResponse(static_cast<std::string>("Unknown request type"), ResponseStatus::Error);
+    return CLIResponse(static_cast<std::string>("Unknown request type"), CLIResponse::Status::Error);
   }
 
 
@@ -222,7 +222,7 @@ namespace cliService
     }
     else {
       response.appendToMessage(_messages.getInvalidLoginMessage());
-      response.setStatus(ResponseStatus::Error);
+      response.setStatus(CLIResponse::Status::Error);
     }
 
     return response;
@@ -250,14 +250,14 @@ namespace cliService
     if (!node)
     {
       response.appendToMessage(_messages.getInvalidPathMessage());
-      response.setStatus(ResponseStatus::InvalidPath);
+      response.setStatus(CLIResponse::Status::InvalidPath);
       return response;
     }
 
     if (!validatePathAccess(node))
     {
       response.appendToMessage(_messages.getAccessDeniedMessage());
-      response.setStatus(ResponseStatus::AccessDenied);
+      response.setStatus(CLIResponse::Status::AccessDenied);
       return response;
     }
 
@@ -290,7 +290,7 @@ namespace cliService
       return (this->*(it->second))(args);
     }
 
-    return CLIResponse("Unknown command: " + std::string(command), ResponseStatus::Error);
+    return CLIResponse("Unknown command: " + std::string(command), CLIResponse::Status::Error);
   }
 
 
@@ -410,7 +410,7 @@ namespace cliService
 
     if (!args.empty())
     {
-      response.setStatus(ResponseStatus::InvalidArguments);
+      response.setStatus(CLIResponse::Status::InvalidArguments);
       response.appendToMessage(std::string(_messages.getNoArgumentsMessage()));
     }
     else
@@ -432,7 +432,7 @@ namespace cliService
 
     if (!args.empty())
     {
-      response.setStatus(ResponseStatus::InvalidArguments);
+      response.setStatus(CLIResponse::Status::InvalidArguments);
       response.appendToMessage(std::string(_messages.getNoArgumentsMessage()));
     }
     else
@@ -452,7 +452,7 @@ namespace cliService
 
     if (!args.empty())
     {
-      response.setStatus(ResponseStatus::InvalidArguments);
+      response.setStatus(CLIResponse::Status::InvalidArguments);
       response.appendToMessage(std::string(_messages.getNoArgumentsMessage()));
     }
     else
@@ -472,7 +472,7 @@ namespace cliService
 
     if (!args.empty())
     {
-      response.setStatus(ResponseStatus::InvalidArguments);
+      response.setStatus(CLIResponse::Status::InvalidArguments);
       response.appendToMessage(std::string(_messages.getNoArgumentsMessage()));
     }
     else
@@ -493,7 +493,7 @@ namespace cliService
 
     if (!args.empty())
     {
-      response.setStatus(ResponseStatus::InvalidArguments);
+      response.setStatus(CLIResponse::Status::InvalidArguments);
       response.appendToMessage(std::string(_messages.getNoArgumentsMessage()));
     }
     else
@@ -515,7 +515,7 @@ namespace cliService
 
     if (!args.empty())
     {
-      response.setStatus(ResponseStatus::InvalidArguments);
+      response.setStatus(CLIResponse::Status::InvalidArguments);
       response.appendToMessage(std::string(_messages.getNoArgumentsMessage()));
     }
     else

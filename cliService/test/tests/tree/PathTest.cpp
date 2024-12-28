@@ -23,7 +23,7 @@ namespace cliService
     Path path("/dir1/dir2");
     EXPECT_FALSE(path.isEmpty());
     EXPECT_TRUE(path.isAbsolute());
-    ASSERT_EQ(path.elements().size(), 2);
+    ASSERT_EQ(path.elements().size(), (size_t)2);
     EXPECT_EQ(path.elements()[0], "dir1");
     EXPECT_EQ(path.elements()[1], "dir2");
   }
@@ -33,7 +33,7 @@ namespace cliService
     Path path("dir1/dir2");
     EXPECT_FALSE(path.isEmpty());
     EXPECT_FALSE(path.isAbsolute());
-    ASSERT_EQ(path.elements().size(), 2);
+    ASSERT_EQ(path.elements().size(), (size_t)2);
     EXPECT_EQ(path.elements()[0], "dir1");
     EXPECT_EQ(path.elements()[1], "dir2");
   }
@@ -42,7 +42,7 @@ namespace cliService
   {
     Path path("///dir1////dir2//");
     EXPECT_TRUE(path.isAbsolute());
-    ASSERT_EQ(path.elements().size(), 2);
+    ASSERT_EQ(path.elements().size(), (size_t)2);
     EXPECT_EQ(path.elements()[0], "dir1");
     EXPECT_EQ(path.elements()[1], "dir2");
   }
@@ -51,7 +51,7 @@ namespace cliService
   {
     Path path("dir1/./dir2");
     auto normalized = path.normalized();
-    ASSERT_EQ(normalized.elements().size(), 2);
+    ASSERT_EQ(normalized.elements().size(), (size_t)2);
     EXPECT_EQ(normalized.elements()[0], "dir1");
     EXPECT_EQ(normalized.elements()[1], "dir2");
   }
@@ -60,7 +60,7 @@ namespace cliService
   {
     Path path("dir1/dir2/../dir3");
     auto normalized = path.normalized();
-    ASSERT_EQ(normalized.elements().size(), 2);
+    ASSERT_EQ(normalized.elements().size(), (size_t)2);
     EXPECT_EQ(normalized.elements()[0], "dir1");
     EXPECT_EQ(normalized.elements()[1], "dir3");
   }
@@ -69,7 +69,7 @@ namespace cliService
   {
     Path path("dir1/dir2/../../dir3");
     auto normalized = path.normalized();
-    ASSERT_EQ(normalized.elements().size(), 1);
+    ASSERT_EQ(normalized.elements().size(), (size_t)1);
     EXPECT_EQ(normalized.elements()[0], "dir3");
   }
 
@@ -78,7 +78,7 @@ namespace cliService
     Path path("/dir1/../dir2");
     auto normalized = path.normalized();
     EXPECT_TRUE(normalized.isAbsolute());
-    ASSERT_EQ(normalized.elements().size(), 1);
+    ASSERT_EQ(normalized.elements().size(), (size_t)1);
     EXPECT_EQ(normalized.elements()[0], "dir2");
   }
 
@@ -86,7 +86,7 @@ namespace cliService
   {
     Path path("dir1/dir2/dir3");
     auto parent = path.parent();
-    ASSERT_EQ(parent.elements().size(), 2);
+    ASSERT_EQ(parent.elements().size(), (size_t)2);
     EXPECT_EQ(parent.elements()[0], "dir1");
     EXPECT_EQ(parent.elements()[1], "dir2");
   }
@@ -96,7 +96,7 @@ namespace cliService
     Path path1("dir1/dir2");
     Path path2("dir3/dir4");
     auto joined = path1.join(path2);
-    ASSERT_EQ(joined.elements().size(), 4);
+    ASSERT_EQ(joined.elements().size(), (size_t)4);
     EXPECT_EQ(joined.elements()[0], "dir1");
     EXPECT_EQ(joined.elements()[1], "dir2");
     EXPECT_EQ(joined.elements()[2], "dir3");
@@ -109,7 +109,7 @@ namespace cliService
     Path path2("/dir3/dir4");
     auto joined = path1.join(path2);
     EXPECT_TRUE(joined.isAbsolute());
-    ASSERT_EQ(joined.elements().size(), 2);
+    ASSERT_EQ(joined.elements().size(), (size_t)2);
     EXPECT_EQ(joined.elements()[0], "dir3");
     EXPECT_EQ(joined.elements()[1], "dir4");
   }

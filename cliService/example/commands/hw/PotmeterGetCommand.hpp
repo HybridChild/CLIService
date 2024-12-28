@@ -25,13 +25,13 @@ namespace cliService
       }
 
       if (!util::isIntegerString(args[0])) {
-        return CLIResponse("Invalid potmeter ID: " + args[0] + ". Must be integer.", ResponseStatus::InvalidArguments);
+        return CLIResponse("Invalid potmeter ID: " + args[0] + ". Must be integer.", CLIResponse::Status::InvalidArguments);
       }
 
       uint32_t potId = std::stoi(args[0]);
 
       if (potId < 1 || potId > 4) {
-        return CLIResponse("Invalid potmeter ID: " + args[0], ResponseStatus::InvalidArguments);
+        return CLIResponse("Invalid potmeter ID: " + args[0], CLIResponse::Status::InvalidArguments);
       }
 
       uint32_t potmeterValue = readPotmeter(potId);
