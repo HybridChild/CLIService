@@ -414,4 +414,88 @@ namespace cliService
     EXPECT_THAT(_ioStream.getOutput(), testing::HasSubstr("\b \b"));
   }
 
+  TEST_F(CLIServiceTest, CommandHistoryNavigationReset)
+  {
+    _service->activate();
+    _ioStream.queueInput("admin:admin123\n");
+    _service->service();
+
+    // Add first command
+    EXPECT_CALL(*_publicCmd, execute(testing::ElementsAre("first")))
+        .WillOnce(testing::Return(CLIResponse::success(std::string("Command executed"))));
+    _ioStream.queueInput("public/info first\n");
+    _service->service();
+    _ioStream.clearOutput();
+
+    // Add second command
+    EXPECT_CALL(*_publicCmd, execute(testing::ElementsAre("second")))
+        .WillOnce(testing::Return(CLIResponse::success(std::string("Command executed"))));
+    _ioStream.queueInput("public/info second\n");
+    _service->service();
+    _ioStream.clearOutput();
+
+    // Navigate up and press enter to execute the previous command
+    _ioStream.queueInput({0x1B, '[', 'A'});  // Up arrow
+    _service->service();
+    
+    // Now expect the command to be executed again
+    EXPECT_CALL(*_publicCmd, execute(testing::ElementsAre("second")))
+        .WillOnce(testing::Return(CLIResponse::success(std::string("Command executed"))));
+    _ioStream.queueInput("\n");  // Press enter to execute
+    _service->service();
+    _ioStream.clearOutput();
+
+    // Add third command
+    EXPECT_CALL(*_publicCmd, execute(testing::ElementsAre("third")))
+        .WillOnce(testing::Return(CLIResponse::success(std::string("Command executed"))));
+    _ioStream.queueInput("public/info third\n");
+    _service->service();
+    _ioStream.clearOutput();
+
+    // Navigate up and verify we get the third command
+    _ioStream.queueInput({0x1B, '[', 'A'});  // Up arrow
+    _service->service();
+
+    // Execute the shown command
+    EXPECT_CALL(*_publicCmd, execute(testing::ElementsAre("third")))
+        .WillOnce(testing::Return(CLIResponse::success(std::string("Command executed"))));
+    _ioStream.queueInput("\n");
+    _service->service();
+  }
+
+  TEST_F(CLIServiceTest, CommandHistoryNavigationResetWithEmptyCommand)
+  {
+    _service->activate();
+    _ioStream.queueInput("admin:admin123\n");
+    _service->service();
+
+    // Add initial command to history
+    EXPECT_CALL(*_publicCmd, execute(testing::ElementsAre("test")))
+        .Times(2)  // Expect two calls
+        .WillRepeatedly(testing::Return(CLIResponse::success(std::string("Command executed"))));
+
+    _ioStream.queueInput("public/info test\n");
+    _service->service();
+    _ioStream.clearOutput();
+
+    // Navigate up in history
+    _ioStream.queueInput({0x1B, '[', 'A'});  // Up arrow
+    _service->service();
+
+    // Execute empty command
+    _ioStream.queueInput("\n");
+    _service->service();
+    _ioStream.clearOutput();
+
+    // Navigate up again and execute the command to verify history is preserved
+    _ioStream.queueInput({0x1B, '[', 'A'});  // Up arrow
+    _service->service();
+
+    // Should be able to execute the original command again
+    EXPECT_CALL(*_publicCmd, execute(testing::ElementsAre("test")))
+        .WillOnce(testing::Return(CLIResponse::success(std::string("Command executed"))));
+    _ioStream.queueInput("\n");
+    _service->service();
+  }
+
 }

@@ -274,8 +274,10 @@ namespace cliService
       response = cmd->execute(request.getArgs());
     }
 
-    if (!request.getPath().isEmpty()) {
+    if (!request.getPath().isEmpty())
+    {
       _commandHistory.addCommand(request.getOriginalInput());
+      _commandHistory.resetNavigation();
     }
 
     return response;
