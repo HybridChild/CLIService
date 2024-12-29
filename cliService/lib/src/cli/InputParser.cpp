@@ -321,6 +321,8 @@ namespace cliService
         if (_trigger == ActionTrigger::ArrowUp || _trigger == ActionTrigger::ArrowDown) {
           return parseToHistoryNavigationRequest(_buffer, _trigger);
         }
+
+        break;
       }
 
       case CLIState::Inactive:
