@@ -62,13 +62,13 @@ int main()
   // Create I/O stream
   MyCharIOStream ioStream{};
 
-  // Define users with access levels
+  // Define Users with name, password and access level
   std::vector<User> users{
-    {"admin", "admin123", AccessLevel::Admin},
-    {"user", "user123", AccessLevel::User}
+    {"admin", "secretPa$$word", AccessLevel::Admin},
+    {"user", "1234", AccessLevel::User}
   };
 
-  // Create menu structure with static and/or dynamic allocation
+  // Create menu structure of sub/directories and commands (static or dynamic allocation)
 
   // Dynamic root
   auto rootDir = std::make_unique<Directory>("root", AccessLevel::User);
