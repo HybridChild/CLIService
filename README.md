@@ -19,12 +19,12 @@ enum class AccessLevel {
   Admin
 };
 
-// Provide platform specific implementation of the CharIOStream interface
+// Provide platform specific implementation of the CharIOStream interface for your serial port
 class MyCharIOStream : public CharIOStreamIf
 {
 public:
-  bool putChar(char c) override { /* Write to your hardware */ }
-  bool getChar(char& c) override { /* Read from your hardware */ }
+  bool putChar(char c) override { /* Write to serial port */ }
+  bool getChar(char& c) override { /* Read from serial port */ }
   bool getCharTimeout(char& c, uint32_t timeout_ms) override { /* Read with timeout */ }
   bool available() const override { /* Check if data available */ }
   void flush() override { /* Clear input buffer */ }
@@ -48,8 +48,11 @@ public:
       return createInvalidArgumentCountResponse(0);
     }
 
-    // Perform command logic here
-    return CLIResponse::success("Command executed successfully.");
+    // Perform command logic
+    int32_t value = 42;
+    auto response = std::String("Command response string: " + std::to_string(value))
+
+    return CLIResponse::success(response);
   }
 };
 
@@ -72,7 +75,7 @@ int main()
 
   // Static nodes
   static Directory sysDir("system", AccessLevel::Admin);
-  static MyCommand rebootCmd("reboot", AccessLevel::Admin, "Reboot the device");
+  static RebootCommand rebootCmd("reboot", AccessLevel::Admin, "Reboot the device");
 
   // Add static directory to dynamic root
   rootDir->addStaticDirectory(sysDir);
@@ -81,11 +84,11 @@ int main()
   sysDir.addStaticCommand(rebootCmd);
     
   // Add dynamic command to static directory
-  sysDir.addDynamicCommand<MyCommand>("heap", AccessLevel::User, "Get heap statistics");
+  sysDir.addDynamicCommand<GetHeapCommand>("heap", AccessLevel::User, "Get heap statistics");
     
   // Add dynamic hardware directory with dynamic command
   auto& hwDir = rootDir->addDynamicDirectory("hw", AccessLevel::User);
-  hwDir.addDynamicCommand<MyCommand>("setRgb", AccessLevel::Admin, "Set RGB LED color");
+  hwDir.addDynamicCommand<SetRgbCommand>("setRgb", AccessLevel::Admin, "Set RGB LED color - Arg1: <red> ; Arg2: <green> ; Arg3: <blue>");
 
   // Configure and create CLI service
   constexpr uint32_t inputTimeout_ms = 1000;
@@ -113,7 +116,7 @@ int main()
 }
 ```
 
-## Building
+## Build and Run the Example
 ```bash
 # Linux/Mac
 sh configureCMake.sh
@@ -130,10 +133,10 @@ sh runExample.sh
 
 ## Requirements
 - C++17 compiler
-- CMake 3.20+
-- Google Test (for building tests)
+- CMake 3.20+ (for building the example)
+- Google Test (for running tests)
 
-## Example Session
+## Example Cli Session
 ```
 
   Welcome to CLI Service. Please login.
@@ -157,16 +160,18 @@ admin@/> tree
     system/
       reboot
       heap
+      setRgb
 
 admin@/ > system/
 admin@/system> ?
 
   reboot - Reboot the device
   heap - Get heap statistics
+  setRgb - Set RGB LED color - Arg1: <red> ; Arg2: <green> ; Arg3: <blue>
 
-admin@/system> reboot
+admin@/system> setRgb 78 255 0
 
-  System reboot initiated...
+  RGB LED updated with values: red=78 green=255 blue=0
 
 admin@/system > ..
 admin@/> logout

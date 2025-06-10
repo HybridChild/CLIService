@@ -20,11 +20,11 @@ std::unique_ptr<Directory> createMixedMenuTree()
   static Directory sysDir("system", AccessLevel::Admin);
   dirRoot->addStaticDirectory(sysDir);
     
-  // Add dynamic command to static directory
+  // Add static command to static directory
   static RebootCommand rebootCmd("reboot", AccessLevel::Admin);
   sysDir.addStaticCommand(rebootCmd);
 
-  // Add static command to static directory
+  // Add dynamic command to static directory
   sysDir.addDynamicCommand<HeapStatsGetCommand>("heap", AccessLevel::Admin);
     
   // Add dynamic hardware directory with dynamic command
